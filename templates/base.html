@@ -1,0 +1,30 @@
+{% load static %}
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CivicConnect AI</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}" />
+  </head>
+  <body>
+    <nav>
+      <a class="brand" href="/">✦ CivicConnect <small>AI</small></a>
+      <div>
+        <a href="/reports/">My Reports</a> {% if user.is_authenticated %}<a
+          class="btn"
+          href="/report/new/"
+          >+ Report Issue</a
+        >{% if user.is_staff %}<a href="/dashboard/">Dashboard</a>{% endif %}
+        <form class="inline" method="post" action="/logout/">
+          {% csrf_token %}<button>Logout</button>
+        </form>
+        {% else %}<a class="btn" href="/login/">Login</a>{% endif %}
+      </div>
+    </nav>
+    <main>
+      {% for m in messages %}
+      <p class="alert">{{m}}</p>
+      {% endfor %}{% block content %}{% endblock %}
+    </main>
+    <footer>CivicConnect AI · Cleaner, safer communities</footer>
+  </body>
+</html>

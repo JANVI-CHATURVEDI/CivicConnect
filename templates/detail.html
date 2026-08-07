@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block content %}<a href="/reports/">← Back</a>
+<div class="detail">
+  <div>
+    <p class="eyebrow">REPORT #{{report.id}}</p>
+    <h1>{{report.title}}</h1>
+    <span class="badge {{report.status}}">{{report.get_status_display}}</span>
+    <p class="lead">{{report.description}}</p>
+    <p>
+      Category: <b>{{report.get_category_display}}</b><br />Priority:
+      <b>{{report.get_priority_display}}</b><br />Location:
+      {{report.address|default:'GPS location shared'}}
+    </p>
+  </div>
+  {% if report.image %}<img src="{{report.image.url}}" />{% endif %}
+</div>
+{% endblock %}

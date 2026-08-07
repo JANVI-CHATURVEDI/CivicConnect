@@ -1,0 +1,24 @@
+{% extends 'base.html' %}{% block content %}
+<div class="box">
+  <p class="eyebrow">NEW REPORT</p>
+  <h1>Tell us what happened</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}{{form.as_p}}<button
+      type="button"
+      class="outline"
+      onclick="getLocation()"
+    >
+      ◎ Use my location</button
+    ><small id="msg"></small><button class="btn big">Submit report</button>
+  </form>
+</div>
+<script>
+  function getLocation() {
+    navigator.geolocation.getCurrentPosition((p) => {
+      id_latitude.value = p.coords.latitude;
+      id_longitude.value = p.coords.longitude;
+      msg.innerText = " Location captured ✓";
+    });
+  }
+</script>
+{% endblock %}

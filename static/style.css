@@ -1,0 +1,253 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap");
+:root {
+  --c: #06b6c9;
+  --d: #07363d;
+  --p: #e9fbfc;
+  --l: #d8edef;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #fbffff;
+  color: var(--d);
+  font-family: "DM Sans";
+}
+nav {
+  height: 76px;
+  padding: 0 7%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid var(--l);
+}
+nav a {
+  margin-left: 18px;
+  color: var(--d);
+  text-decoration: none;
+}
+.brand {
+  font: 700 22px "Space Grotesk";
+}
+.brand:first-letter,
+.eyebrow,
+h1 span {
+  color: var(--c);
+}
+small {
+  display: block;
+  color: #72898d;
+  margin-top: 8px;
+}
+.btn {
+  background: var(--c);
+  color: white !important;
+  padding: 11px 16px;
+  border-radius: 7px;
+  font-weight: 700;
+  border: 0;
+  cursor: pointer;
+}
+.big {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 14px 20px;
+}
+.inline {
+  display: inline;
+}
+.inline button {
+  border: 0;
+  background: none;
+  color: var(--d);
+  font: inherit;
+  cursor: pointer;
+}
+.alert {
+  max-width: 1050px;
+  margin: 20px auto;
+  padding: 14px;
+  background: var(--p);
+  border-left: 4px solid var(--c);
+}
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 55px 22px;
+}
+.hero {
+  display: grid;
+  grid-template-columns: 1.3fr 0.8fr;
+  gap: 70px;
+  align-items: center;
+  padding: 35px 0 80px;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+h1,
+h2 {
+  font-family: "Space Grotesk";
+  font-size: 44px;
+  line-height: 1.08;
+}
+.lead {
+  color: #607b80;
+  line-height: 1.7;
+  font-size: 17px;
+}
+.hero-card {
+  background: var(--d);
+  color: #fff;
+  border-radius: 18px;
+  padding: 45px 30px;
+  text-align: center;
+  font-size: 44px;
+}
+.hero-card h2 {
+  font-size: 25px;
+}
+.hero-card p {
+  font-size: 16px;
+  color: #a5d7da;
+}
+.card,
+.row,
+.box,
+table,
+.stats div {
+  background: #fff;
+  border: 1px solid var(--l);
+  border-radius: 10px;
+  padding: 20px;
+  margin: 12px 0;
+}
+.box {
+  max-width: 560px;
+  margin: 20px auto;
+}
+.box input,
+.box textarea,
+.box select,
+.filters select {
+  width: 100%;
+  padding: 11px;
+  margin: 7px 0 15px;
+  border: 1px solid #c9dfe1;
+  border-radius: 6px;
+  font: inherit;
+}
+.box label {
+  font-weight: 600;
+}
+.outline {
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid var(--c);
+  border-radius: 6px;
+  color: var(--d);
+  cursor: pointer;
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-decoration: none;
+  color: var(--d);
+}
+.badge {
+  padding: 5px 9px;
+  border-radius: 15px;
+  font-size: 12px;
+  background: #edf1f2;
+}
+.resolved {
+  background: #def8ec;
+  color: #087849;
+}
+.progress {
+  background: #fff3d6;
+  color: #996600;
+}
+.reported {
+  background: #e3f5f8;
+  color: #087887;
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.detail {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 40px;
+  margin-top: 25px;
+}
+.detail img {
+  max-width: 100%;
+  border-radius: 10px;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.stats b {
+  font: 32px "Space Grotesk";
+  color: var(--c);
+  display: block;
+}
+.filters {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+.filters select {
+  width: 220px;
+  margin: 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  text-align: left;
+  padding: 13px;
+  border-bottom: 1px solid var(--l);
+}
+footer {
+  text-align: center;
+  padding: 30px;
+  color: #72898d;
+  border-top: 1px solid var(--l);
+}
+@media (max-width: 700px) {
+  nav {
+    padding: 0 3%;
+    font-size: 13px;
+  }
+  .hero,
+  .detail {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .hero h1,
+  h1 {
+    font-size: 35px;
+  }
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .filters {
+    flex-wrap: wrap;
+  }
+  .filters select {
+    width: 100%;
+  }
+}

@@ -1,0 +1,40 @@
+{% extends 'base.html' %}{% block content %}
+<p class="eyebrow">AUTHORITY CONSOLE</p>
+<h1>Operations dashboard</h1>
+<div class="stats">
+  {% for n in stats %}
+  <div><b>{{n}}</b><small>Reports</small></div>
+  {% endfor %}
+</div>
+<form class="filters">
+  <select name="category">
+    <option value="">All categories</option>
+    {% for k,v in categories %}
+    <option value="{{k}}">{{v}}</option>
+    {% endfor %}</select
+  ><select name="status">
+    <option value="">All statuses</option>
+    <option value="reported">Reported</option>
+    <option value="progress">In Progress</option>
+    <option value="resolved">Resolved</option></select
+  ><button class="outline">Filter</button>
+</form>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Issue</th>
+    <th>Category</th>
+    <th>Priority</th>
+    <th>Status</th>
+  </tr>
+  {% for x in reports %}
+  <tr>
+    <td>#{{x.id}}</td>
+    <td>{{x.title}}</td>
+    <td>{{x.get_category_display}}</td>
+    <td>{{x.get_priority_display}}</td>
+    <td><span class="badge {{x.status}}">{{x.get_status_display}}</span></td>
+  </tr>
+  {% endfor %}
+</table>
+{% endblock %}

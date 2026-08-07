@@ -1,0 +1,31 @@
+{% extends 'base.html' %}{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">SMART CIVIC REPORTING</p>
+    <h1>Make your city <span>better, together.</span></h1>
+    <p class="lead">
+      Report potholes, leaks, garbage and public hazards in seconds. Track every
+      issue transparently.
+    </p>
+    <a
+      class="btn big"
+      href="{% if user.is_authenticated %}/report/new/{% else %}/login/{% endif %}"
+      >Report a civic issue →</a
+    >
+  </div>
+  <div class="hero-card">
+    ✦
+    <h2>See something?<br />Say something.</h2>
+    <p>Photo + location + one simple form.</p>
+  </div>
+</section>
+<h2>Recently resolved</h2>
+{% for x in latest %}
+<article class="card">
+  <b>{{x.title}}</b>
+  <p>{{x.get_category_display}} · {{x.address}}</p>
+  <span class="badge resolved">Resolved</span>
+</article>
+{empty}
+<p>No resolved reports yet.</p>
+{% endfor %}{% endblock %}
