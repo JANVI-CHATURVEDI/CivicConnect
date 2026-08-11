@@ -1,24 +1,898 @@
-{% extends 'base.html' %}{% block content %}
-<div class="box">
-  <p class="eyebrow">NEW REPORT</p>
-  <h1>Tell us what happened</h1>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}{{form.as_p}}<button
-      type="button"
-      class="outline"
-      onclick="getLocation()"
-    >
-      ◎ Use my location</button
-    ><small id="msg"></small><button class="btn big">Submit report</button>
-  </form>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+/* ===== Report Issue Page ===== */
+
+.report-page {
+    --navy: #0B1F3A;
+    --primary: #1769FF;
+    --teal: #16C7B7;
+    --background: #F5F8FC;
+    --white: #FFFFFF;
+    --text: #172033;
+    --light-text: #5B6B85;
+    --border: #E2E8F0;
+    --danger: #DC2626;
+
+    background: var(--background);
+    color: var(--text);
+    padding-bottom: 70px;
+}
+
+/* Header */
+
+.report-page .container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.page-header {
+    text-align: center;
+    padding: 55px 0 30px;
+}
+
+.page-header h1 {
+    font-size: 42px;
+    margin-bottom: 12px;
+}
+
+.page-header h1 span {
+    color: var(--primary);
+}
+
+.page-header p {
+    color: var(--light-text);
+    font-size: 17px;
+    max-width: 560px;
+    margin: auto;
+}
+
+/* Card */
+
+.form-section {
+    padding: 20px 0 40px;
+}
+
+.form-card {
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,.06);
+    padding: 45px;
+    max-width: 720px;
+    margin: auto;
+}
+
+/* Form */
+
+.form-group {
+    margin-bottom: 28px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.hint {
+    font-weight: 400;
+    color: var(--light-text);
+    font-size: 13px;
+    margin-left: 6px;
+}
+
+.text-input,
+.form-group input[type="text"],
+.form-group input[type="file"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--text);
+    background: white;
+    transition: .3s;
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.text-input:focus,
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Title */
+
+.title-input {
+    width: 100%;
+}
+
+/* Photo upload */
+
+.upload-box {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    text-align: center;
+    padding: 35px 20px;
+    cursor: pointer;
+    transition: .3s;
+    background: var(--background);
+    position: relative;
+}
+
+.upload-box:hover {
+    border-color: var(--primary);
+    background: #EAF1FF;
+}
+
+.upload-box .icon {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.upload-box p {
+    color: var(--light-text);
+    font-size: 14px;
+    margin: 0 0 5px;
+}
+
+.upload-box small {
+    color: var(--light-text);
+}
+
+.upload-box input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+#preview-wrap {
+    margin-top: 16px;
+    display: none;
+}
+
+#preview-wrap img {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: 14px;
+}
+
+/* Category */
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 14px;
+}
+
+.category-option {
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: .25s;
+    background: var(--white);
+}
+
+.category-option:hover {
+    border-color: var(--primary);
+}
+
+.category-option.selected {
+    border-color: var(--primary);
+    background: #EAF1FF;
+}
+
+.category-option .cat-icon {
+    font-size: 26px;
+    margin-bottom: 6px;
+}
+
+.category-option .cat-name {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.category-option input {
+    display: none;
+}
+
+/* Location */
+
+.location-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    flex-wrap: wrap;
+}
+
+.loc-icon {
+    font-size: 20px;
+    color: var(--primary);
+}
+
+.loc-text {
+    flex: 1;
+    min-width: 150px;
+    font-size: 14px;
+    color: var(--light-text);
+}
+
+.loc-text.active {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.detect-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.address-field {
+    margin-top: 14px;
+}
+
+/* Priority */
+
+.priority-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.priority-chip {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+    padding: 12px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    transition: .25s;
+}
+
+.priority-chip input {
+    display: none;
+}
+
+.priority-chip.low.selected {
+    border-color: var(--teal);
+    background: #E6FBF8;
+    color: var(--teal);
+}
+
+.priority-chip.medium.selected {
+    border-color: #D97706;
+    background: #FFFBEB;
+    color: #D97706;
+}
+
+.priority-chip.high.selected {
+    border-color: var(--danger);
+    background: #FEF2F2;
+    color: var(--danger);
+}
+
+/* Submit */
+
+.submit-btn {
+    width: 100%;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .3s;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+}
+
+.note {
+    text-align: center;
+    color: var(--light-text);
+    font-size: 12px;
+    margin-top: 14px;
+}
+
+/* Errors */
+
+.field-errors {
+    color: var(--danger);
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+/* Mobile */
+
+@media(max-width:650px) {
+
+    .form-card {
+        padding: 24px;
+    }
+
+    .page-header h1 {
+        font-size: 30px;
+    }
+
+    .location-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .detect-btn {
+        width: 100%;
+    }
+
+    .priority-row {
+        flex-direction: column;
+    }
+}
+</style>
+
+
+<div class="report-page">
+
+    <!-- Page Header -->
+    <div class="container page-header">
+
+        <h1>
+            Report a Civic <span>Issue</span>
+        </h1>
+
+        <p>
+            Snap a photo, confirm the location, pick a category —
+            we'll route it to the right department.
+        </p>
+
+    </div>
+
+
+    <!-- Form -->
+    <section class="form-section">
+
+        <div class="container">
+
+            <div class="form-card">
+
+                <form method="post"
+                      enctype="multipart/form-data"
+                      id="reportForm">
+
+                    {% csrf_token %}
+
+
+                    <!-- TITLE -->
+                    <div class="form-group">
+
+                        <label for="{{ form.title.id_for_label }}">
+                            Issue Title
+                        </label>
+
+                        {{ form.title }}
+
+                        {% if form.title.errors %}
+                            <div class="field-errors">
+                                {{ form.title.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- PHOTO -->
+                    <div class="form-group">
+
+                        <label>
+                            Upload Photo
+                            <span class="hint">
+                                (clear photo of the issue)
+                            </span>
+                        </label>
+
+                        <div class="upload-box" id="uploadBox">
+
+                            <div class="icon">📷</div>
+
+                            <p>
+                                Tap to capture or upload a photo
+                            </p>
+
+                            <small>
+                                JPG, JPEG or PNG
+                            </small>
+
+                            {{ form.image }}
+
+                        </div>
+
+
+                        <div id="preview-wrap">
+
+                            <img id="previewImg"
+                                 src=""
+                                 alt="Selected image preview">
+
+                        </div>
+
+
+                        {% if form.image.errors %}
+                            <div class="field-errors">
+                                {{ form.image.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- CATEGORY -->
+                    <div class="form-group">
+
+                        <label>
+                            Select Category
+                        </label>
+
+                        <div class="category-grid">
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="road"
+                                >
+                                <div class="cat-icon">🚧</div>
+                                <div class="cat-name">Road Damage</div>
+                            </label>
+
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="water"
+                                >
+                                <div class="cat-icon">💧</div>
+                                <div class="cat-name">Water Leakage</div>
+                            </label>
+
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="garbage"
+                                >
+                                <div class="cat-icon">🗑️</div>
+                                <div class="cat-name">Garbage Overflow</div>
+                            </label>
+
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="light"
+                                >
+                                <div class="cat-icon">💡</div>
+                                <div class="cat-name">Streetlight</div>
+                            </label>
+
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="tree"
+                                >
+                                <div class="cat-icon">🌳</div>
+                                <div class="cat-name">Fallen Tree</div>
+                            </label>
+
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="manhole"
+                                >
+                                <div class="cat-icon">🕳️</div>
+                                <div class="cat-name">Open Manhole</div>
+                            </label>
+
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="traffic"
+                                >
+                                <div class="cat-icon">🚦</div>
+                                <div class="cat-name">Traffic Signal</div>
+                            </label>
+
+
+                            <label class="category-option">
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    value="other"
+                                >
+                                <div class="cat-icon">🚨</div>
+                                <div class="cat-name">Other Hazard</div>
+                            </label>
+
+                        </div>
+
+
+                        {% if form.category.errors %}
+                            <div class="field-errors">
+                                {{ form.category.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- LOCATION -->
+                    <div class="form-group">
+
+                        <label>
+                            Location
+                        </label>
+
+                        <div class="location-box">
+
+                            <div class="loc-icon">
+                                📍
+                            </div>
+
+                            <div class="loc-text" id="locText">
+                                Location not detected yet
+                            </div>
+
+                            <button
+                                type="button"
+                                class="detect-btn"
+                                id="detectBtn"
+                            >
+                                Detect My Location
+                            </button>
+
+                        </div>
+
+
+                        <div class="address-field">
+
+                            <label for="{{ form.address.id_for_label }}">
+                                Address / Landmark
+                                <span class="hint">
+                                    (if GPS is not exact)
+                                </span>
+                            </label>
+
+                            {{ form.address }}
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- PRIORITY -->
+                    <div class="form-group">
+
+                        <label>
+                            Priority
+                            <span class="hint">
+                                (how urgent is this?)
+                            </span>
+                        </label>
+
+                        <div class="priority-row">
+
+                            <label class="priority-chip low">
+
+                                <input
+                                    type="radio"
+                                    name="priority"
+                                    value="low"
+                                >
+
+                                Low
+
+                            </label>
+
+
+                            <label class="priority-chip medium">
+
+                                <input
+                                    type="radio"
+                                    name="priority"
+                                    value="medium"
+                                >
+
+                                Medium
+
+                            </label>
+
+
+                            <label class="priority-chip high">
+
+                                <input
+                                    type="radio"
+                                    name="priority"
+                                    value="high"
+                                >
+
+                                High
+
+                            </label>
+
+                        </div>
+
+
+                        {% if form.priority.errors %}
+                            <div class="field-errors">
+                                {{ form.priority.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+                    <div class="form-group">
+
+                        <label for="{{ form.description.id_for_label }}">
+                            Description
+                            <span class="hint">
+                                (add details about the issue)
+                            </span>
+                        </label>
+
+                        {{ form.description }}
+
+                        {% if form.description.errors %}
+                            <div class="field-errors">
+                                {{ form.description.errors }}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <!-- Hidden GPS fields -->
+                    {{ form.latitude }}
+                    {{ form.longitude }}
+
+
+                    <!-- SUBMIT -->
+
+                    <button
+                        type="submit"
+                        class="submit-btn"
+                    >
+                        Submit Complaint
+                    </button>
+
+
+                    <p class="note">
+                        Your report will be submitted through CivicConnect.
+                    </p>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </section>
+
 </div>
+
+
 <script>
-  function getLocation() {
-    navigator.geolocation.getCurrentPosition((p) => {
-      id_latitude.value = p.coords.latitude;
-      id_longitude.value = p.coords.longitude;
-      msg.innerText = " Location captured ✓";
+
+/* =========================
+   PHOTO PREVIEW
+========================= */
+
+const photoInput =
+    document.getElementById("id_image");
+
+const previewWrap =
+    document.getElementById("preview-wrap");
+
+const previewImg =
+    document.getElementById("previewImg");
+
+
+if (photoInput) {
+
+    photoInput.addEventListener("change", function () {
+
+        const file = this.files[0];
+
+        if (file) {
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+
+                previewImg.src = e.target.result;
+
+                previewWrap.style.display = "block";
+
+            };
+
+            reader.readAsDataURL(file);
+
+        }
+
     });
-  }
+
+}
+
+
+/* =========================
+   CATEGORY SELECTION
+========================= */
+
+document
+    .querySelectorAll(".category-option")
+    .forEach(function(option) {
+
+        option.addEventListener("click", function() {
+
+            document
+                .querySelectorAll(".category-option")
+                .forEach(function(item) {
+
+                    item.classList.remove("selected");
+
+                });
+
+            option.classList.add("selected");
+
+            const radio =
+                option.querySelector("input");
+
+            radio.checked = true;
+
+        });
+
+    });
+
+
+/* =========================
+   PRIORITY SELECTION
+========================= */
+
+document
+    .querySelectorAll(".priority-chip")
+    .forEach(function(chip) {
+
+        chip.addEventListener("click", function() {
+
+            document
+                .querySelectorAll(".priority-chip")
+                .forEach(function(item) {
+
+                    item.classList.remove("selected");
+
+                });
+
+            chip.classList.add("selected");
+
+            const radio =
+                chip.querySelector("input");
+
+            radio.checked = true;
+
+        });
+
+    });
+
+
+/* =========================
+   LOCATION
+========================= */
+
+const detectBtn =
+    document.getElementById("detectBtn");
+
+const locText =
+    document.getElementById("locText");
+
+
+if (detectBtn) {
+
+    detectBtn.addEventListener("click", function() {
+
+        if (!navigator.geolocation) {
+
+            locText.textContent =
+                "Geolocation is not supported.";
+
+            return;
+
+        }
+
+        locText.textContent =
+            "Detecting location...";
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            function(position) {
+
+                const lat =
+                    position.coords.latitude;
+
+                const lng =
+                    position.coords.longitude;
+
+
+                document.getElementById(
+                    "id_latitude"
+                ).value = lat;
+
+
+                document.getElementById(
+                    "id_longitude"
+                ).value = lng;
+
+
+                locText.textContent =
+                    `Lat ${lat.toFixed(5)}, Lng ${lng.toFixed(5)}`;
+
+                locText.classList.add("active");
+
+            },
+
+
+            function() {
+
+                locText.textContent =
+                    "Could not detect location — check permissions.";
+
+            }
+
+        );
+
+    });
+
+}
+
 </script>
+
 {% endblock %}
