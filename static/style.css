@@ -251,3 +251,183 @@ footer {
     width: 100%;
   }
 }
+/* =========================================
+   CIVICCONNECT AI - LOGIN PAGE
+   ========================================= */
+
+.login-page {
+    min-height: 70vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 20px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 470px;
+    background: #ffffff;
+    border: 1px solid var(--l);
+    border-radius: 18px;
+    padding: 40px;
+    box-shadow: 0 15px 40px rgba(7, 54, 61, 0.08);
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-logo img {
+    width: 90px;
+    height: 90px;
+    object-fit: contain;
+}
+
+.login-eyebrow {
+    text-align: center;
+    color: var(--c);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.login-card h1 {
+    text-align: center;
+    font-size: 38px;
+    margin: 0;
+}
+
+.login-subtitle {
+    text-align: center;
+    color: #72898d;
+    margin-bottom: 30px;
+}
+
+.login-field {
+    margin-bottom: 20px;
+}
+
+.login-field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.password-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.password-label label {
+    margin-bottom: 0;
+}
+
+.forgot-password {
+    color: var(--c);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.login-field input {
+    width: 100%;
+    padding: 13px 14px;
+    border: 1px solid #c9dfe1;
+    border-radius: 8px;
+    font: inherit;
+    outline: none;
+}
+
+.login-field input:focus {
+    border-color: var(--c);
+    box-shadow: 0 0 0 3px rgba(6, 182, 201, 0.1);
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 45px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    color: #72898d;
+}
+
+.login-submit,
+.google-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.login-submit {
+    border: 0;
+    background: var(--c);
+    color: white;
+}
+
+.login-submit:hover {
+    opacity: 0.9;
+}
+
+.google-btn {
+    background: white;
+    border: 1px solid #c9dfe1;
+    color: var(--d);
+}
+
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 25px 0;
+    color: #8aa0a4;
+    font-size: 12px;
+}
+
+.login-divider::before,
+.login-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--l);
+}
+
+.register {
+    text-align: center;
+    color: #72898d;
+    margin-top: 25px;
+    font-size: 14px;
+}
+
+.register a {
+    color: var(--c);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (max-width: 500px) {
+
+    .login-card {
+        padding: 28px 20px;
+    }
+
+    .login-card h1 {
+        font-size: 32px;
+    }
+
+}
