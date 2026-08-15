@@ -1,31 +1,1086 @@
-{% extends 'base.html' %}{% block content %}
-<section class="hero">
-  <div>
-    <p class="eyebrow">SMART CIVIC REPORTING</p>
-    <h1>Make your city <span>better, together.</span></h1>
-    <p class="lead">
-      Report potholes, leaks, garbage and public hazards in seconds. Track every
-      issue transparently.
-    </p>
-    <a
-      class="btn big"
-      href="{% if user.is_authenticated %}/report/new/{% else %}/login/{% endif %}"
-      >Report a civic issue →</a
-    >
-  </div>
-  <div class="hero-card">
-    ✦
-    <h2>See something?<br />Say something.</h2>
-    <p>Photo + location + one simple form.</p>
-  </div>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicConnect AI | Smart Civic Reporting</title>
+
+    <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+      <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+
+    <header class="navbar">
+
+        <div class="logo-container">
+            <img src="{% static 'images/logo.png' %}" alt="CivicConnect AI Logo">
+        </div>
+
+        <!-- MOBILE MENU BUTTON -->
+    <button class="menu-toggle" aria-label="Open navigation">
+        ☰
+    </button>
+
+        <nav>
+            <a href="#" class="active">Home</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="#features">Features</a>
+            <a href="#issues">Issues</a>
+        </nav>
+
+        <div class="nav-buttons">
+            <button class="login-btn">Login</button>
+            <button class="report-btn">Report Issue</button>
+        </div>
+
+    </header>
+
+
+    <!-- ================= HERO SECTION ================= -->
+
+    <main>
+
+        <section class="hero">
+
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    ✦ AI-POWERED CIVIC PLATFORM
+                </div>
+
+                <h1>
+                    Report Problems.
+                    <span>Build Better Cities.</span>
+                </h1>
+
+                <p>
+                    CivicConnect AI makes reporting civic issues simple.
+                    Capture a problem, share its location, and let AI
+                    connect it to the right authority.
+                </p>
+
+                <div class="hero-buttons">
+
+                    <button class="primary-btn report-btn">
+                        📍 Report an Issue
+                    </button>
+
+                    <button class="secondary-btn">
+                        How It Works →
+                    </button>
+
+                </div>
+
+                <div class="hero-trust">
+
+                    <div>
+                        <strong>AI</strong>
+                        <span>Powered Detection</span>
+                    </div>
+
+                    <div>
+                        <strong>GPS</strong>
+                        <span>Smart Location</span>
+                    </div>
+
+                    <div>
+                        <strong>24/7</strong>
+                        <span>Easy Reporting</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- HERO VISUAL -->
+
+            <div class="hero-visual">
+
+                <div class="city-card">
+
+                    <div class="map-grid"></div>
+
+                    <div class="city-building building-one"></div>
+                    <div class="city-building building-two"></div>
+                    <div class="city-building building-three"></div>
+                    <div class="city-building building-four"></div>
+
+                    <div class="location-pin">
+                        <div class="pin-dot"></div>
+                    </div>
+
+                    <div class="ai-circle">
+                        <span>AI</span>
+                    </div>
+
+                    <div class="issue-card issue-one">
+                        🚧 Road Issue
+                    </div>
+
+                    <div class="issue-card issue-two">
+                        💧 Water Leak
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+    </main>
+
+    
+<!-- ================= HOW IT WORKS ================= -->
+
+<section class="how-it-works" id="how-it-works">
+
+    <div class="section-heading">
+
+        <span class="section-label">HOW IT WORKS</span>
+
+        <h2>
+            From Problem to
+            <span>Resolution.</span>
+        </h2>
+
+        <p>
+            CivicConnect AI makes reporting civic issues simple,
+            smart, and transparent.
+        </p>
+
+    </div>
+
+
+    <div class="steps-container">
+
+        <!-- STEP 1 -->
+
+        <div class="step-card">
+
+            <div class="step-number">01</div>
+
+            <div class="step-icon">📸</div>
+
+            <h3>Capture</h3>
+
+            <p>
+                Take a photo of the civic issue you want to report.
+            </p>
+
+        </div>
+
+
+        <div class="step-line"></div>
+
+
+        <!-- STEP 2 -->
+
+        <div class="step-card">
+
+            <div class="step-number">02</div>
+
+            <div class="step-icon">📍</div>
+
+            <h3>Locate</h3>
+
+            <p>
+                Your location is automatically detected using GPS.
+            </p>
+
+        </div>
+
+
+        <div class="step-line"></div>
+
+
+        <!-- STEP 3 -->
+
+        <div class="step-card featured-step">
+
+            <div class="step-number">03</div>
+
+            <div class="step-icon">🤖</div>
+
+            <h3>AI Analyze</h3>
+
+            <p>
+                AI identifies the issue and estimates its priority.
+            </p>
+
+        </div>
+
+
+        <div class="step-line"></div>
+
+
+        <!-- STEP 4 -->
+
+        <div class="step-card">
+
+            <div class="step-number">04</div>
+
+            <div class="step-icon">🏛️</div>
+
+            <h3>Connect</h3>
+
+            <p>
+                The complaint is routed to the concerned authority.
+            </p>
+
+        </div>
+
+
+        <div class="step-line"></div>
+
+
+        <!-- STEP 5 -->
+
+        <div class="step-card">
+
+            <div class="step-number">05</div>
+
+            <div class="step-icon">✅</div>
+
+            <h3>Resolve</h3>
+
+            <p>
+                Track the complaint until the issue is resolved.
+            </p>
+
+        </div>
+
+    </div>
+
+ </section>
+
+
+<!-- ================= AI FEATURES ================= -->
+
+<section class="ai-features" id="features">
+
+    <div class="section-heading">
+
+        <span class="section-label">POWERED BY AI</span>
+
+        <h2>
+            Smarter Reporting.
+            <span>Faster Resolution.</span>
+        </h2>
+
+        <p>
+            CivicConnect AI uses intelligent technology to understand
+            civic problems and help authorities respond more efficiently.
+        </p>
+
+    </div>
+
+
+    <div class="features-grid">
+
+        <!-- FEATURE 1 -->
+
+        <div class="feature-card">
+
+            <div class="feature-icon blue-icon">
+                🤖
+            </div>
+
+            <div class="feature-content">
+
+                <h3>AI Issue Detection</h3>
+
+                <p>
+                    Upload a photo and AI automatically identifies
+                    the type of civic issue.
+                </p>
+
+                <span class="feature-tag">
+                    Image Intelligence
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- FEATURE 2 -->
+
+        <div class="feature-card">
+
+            <div class="feature-icon teal-icon">
+                ⚡
+            </div>
+
+            <div class="feature-content">
+
+                <h3>Severity Analysis</h3>
+
+                <p>
+                    AI estimates whether an issue is minor,
+                    moderate, or critical.
+                </p>
+
+                <span class="feature-tag">
+                    Smart Priority
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- FEATURE 3 -->
+
+        <div class="feature-card">
+
+            <div class="feature-icon purple-icon">
+                🔍
+            </div>
+
+            <div class="feature-content">
+
+                <h3>Duplicate Detection</h3>
+
+                <p>
+                    Similar complaints near the same location
+                    can be detected and grouped together.
+                </p>
+
+                <span class="feature-tag">
+                    Less Duplication
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- FEATURE 4 -->
+
+        <div class="feature-card">
+
+            <div class="feature-icon orange-icon">
+                🏛️
+            </div>
+
+            <div class="feature-content">
+
+                <h3>Smart Department Routing</h3>
+
+                <p>
+                    Complaints can be directed to the department
+                    responsible for resolving the issue.
+                </p>
+
+                <span class="feature-tag">
+                    Smart Routing
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- FEATURE 5 -->
+
+        <div class="feature-card large-feature">
+
+            <div class="feature-icon green-icon">
+                ✍️
+            </div>
+
+            <div class="feature-content">
+
+                <h3>Automatic Complaint Description</h3>
+
+                <p>
+                    AI can generate a clear and concise description
+                    from the uploaded image, saving citizens time.
+                </p>
+
+                <span class="feature-tag">
+                    AI Generated
+                </span>
+
+            </div>
+
+        </div>
+
+         <!-- AI STATUS CARD -->
+
+        <div class="ai-status-card">
+
+            <div class="ai-status-top">
+
+                <div class="status-dot"></div>
+
+                <span>AI SYSTEM</span>
+
+                <span class="online-text">ONLINE</span>
+
+            </div>
+
+            <div class="ai-status-main">
+
+                <span class="ai-symbol">✦</span>
+
+                <h3>Smart Civic Intelligence</h3>
+
+                <p>
+                    Turning citizen reports into actionable
+                    information for better cities.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </section>
-<h2>Recently resolved</h2>
-{% for x in latest %}
-<article class="card">
-  <b>{{x.title}}</b>
-  <p>{{x.get_category_display}} · {{x.address}}</p>
-  <span class="badge resolved">Resolved</span>
-</article>
-{empty}
-<p>No resolved reports yet.</p>
-{% endfor %}{% endblock %}
+
+
+<!-- ================= CIVIC ISSUES ================= -->
+
+<section class="civic-issues" id="issues">
+
+    <div class="section-heading">
+
+        <span class="section-label">CIVIC ISSUES</span>
+
+        <h2>
+            See a Problem?
+            <span>Report It.</span>
+        </h2>
+
+        <p>
+            From damaged roads to overflowing garbage,
+            CivicConnect AI helps communities make local
+            problems visible.
+        </p>
+
+    </div>
+
+
+    <div class="issues-grid">
+
+        <!-- ROAD DAMAGE -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon road-icon">
+                🚧
+            </div>
+
+            <div>
+                <h3>Road Damage</h3>
+
+                <p>
+                    Potholes, cracks and damaged roads.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+
+        <!-- WATER LEAKAGE -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon water-icon">
+                💧
+            </div>
+
+            <div>
+                <h3>Water Leakage</h3>
+
+                <p>
+                    Report leaking pipes and water wastage.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+
+        <!-- GARBAGE -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon garbage-icon">
+                🗑️
+            </div>
+
+            <div>
+                <h3>Garbage Overflow</h3>
+
+                <p>
+                    Overflowing bins and waste accumulation.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+
+        <!-- STREETLIGHT -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon light-icon">
+                💡
+            </div>
+
+            <div>
+                <h3>Broken Streetlights</h3>
+
+                <p>
+                    Help identify dark and unsafe streets.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+
+        <!-- FALLEN TREE -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon tree-icon">
+                🌳
+            </div>
+
+            <div>
+                <h3>Fallen Trees</h3>
+
+                <p>
+                    Report fallen or hazardous trees.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+
+        <!-- OPEN MANHOLE -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon manhole-icon">
+                🕳️
+            </div>
+
+            <div>
+                <h3>Open Manholes</h3>
+
+                <p>
+                    Report dangerous open manholes.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+
+        <!-- TRAFFIC SIGNAL -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon traffic-icon">
+                🚦
+            </div>
+
+            <div>
+                <h3>Traffic Signals</h3>
+
+                <p>
+                    Report broken or malfunctioning signals.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+
+        <!-- WATERLOGGING -->
+
+        <div class="issue-item">
+
+            <div class="issue-icon flood-icon">
+                🌊
+            </div>
+
+            <div>
+                <h3>Waterlogging</h3>
+
+                <p>
+                    Report flooded and waterlogged areas.
+                </p>
+            </div>
+
+            <span class="issue-arrow">↗</span>
+
+        </div>
+
+    </div>
+
+
+    <div class="issues-cta">
+
+        <p>
+            Don't see your issue?
+        </p>
+
+        <button class="primary-btn report-btn">
+            Report Other Issue →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================= IMPACT SECTION ================= -->
+
+<section class="impact-section">
+
+    <div class="impact-content">
+
+        <div class="impact-text">
+
+            <span class="section-label">
+                OUR IMPACT
+            </span>
+
+            <h2>
+                Every Report Can
+                <span>Make a Difference.</span>
+            </h2>
+
+            <p>
+                When citizens and authorities work together,
+                small reports can lead to meaningful changes
+                across an entire community.
+            </p>
+
+            <button class="primary-btn contributor-btn">
+                Become a Civic Contributor →
+            </button>
+
+        </div>
+
+
+        <div class="impact-stats">
+
+            <div class="stat-card">
+
+                <div class="stat-icon">📋</div>
+
+                <strong class="stat-number" data-target="10000" data-suffix="K+">
+                    0
+                </strong>
+
+                <span>
+                    Issues Reported*
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">✅</div>
+
+                <strong class="stat-number" data-target="8000" data-suffix="K+">
+                    0
+                </strong>
+
+                <span>
+                    Issues Resolved*
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">📍</div>
+
+                <strong class="stat-number" data-target="95" data-suffix="%">
+                    0
+                </strong>
+
+                <span>
+                    Location Accuracy*
+                </span>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-icon">🏙️</div>
+
+                <strong class="stat-number" data-target="50" data-suffix="+">
+                    0
+                </strong>
+
+                <span>
+                    Communities Connected*
+                </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <p class="demo-note">
+        *Illustrative platform metrics for demonstration purposes.
+    </p>
+
+</section>
+
+
+<!-- ================= FINAL CTA ================= -->
+
+<section class="final-cta">
+
+    <div class="cta-content">
+
+        <div class="cta-icon">
+            📍
+        </div>
+
+        <span class="section-label">
+            MAKE YOUR CITY BETTER
+        </span>
+
+        <h2>
+            See a Problem?
+            <span>Make It Visible.</span>
+        </h2>
+
+        <p>
+            Your report can help authorities identify problems faster
+            and make your community safer, cleaner, and better.
+        </p>
+
+        <button class="primary-btn cta-button report-btn">
+            Report a Civic Issue →
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="footer">
+
+    <div class="footer-main">
+
+        <!-- BRAND -->
+
+        <div class="footer-brand">
+
+            <img
+                src="images/logo.png"
+                alt="CivicConnect AI Logo"
+            >
+
+            <p>
+                AI-powered civic reporting for cleaner,
+                safer, and smarter communities.
+            </p>
+
+        </div>
+
+
+        <!-- NAVIGATION -->
+
+        <div class="footer-column">
+
+            <h4>Explore</h4>
+
+            <a href="#">Home</a>
+
+            <a href="#how-it-works">
+                How It Works
+            </a>
+
+            <a href="#features">
+                AI Features
+            </a>
+
+            <a href="#issues">
+                Civic Issues
+            </a>
+
+        </div>
+
+
+        <!-- ISSUES -->
+
+        <div class="footer-column">
+
+            <h4>Report</h4>
+
+            <a href="#issues">
+                Road Damage
+            </a>
+
+            <a href="#issues">
+                Water Leakage
+            </a>
+
+            <a href="#issues">
+                Garbage Overflow
+            </a>
+
+            <a href="#issues">
+                Streetlight Issues
+            </a>
+
+        </div>
+
+
+        <!-- CTA -->
+
+        <div class="footer-action">
+
+            <h4>Make a Difference</h4>
+
+            <p>
+                See a civic problem?
+                Help make it visible.
+            </p>
+
+            <button class="footer-report-btn report-btn">
+                Report an Issue →
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- FOOTER BOTTOM -->
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 CivicConnect AI. All rights reserved.
+        </p>
+
+        <span>
+            Built for smarter communities.
+        </span>
+
+    </div>
+
+</footer>
+
+
+  <!-- ================= REPORT ISSUE MODAL ================= -->
+
+
+<div class="report-modal" id="reportModal">
+
+    <div class="report-box">
+
+        <button
+            type="button"
+            class="close-report"
+            id="closeReport"
+            aria-label="Close"
+        >
+            ×
+        </button>
+
+        <div class="report-header">
+
+            <span class="section-label">
+                REPORT AN ISSUE
+            </span>
+
+            <h2>
+                Help Improve Your <span>City.</span>
+            </h2>
+
+            <p>
+                Tell us about the civic problem and we'll help connect it
+                to the right authority.
+            </p>
+
+        </div>
+
+        <form id="reportForm">
+
+            <!-- CATEGORY -->
+
+            <div class="form-group">
+
+                <label for="issueCategory">
+                    Issue Category
+                </label>
+
+                <select
+                    id="issueCategory"
+                    required
+                >
+
+                    <option value="">
+                        Select an issue
+                    </option>
+
+                    <option value="Road Issue">
+                        🚧 Road Issue
+                    </option>
+
+                    <option value="Water Leak">
+                        💧 Water Leak
+                    </option>
+
+                    <option value="Street Light">
+                        💡 Street Light
+                    </option>
+
+                    <option value="Garbage Overflow">
+                        🗑️ Garbage Overflow
+                    </option>
+
+                    <option value="Traffic Signal">
+                        🚦 Traffic Signal
+                    </option>
+
+                    <option value="Waterlogging">
+                        🌊 Waterlogging
+                    </option>
+
+                    <option value="Fallen Tree">
+                        🌳 Fallen Tree
+                    </option>
+
+                    <option value="Open Manhole">
+                        🕳️ Open Manhole
+                    </option>
+
+                    <option value="Other">
+                        Other Issue
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group">
+
+                <label for="issueDescription">
+                    Describe the Issue
+                </label>
+
+                <textarea
+                    id="issueDescription"
+                    rows="4"
+                    placeholder="Describe the civic problem..."
+                    required
+                ></textarea>
+
+            </div>
+
+
+            <!-- PHOTO -->
+
+            <div class="form-group">
+
+                <label for="issuePhoto">
+                    Upload Photo
+                </label>
+
+                <input
+                    type="file"
+                    id="issuePhoto"
+                    accept="image/*"
+                    required
+                >
+
+                <small>
+                    Upload a clear photo of the civic issue.
+                </small>
+
+                <div id="photoPreview"></div>
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="form-group">
+
+                <label for="issueLocation">
+                    Location
+                </label>
+
+                <div class="location-row">
+
+                    <input
+                        type="text"
+                        id="issueLocation"
+                        placeholder="Click Detect Location"
+                        readonly
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="location-btn"
+                        id="getLocation"
+                    >
+                        📍 Detect
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                type="submit"
+                class="submit-report"
+            >
+                Submit Report →
+            </button>
+
+        </form>
+
+    </div>
+
+ </div>
+
+<script src="{% static 'script.js' %}"></script>
+
+</body>
+</html>
