@@ -1,6 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.conf import settings
+import requests
+
 from .models import Report
 from .forms import ReportForm
 
@@ -65,3 +69,53 @@ def dashboard(r):
             ],
         },
     )
+def get_address(request):
+    latitude = request.GET.get("lat")
+    longitude = request.GET.get("lon")
+
+    if not latitude or not longitude:
+        return JsonResponse({
+            "success": False,
+            "error": "Location coordinates are missing."
+        }, status=400)
+
+    api_key = settings.GEOAPIFY_API_KEY
+
+    url = "https://api.geoapify.com/v1/geocode/reverse"
+
+    params = {
+        "lat": latitude,
+        "lon": longitude,
+        "apiKey": api_key
+    }
+
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+
+        data = response.json()
+
+        if data.get("features"):
+            properties = data["features"][0].get("properties", {})
+
+            address = (
+                properties.get("formatted")
+                or properties.get("address_line1")
+                or "Address not found"
+            )
+
+            return JsonResponse({
+                "success": True,
+                "address": address
+            })
+
+        return JsonResponse({
+            "success": False,
+            "error": "Address not found."
+        })
+
+    except requests.RequestException:
+        return JsonResponse({
+            "success": False,
+            "error": "Unable to contact location service."
+        }, status=500)
