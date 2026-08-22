@@ -39,6 +39,7 @@ TEMPLATES = [
         },
     }
 ]
+GEOAPIFY_API_KEY = os.getenv("GEOAPIFY_API_KEY")
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
