@@ -1,30 +1,274 @@
 {% load static %}
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>CivicConnect AI</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}" />
-  </head>
-  <body>
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>CivicConnect AI</title>
+
+<link
+    rel="stylesheet"
+    href="{% static 'style.css' %}"
+>
+
+
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<header class="navbar">
+
+    <div class="logo-container">
+
+        <a href="{% url 'home' %}">
+
+            <img
+                src="{% static 'images/civicconnect-logo.png' %}"
+                alt="CivicConnect AI Logo"
+            >
+
+        </a>
+
+    </div>
+
+
     <nav>
-      <a class="brand" href="/">✦ CivicConnect <small>AI</small></a>
-      <div>
-        <a href="/reports/">My Reports</a> {% if user.is_authenticated %}<a
-          class="btn"
-          href="/report/new/"
-          >+ Report Issue</a
-        >{% if user.is_staff %}<a href="/dashboard/">Dashboard</a>{% endif %}
-        <form class="inline" method="post" action="/logout/">
-          {% csrf_token %}<button>Logout</button>
-        </form>
-        {% else %}<a class="btn" href="/login/">Login</a>{% endif %}
-      </div>
+
+        <a href="{% url 'home' %}">
+            Home
+        </a>
+
+        <a href="{% url 'home' %}#how-it-works">
+            How It Works
+        </a>
+
+        <a href="{% url 'home' %}#features">
+            Features
+        </a>
+
+        <a href="{% url 'home' %}#issues">
+            Issues
+        </a>
+
     </nav>
-    <main>
-      {% for m in messages %}
-      <p class="alert">{{m}}</p>
-      {% endfor %}{% block content %}{% endblock %}
-    </main>
-    <footer>CivicConnect AI · Cleaner, safer communities</footer>
-  </body>
+
+
+    <div class="nav-buttons">
+
+        {% if user.is_authenticated %}
+
+            <a
+                href="{% url 'mine' %}"
+                class="login-btn"
+            >
+                My Reports
+            </a>
+
+
+            <a
+                href="{% url 'new' %}"
+                class="report-btn"
+            >
+                Report Issue
+            </a>
+
+
+            {% if user.is_staff %}
+
+                <a
+                    href="{% url 'dashboard' %}"
+                    class="login-btn"
+                >
+                    Dashboard
+                </a>
+
+            {% endif %}
+
+
+            <form
+                method="post"
+                action="{% url 'logout' %}"
+                style="display: inline;"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="login-btn"
+                >
+                    Logout
+                </button>
+
+            </form>
+
+
+        {% else %}
+
+            <a
+                href="{% url 'login' %}"
+                class="login-btn"
+            >
+                Login
+            </a>
+
+
+            <a
+                href="{% url 'new' %}"
+                class="report-btn"
+            >
+                Report Issue
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</header>
+
+
+<!-- ================= MESSAGES ================= -->
+
+{% if messages %}
+
+    <div class="messages">
+
+        {% for message in messages %}
+
+            <div class="alert">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% endif %}
+
+
+<!-- ================= PAGE CONTENT ================= -->
+
+<main>
+
+    {% block content %}
+
+    {% endblock %}
+
+</main>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer class="footer">
+
+    <div class="footer-main">
+
+        <div class="footer-brand">
+
+            <a href="{% url 'home' %}">
+
+                <img
+                    src="{% static 'images/civicconnect-logo.png' %}"
+                    alt="CivicConnect AI Logo"
+                >
+
+            </a>
+
+            <p>
+                AI-powered civic reporting for cleaner,
+                safer, and smarter communities.
+            </p>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>Explore</h4>
+
+            <a href="{% url 'home' %}">
+                Home
+            </a>
+
+            <a href="{% url 'home' %}#how-it-works">
+                How It Works
+            </a>
+
+            <a href="{% url 'home' %}#features">
+                AI Features
+            </a>
+
+            <a href="{% url 'home' %}#issues">
+                Civic Issues
+            </a>
+
+        </div>
+
+
+        <div class="footer-column">
+
+            <h4>Report</h4>
+
+            <a href="{% url 'new' %}">
+                Report an Issue
+            </a>
+
+            <a href="{% url 'mine' %}">
+                My Reports
+            </a>
+
+        </div>
+
+
+        <div class="footer-action">
+
+            <h4>Make a Difference</h4>
+
+            <p>
+                See a civic problem?
+                Help make it visible.
+            </p>
+
+            <a
+                href="{% url 'new' %}"
+                class="footer-report-btn report-btn"
+            >
+                Report an Issue →
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <p>
+            © 2026 CivicConnect AI. All rights reserved.
+        </p>
+
+        <span>
+            Built for smarter communities.
+        </span>
+
+    </div>
+
+</footer>
+
+
+<script src="{% static 'login.js' %}"></script>
+
+</body>
+
 </html>
