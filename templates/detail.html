@@ -1,16 +1,193 @@
-{% extends 'base.html' %}{% block content %}<a href="/reports/">← Back</a>
-<div class="detail">
-  <div>
-    <p class="eyebrow">REPORT #{{report.id}}</p>
-    <h1>{{report.title}}</h1>
-    <span class="badge {{report.status}}">{{report.get_status_display}}</span>
-    <p class="lead">{{report.description}}</p>
-    <p>
-      Category: <b>{{report.get_category_display}}</b><br />Priority:
-      <b>{{report.get_priority_display}}</b><br />Location:
-      {{report.address|default:'GPS location shared'}}
-    </p>
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="detail-page">
+
+  <!-- Top Section -->
+  <div class="detail-header">
+
+    <div>
+      <p class="detail-label">CIVIC REPORT</p>
+
+      <h1>Report #{{ report.id }}</h1>
+
+      <p class="detail-date">
+        Submitted on {{ report.created_at|date:'d M Y, H:i' }}
+      </p>
+    </div>
+
+    <a href="{% url 'mine' %}" class="back-btn">
+      <svg class="icon-svg" viewBox="0 0 24 24" width="15" height="15">
+        <line x1="19" y1="12" x2="5" y2="12" />
+        <polyline points="12 19 5 12 12 5" />
+      </svg>
+      Back to My Reports
+    </a>
+
   </div>
-  {% if report.image %}<img src="{{report.image.url}}" />{% endif %}
+
+
+  <!-- Main Card -->
+  <div class="report-detail-card">
+
+    <!-- Title + Status -->
+    <div class="report-title-section">
+
+      <div>
+        <h2>{{ report.title }}</h2>
+
+        <p class="category-text">
+          {{ report.get_category_display }}
+        </p>
+      </div>
+
+      <span class="detail-status {{ report.status }}">
+        {{ report.get_status_display }}
+      </span>
+
+    </div>
+
+    <!-- Vote Section -->
+    <div class="vote-section">
+
+      <form method="post" action="{% url 'vote_report' report.id %}">
+        {% csrf_token %}
+
+        <button type="submit" class="vote-btn">
+          <svg class="icon-svg" viewBox="0 0 24 24" width="16" height="16">
+            <path
+              d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1zM7 11l4.5-9a2 2 0 0 1 3.4 2l-1 5H19a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 17.6 21H7" />
+          </svg>
+          Upvote Report
+        </button>
+      </form>
+  
+      <span class="vote-count">
+        {{ report.votes.count }} Upvotes
+      </span>
+
+    </div>
+
+    <!-- Comments -->
+    <div class="comments-section">
+
+      <h3>Comments</h3>
+
+      <!-- Add Comment -->
+      <form method="post" action="{% url 'add_comment' report.id %}" class="comment-form">
+        {% csrf_token %}
+
+        <textarea name="text" placeholder="Write a comment..." required></textarea>
+
+        <button type="submit" class="comment-btn">
+          Post Comment
+        </button>
+
+      </form>
+
+
+      <!-- Existing Comments -->
+      <div class="comments-list">
+
+        {% for comment in report.comments.all %}
+
+        <div class="comment">
+
+          <div class="comment-header">
+
+            <strong>
+              {{ comment.user.username }}
+            </strong>
+
+            <span>
+              {{ comment.created_at|date:"d M Y, H:i" }}
+            </span>
+
+          </div>
+
+          <p>
+            {{ comment.text }}
+          </p>
+
+        </div>
+
+        {% empty %}
+
+        <p class="no-comments">
+          No comments yet. Be the first to comment.
+        </p>
+
+        {% endfor %}
+
+      </div>
+
+    </div>
+
+    <!-- Description -->
+    <div class="detail-section">
+
+      <h3>Description</h3>
+
+      <p>
+        {{ report.description }}
+      </p>
+
+    </div>
+
+
+    <!-- Information -->
+    <div class="detail-info-grid">
+
+      <div class="info-box">
+        <span class="info-label">Category</span>
+        <strong>{{ report.get_category_display }}</strong>
+      </div>
+
+      <div class="info-box">
+        <span class="info-label">Priority</span>
+        <strong>{{ report.get_priority_display }}</strong>
+      </div>
+
+      <div class="info-box">
+        <span class="info-label">Status</span>
+        <strong>{{ report.get_status_display }}</strong>
+      </div>
+
+      {% if report.address %}
+      <div class="info-box">
+        <span class="info-label">Location</span>
+        <strong>{{ report.address }}</strong>
+      </div>
+      {% endif %}
+
+    </div>
+
+
+    <!-- Image -->
+    {% if report.image %}
+
+    <div class="detail-section">
+
+      <h3>Reported Image</h3>
+
+      <div class="report-image-container">
+        <img src="{{ report.image.url }}" alt="Report image" class="report-detail-image">
+      </div>
+
+    </div>
+
+    {% endif %}
+
+
+    <!-- Footer -->
+    <div class="report-detail-footer">
+      <span>Report ID: #{{ report.id }}</span>
+      <span>{{ report.created_at|date:'d M Y' }}</span>
+    </div>
+
+  </div>
+
 </div>
+
 {% endblock %}
