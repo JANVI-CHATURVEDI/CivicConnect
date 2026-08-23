@@ -810,7 +810,7 @@
                     <div class="priority-options">
 
                         <label class="priority-pill low">
-
+                            <input type="radio" name="priority" value="low">
                             <input type="radio" name="priority" value="low" {% if form.priority.value == 'low' %}checked{%
                                 endif %}>
 
@@ -821,6 +821,7 @@
 
                         <label class="priority-pill medium">
 
+                            <input type="radio" name="priority" value="medium"
                             <input type="radio" name="priority" value="medium" {% if form.priority.value == 'medium' or
                                 not form.priority.value %}checked{% endif %}>
 
@@ -831,6 +832,7 @@
 
                         <label class="priority-pill high">
 
+                            <input type="radio" name="priority" value="high">
                             <input type="radio" name="priority" value="high" {% if form.priority.value == 'high'%}checked{% endif %}>
 
                             Urgent

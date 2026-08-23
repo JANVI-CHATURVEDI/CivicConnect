@@ -3,10 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.conf import settings
+from .models import Report, Comment, Vote
 import requests
-
 from .models import Report
 from .forms import ReportForm
+
+import requests
 
 
 def home(r):
@@ -22,9 +24,15 @@ def new(r):
         x = f.save(commit=False)
         x.citizen = r.user
         x.save()
-        messages.success(r, "Report submitted successfully.")
-        return redirect("detail", x.pk)
+        return redirect("success", x.pk)
     return render(r, "form.html", {"form": f})
+
+
+def success(r, pk):
+    x = get_object_or_404(Report, pk=pk)
+    if x.citizen != r.user and not r.user.is_staff:
+        return redirect("mine")
+    return render(r, "success.html", {"report": x})
 
 
 @login_required
@@ -45,16 +53,84 @@ def detail(r, pk):
 
 
 @login_required
+def add_comment(r, pk):
+    report = get_object_or_404(Report, pk=pk)
+
+    if r.method == "POST":
+        text = r.POST.get("text", "").strip()
+
+        if text:
+            Comment.objects.create(
+                report=report,
+                user=r.user,
+                text=text
+            )
+
+    return redirect("detail", pk=pk)
+
+
+@login_required
+def vote_report(r, pk):
+    report = get_object_or_404(Report, pk=pk)
+
+    vote = Vote.objects.filter(
+        report=report,
+        user=r.user
+    ).first()
+
+    if vote:
+        vote.delete()
+    else:
+        Vote.objects.create(
+            report=report,
+            user=r.user
+        )
+
+    return redirect("detail", pk=pk)
+
+
+@login_required
+def update_status(request, pk):
+    if not request.user.is_staff:
+        return redirect("mine")
+
+    report = get_object_or_404(Report, pk=pk)
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        valid_statuses = ["reported", "progress", "resolved"]
+
+        if new_status in valid_statuses:
+            report.status = new_status
+            report.save()
+            messages.success(
+                request,
+                "Report status updated successfully."
+            )
+
+    return redirect("dashboard")
+
+
+@login_required
 def dashboard(r):
     if not r.user.is_staff:
         return redirect("mine")
+
     qs = Report.objects.all().order_by("-created_at")
+
     c = r.GET.get("category")
     s = r.GET.get("status")
+    p = r.GET.get("priority")
+
     if c:
         qs = qs.filter(category=c)
+
     if s:
         qs = qs.filter(status=s)
+
+    if p:
+        qs = qs.filter(priority=p)
+
     return render(
         r,
         "dashboard.html",
