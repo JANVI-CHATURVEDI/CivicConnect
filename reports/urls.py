@@ -29,4 +29,5 @@ urlpatterns = [
         views.update_status,
         name="update_status"
     ),
+    path("api/get-address/", views.get_address, name="get_address"),
 ]

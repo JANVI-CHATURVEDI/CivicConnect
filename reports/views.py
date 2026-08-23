@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.conf import settings
-
 from .models import Report, Comment, Vote
+import requests
+from .models import Report
 from .forms import ReportForm
 
 import requests

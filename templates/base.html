@@ -148,6 +148,26 @@
     </div>
 {% endif %}
 
+
+<!-- ================= MESSAGES ================= -->
+
+{% if messages %}
+
+    <div class="messages">
+
+        {% for message in messages %}
+
+            <div class="alert">
+                {{ message }}
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+{% endif %}
+
+
 <!-- ================= PAGE CONTENT ================= -->
 
 <main>

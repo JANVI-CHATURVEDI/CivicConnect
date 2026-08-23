@@ -3,6 +3,10 @@ from dotenv import load_dotenv
 import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
+GEOAPIFY_API_KEY = os.getenv("GEOAPIFY_API_KEY")
 SECRET_KEY = "change-this-secret-key"
 DEBUG = True
 ALLOWED_HOSTS = []
