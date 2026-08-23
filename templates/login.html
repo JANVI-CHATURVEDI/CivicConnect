@@ -1,9 +1,334 @@
-{% extends 'base.html' %}{% block content %}
-<div class="box">
-  <p class="eyebrow">WELCOME BACK</p>
-  <h1>Sign in</h1>
-  <form method="post">
-    {% csrf_token %}{{form.as_p}}<button class="btn big">Sign in</button>
-  </form>
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicConnect AI | Login</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Login CSS -->
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+</head>
+
+<body>
+
+<div class="login-page">
+
+    <div class="login-container">
+
+        <!-- ================= LEFT SIDE ================= -->
+
+        <div class="login-left">
+
+            <div class="logo-box">
+                <img src="{% static 'images/civicconnect-logo.png' %}"
+                     alt="CivicConnect AI Logo">
+            </div>
+
+            <h1>
+                CivicConnect<span>AI</span>
+            </h1>
+
+            <p class="tagline">
+                Report. Track. Improve Your City with AI.
+            </p>
+
+
+            <!-- Feature 1 -->
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+
+                <div>
+                    <h3>AI Issue Detection</h3>
+                    <p>
+                        Automatically identify civic issues using AI.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Feature 2 -->
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+
+                <div>
+                    <h3>Automatic GPS Location</h3>
+                    <p>
+                        Detect and capture the exact issue location.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Feature 3 -->
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+
+                <div>
+                    <h3>Real-Time Tracking</h3>
+                    <p>
+                        Track your complaint from submission to resolution.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <!-- Feature 4 -->
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+
+                <div>
+                    <h3>Secure Platform</h3>
+                    <p>
+                        Your complaints and information stay protected.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="left-footer">
+                <span>
+                    <i class="fa-solid fa-city"></i>
+                    Smart City
+                </span>
+
+                <span>
+                    <i class="fa-solid fa-microchip"></i>
+                    AI Powered
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- ================= RIGHT SIDE ================= -->
+
+        <div class="login-right">
+
+            <div class="login-form-container">
+
+                <h2>Welcome Back</h2>
+
+                <p class="login-subtitle">
+                    Login to continue to CivicConnect AI
+                </p>
+
+
+                <!-- Django Login Form -->
+
+                <form method="post" id="loginForm">
+
+                    {% csrf_token %}
+
+
+                    <!-- Username / Email -->
+
+                    <div class="form-group">
+
+                        <label for="id_username">
+                            Email Address
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-envelope"></i>
+
+                            <input
+                                type="text"
+                                name="username"
+                                id="id_username"
+                                placeholder="Enter your email address"
+                                autocomplete="username"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Password -->
+
+                    <div class="form-group">
+
+                        <label for="id_password">
+                            Password
+                        </label>
+
+                        <div class="input-wrapper">
+
+                            <i class="fa-solid fa-lock"></i>
+
+                            <input
+                                type="password"
+                                name="password"
+                                id="id_password"
+                                placeholder="Enter your password"
+                                autocomplete="current-password"
+                                required
+                            >
+
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                id="togglePassword"
+                                aria-label="Show password"
+                            >
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Remember + Forgot -->
+
+                    <div class="login-options">
+
+                        <label class="remember">
+
+                            <input
+                                type="checkbox"
+                                name="remember"
+                            >
+
+                            <span>Remember Me</span>
+
+                        </label>
+
+                        <a href="#" id="forgotPassword">
+                            Forgot Password?
+                        </a>
+
+                    </div>
+
+
+                    <!-- Django errors -->
+
+                    {% if form.errors %}
+                        <div class="django-error">
+                            Invalid username or password.
+                        </div>
+                    {% endif %}
+
+
+                    <!-- Login Button -->
+
+                    <button
+                        type="submit"
+                        class="login-button"
+                        id="loginBtn"
+                    >
+
+                        <span>Secure Login</span>
+
+                        <i class="fa-solid fa-arrow-right"></i>
+
+                    </button>
+
+
+                    <!-- OR -->
+
+                    <div class="divider">
+                        <span>OR</span>
+                    </div>
+
+
+                    <!-- Google -->
+
+                    <button
+                        type="button"
+                        class="google-button"
+                        id="googleBtn"
+                    >
+
+                        <i class="fa-brands fa-google"></i>
+
+                        <span>Continue with Google</span>
+
+                    </button>
+
+
+                    <!-- Register -->
+
+                    <p class="register-text">
+
+                        Don't have an account?
+
+                        <a href="#" id="registerLink">
+                            Register
+                        </a>
+
+                    </p>
+
+
+                    <!-- Security -->
+
+                    <div class="security-info">
+
+                        <span>
+                            <i class="fa-solid fa-lock"></i>
+                            Secure
+                        </span>
+
+                        <span>
+                            <i class="fa-solid fa-microchip"></i>
+                            AI Powered
+                        </span>
+
+                        <span>
+                            <i class="fa-solid fa-building-columns"></i>
+                            Trusted Platform
+                        </span>
+
+                    </div>
+
+
+                    <p class="copyright">
+                        © 2026 CivicConnect AI
+                    </p>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
-{% endblock %}
+
+
+<script src="{% static 'login.js' %}"></script>
+
+</body>
+</html>

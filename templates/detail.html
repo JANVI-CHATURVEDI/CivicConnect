@@ -18,10 +18,7 @@
     </div>
 
     <a href="{% url 'mine' %}" class="back-btn">
-      <svg class="icon-svg" viewBox="0 0 24 24" width="15" height="15">
-        <line x1="19" y1="12" x2="5" y2="12" />
-        <polyline points="12 19 5 12 12 5" />
-      </svg>
+      <svg class="icon-svg" viewBox="0 0 24 24" width="15" height="15"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
       Back to My Reports
     </a>
 
@@ -55,14 +52,11 @@
         {% csrf_token %}
 
         <button type="submit" class="vote-btn">
-          <svg class="icon-svg" viewBox="0 0 24 24" width="16" height="16">
-            <path
-              d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1zM7 11l4.5-9a2 2 0 0 1 3.4 2l-1 5H19a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 17.6 21H7" />
-          </svg>
+          <svg class="icon-svg" viewBox="0 0 24 24" width="16" height="16"><path d="M7 11v10H4a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1zM7 11l4.5-9a2 2 0 0 1 3.4 2l-1 5H19a2 2 0 0 1 2 2.3l-1.4 8A2 2 0 0 1 17.6 21H7"/></svg>
           Upvote Report
         </button>
       </form>
-  
+
       <span class="vote-count">
         {{ report.votes.count }} Upvotes
       </span>

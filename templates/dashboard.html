@@ -1,217 +1,147 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard_extra.css' %}">
+{% endblock %}
 
 {% block content %}
 
-{% if messages %}
-<div class="messages">
-    {% for message in messages %}
-    <div class="success-message">
-        {{ message }}
+<div class="dashboard-page">
+
+
+    <div class="dashboard-header">
+        <p class="eyebrow">AUTHORITY CONSOLE</p>
+        <h1>Operations Dashboard</h1>
     </div>
-    {% endfor %}
+
+    <!-- Statistics -->
+    <div class="dashboard-stats">
+
+        <div class="dashboard-stat-card">
+            <span class="dashboard-stat-value">{{ stats.0 }}</span>
+            <span class="dashboard-stat-label">Total Reports</span>
+        </div>
+
+        <div class="dashboard-stat-card stat-reported">
+            <span class="dashboard-stat-value">{{ stats.1 }}</span>
+            <span class="dashboard-stat-label">Reported</span>
+        </div>
+
+        <div class="dashboard-stat-card stat-progress">
+            <span class="dashboard-stat-value">{{ stats.2 }}</span>
+            <span class="dashboard-stat-label">In Progress</span>
+        </div>
+
+        <div class="dashboard-stat-card stat-resolved">
+            <span class="dashboard-stat-value">{{ stats.3 }}</span>
+            <span class="dashboard-stat-label">Resolved</span>
+        </div>
+
+    </div>
+
+
+    <!-- Filters -->
+    <form class="filters" method="get">
+
+        <div class="filter-group">
+            <svg class="icon-svg filter-icon" viewBox="0 0 24 24" width="15" height="15"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+
+            <select name="category" onchange="this.form.submit()">
+                <option value="">All categories</option>
+                {% for k,v in categories %}
+                <option value="{{ k }}" {% if request.GET.category == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <select name="status" onchange="this.form.submit()">
+                <option value="">All statuses</option>
+                <option value="reported" {% if request.GET.status == "reported" %}selected{% endif %}>Reported</option>
+                <option value="progress" {% if request.GET.status == "progress" %}selected{% endif %}>In Progress</option>
+                <option value="resolved" {% if request.GET.status == "resolved" %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <select name="priority" onchange="this.form.submit()">
+                <option value="">All priorities</option>
+                <option value="low" {% if request.GET.priority == "low" %}selected{% endif %}>Low</option>
+                <option value="medium" {% if request.GET.priority == "medium" %}selected{% endif %}>Medium</option>
+                <option value="high" {% if request.GET.priority == "high" %}selected{% endif %}>High</option>
+            </select>
+        </div>
+
+    </form>
+
+
+    <!-- Reports Table -->
+    <div class="dashboard-table-wrap">
+
+        <table class="dashboard-table">
+
+            <tr>
+                <th>ID</th>
+                <th>Issue</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Status</th>
+            </tr>
+
+            {% for x in reports %}
+
+            <tr>
+
+                <td class="dashboard-id">#{{ x.id }}</td>
+
+                <td>
+                    <a href="{% url 'detail' x.id %}" class="dashboard-report-link">
+                        {{ x.title }}
+                    </a>
+                </td>
+
+                <td>{{ x.get_category_display }}</td>
+
+                <td>
+                    <span class="priority-tag priority-{{ x.priority }}">{{ x.get_priority_display }}</span>
+                </td>
+
+                <td>
+
+                    <form method="post" action="{% url 'update_status' x.id %}" class="status-form">
+
+                        {% csrf_token %}
+
+                        <select name="status" onchange="this.form.submit()" class="status-select {{ x.status }}">
+                            <option value="reported" {% if x.status == "reported" %}selected{% endif %}>Reported</option>
+                            <option value="progress" {% if x.status == "progress" %}selected{% endif %}>In Progress</option>
+                            <option value="resolved" {% if x.status == "resolved" %}selected{% endif %}>Resolved</option>
+                        </select>
+
+                    </form>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="5" class="no-results">
+                    <div class="no-results-content">
+                        <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <strong>No issues found</strong>
+                        <span>There are no reports matching the selected filter.</span>
+                    </div>
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+    </div>
+
 </div>
-{% endif %}
-
-
-<p class="eyebrow">AUTHORITY CONSOLE</p>
-
-<h1>Operations dashboard</h1>
-
-
-<!-- Statistics -->
-<div class="stats">
-
-    <div>
-        <b>{{ stats.0 }}</b>
-        <small>Total Reports</small>
-    </div>
-
-    <div>
-        <b>{{ stats.1 }}</b>
-        <small>Reported</small>
-    </div>
-
-    <div>
-        <b>{{ stats.2 }}</b>
-        <small>In Progress</small>
-    </div>
-
-    <div>
-        <b>{{ stats.3 }}</b>
-        <small>Resolved</small>
-    </div>
-
-</div>
-
-
-<!-- Filters -->
-<form class="filters" method="get">
-
-    <!-- Category -->
-    <select name="category" onchange="this.form.submit()">
-
-        <option value="">All categories</option>
-
-        {% for k,v in categories %}
-
-        <option value="{{ k }}"
-            {% if request.GET.category == k %}selected{% endif %}>
-            {{ v }}
-        </option>
-
-        {% endfor %}
-
-    </select>
-
-
-    <!-- Status -->
-    <select name="status" onchange="this.form.submit()">
-
-        <option value="">All statuses</option>
-
-        <option value="reported"
-            {% if request.GET.status == "reported" %}selected{% endif %}>
-            Reported
-        </option>
-
-        <option value="progress"
-            {% if request.GET.status == "progress" %}selected{% endif %}>
-            In Progress
-        </option>
-
-        <option value="resolved"
-            {% if request.GET.status == "resolved" %}selected{% endif %}>
-            Resolved
-        </option>
-
-    </select>
-
-
-    <!-- Priority -->
-    <select name="priority" onchange="this.form.submit()">
-
-        <option value="">All priorities</option>
-
-        <option value="low"
-            {% if request.GET.priority == "low" %}selected{% endif %}>
-            Low
-        </option>
-
-        <option value="medium"
-            {% if request.GET.priority == "medium" %}selected{% endif %}>
-            Medium
-        </option>
-
-        <option value="high"
-            {% if request.GET.priority == "high" %}selected{% endif %}>
-            High
-        </option>
-
-    </select>
-
-</form>
-
-
-<!-- Reports Table -->
-<table>
-
-    <tr>
-        <th>ID</th>
-        <th>Issue</th>
-        <th>Category</th>
-        <th>Priority</th>
-        <th>Status</th>
-    </tr>
-
-
-    {% for x in reports %}
-
-    <tr>
-
-        <td>
-            #{{ x.id }}
-        </td>
-
-
-        <td>
-            <a href="{% url 'detail' x.id %}" class="dashboard-report-link">
-                {{ x.title }}
-            </a>
-        </td>
-
-
-        <td>
-            {{ x.get_category_display }}
-        </td>
-
-
-        <td>
-            {{ x.get_priority_display }}
-        </td>
-
-
-        <td>
-
-            <form
-                method="post"
-                action="{% url 'update_status' x.id %}"
-                class="status-form"
-            >
-
-                {% csrf_token %}
-
-                <select
-                    name="status"
-                    onchange="this.form.submit()"
-                    class="status-select {{ x.status }}"
-                >
-
-                    <option value="reported"
-                        {% if x.status == "reported" %}selected{% endif %}>
-                        Reported
-                    </option>
-
-                    <option value="progress"
-                        {% if x.status == "progress" %}selected{% endif %}>
-                        In Progress
-                    </option>
-
-                    <option value="resolved"
-                        {% if x.status == "resolved" %}selected{% endif %}>
-                        Resolved
-                    </option>
-
-                </select>
-
-            </form>
-
-        </td>
-
-    </tr>
-
-
-    {% empty %}
-
-    <tr>
-
-        <td colspan="5" class="no-results">
-
-            <div class="no-results-content">
-
-                <strong>No issues found</strong>
-
-                <span>
-                    There are no reports matching the selected filter.
-                </span>
-
-            </div>
-
-        </td>
-
-    </tr>
-
-    {% endfor %}
-
-</table>
 
 {% endblock %}
