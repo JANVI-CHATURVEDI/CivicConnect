@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Report
-from .forms import ReportForm
+from .forms import ReportForm, RegistrationForm
 
 
 def home(r):
@@ -65,3 +65,46 @@ def dashboard(r):
             ],
         },
     )
+
+def register(request):
+    if request.user.is_authenticated:
+        return redirect("home")
+
+    if request.method == "POST":
+        form = RegistrationForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+
+            messages.success(
+                request,
+                "Registration successful. You can now log in."
+            )
+
+            return redirect("login")
+    else:
+        form = RegistrationForm()
+
+    return render(
+        request,
+        "register.html",
+        {"form": form}
+    )
+
+@login_required
+def update_status(r, pk):
+    if not r.user.is_staff:
+        return redirect("mine")
+
+    x = get_object_or_404(Report, pk=pk)
+
+    if r.method == "POST":
+        status = r.POST.get("status")
+
+        if status in ["reported", "progress", "resolved"]:
+            x.status = status
+            x.save()
+
+        return redirect("dashboard")
+
+    return redirect("dashboard")

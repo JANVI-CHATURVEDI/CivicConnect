@@ -29,11 +29,20 @@
   </tr>
   {% for x in reports %}
   <tr>
-    <td>#{{x.id}}</td>
+    <td><a href="/reports/{{x.id}}/">#{{x.id}}</a></td>
     <td>{{x.title}}</td>
     <td>{{x.get_category_display}}</td>
     <td>{{x.get_priority_display}}</td>
-    <td><span class="badge {{x.status}}">{{x.get_status_display}}</span></td>
+    <td>
+      <form method="post" action="/reports/{{x.id}}/status/">
+        {% csrf_token %}
+        <select name="status" onchange="this.form.submit()">
+         <option value="reported" {% if x.status == "reported" %}selected{% endif %}>Reported</option>
+         <option value="progress" {% if x.status == "progress" %}selected{% endif %}>In Progress</option>
+         <option value="resolved" {% if x.status == "resolved" %}selected{% endif %}>Resolved</option>
+        </select>
+      </form>
+    </td>
   </tr>
   {% endfor %}
 </table>
