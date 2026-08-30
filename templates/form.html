@@ -526,6 +526,12 @@
         const latInput = document.getElementById("id_latitude");
         const lngInput = document.getElementById("id_longitude");
 
+        if (addressInput) {
+            addressInput.addEventListener("input", function () {
+                addressInput.dataset.manuallyEdited = "true";
+            });
+        }
+
         if (detectBtn) {
             detectBtn.addEventListener("click", function () {
 
@@ -558,6 +564,9 @@
                                 locText.textContent = data.address;
                                 locText.classList.add("detected");
                                 detectBtn.textContent = "✓ Location Detected";
+                                if (addressInput && !addressInput.dataset.manuallyEdited) {
+                                    addressInput.value = data.address;
+                                }
                             } else {
                                 locText.textContent = "Location detected. Please enter the address manually.";
                                 detectBtn.textContent = "Try Again";
