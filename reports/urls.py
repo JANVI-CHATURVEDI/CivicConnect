@@ -4,12 +4,14 @@ from . import views
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("signup/", views.signup, name="signup"),
     path("report/new/", views.new, name="new"),
     path("reports/", views.mine, name="mine"),
     path("reports/<int:pk>/", views.detail, name="detail"),
     path("dashboard/", views.dashboard, name="dashboard"),
 
     path("api/get-address/", views.get_address, name="get_address"),
+    path("api/ai-suggest/", views.ai_suggest, name="ai_suggest"),
     path("success/<int:pk>/", views.success, name="success"),
 
     path(
@@ -29,5 +31,4 @@ urlpatterns = [
         views.update_status,
         name="update_status"
     ),
-    path("api/get-address/", views.get_address, name="get_address"),
 ]

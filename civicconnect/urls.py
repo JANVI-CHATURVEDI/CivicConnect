@@ -8,5 +8,27 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("login/", av.LoginView.as_view(template_name="login.html"), name="login"),
     path("logout/", av.LogoutView.as_view(), name="logout"),
+
+    path(
+        "password-reset/",
+        av.PasswordResetView.as_view(template_name="registration/password_reset_form.html"),
+        name="password_reset",
+    ),
+    path(
+        "password-reset/done/",
+        av.PasswordResetDoneView.as_view(template_name="registration/password_reset_done.html"),
+        name="password_reset_done",
+    ),
+    path(
+        "password-reset/confirm/<uidb64>/<token>/",
+        av.PasswordResetConfirmView.as_view(template_name="registration/password_reset_confirm.html"),
+        name="password_reset_confirm",
+    ),
+    path(
+        "password-reset/complete/",
+        av.PasswordResetCompleteView.as_view(template_name="registration/password_reset_complete.html"),
+        name="password_reset_complete",
+    ),
+
     path("", include("reports.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

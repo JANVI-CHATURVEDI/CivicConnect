@@ -5,16 +5,12 @@
 <div class="my-reports-page">
 
     <div class="my-reports-header">
-
         <h1>My Reports</h1>
-
         <a class="my-reports-new-btn" href="{% url 'new' %}">
             <svg class="icon-svg" viewBox="0 0 24 24" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             New Report
         </a>
-
     </div>
-
 
     <div class="my-reports-list">
 
@@ -23,32 +19,19 @@
         <a class="report-row" href="{% url 'detail' x.id %}">
 
             <span class="report-row-content">
-
-                <span class="report-row-title">
-                    #{{ x.id }} · {{ x.title }}
-                </span>
-
+                <span class="report-row-title">#{{ x.id }} · {{ x.title }}</span>
                 <span class="report-row-meta">
-                    {{ x.get_category_display }}
-                    ·
-                    {{ x.created_at|date:'d M Y' }}
+                    {{ x.get_category_display }} · {{ x.created_at|date:'d M Y' }}
+                    {% if x.department %} · Routed to {{ x.department }}{% endif %}
                 </span>
-
             </span>
 
-
-            <span class="badge {{ x.status }}">
-                {{ x.get_status_display }}
-            </span>
+            <span class="badge {{ x.status }}">{{ x.get_status_display }}</span>
 
         </a>
 
         {% empty %}
-
-        <p class="no-reports">
-            No reports yet.
-        </p>
-
+        <p class="no-reports">No reports yet.</p>
         {% endfor %}
 
     </div>

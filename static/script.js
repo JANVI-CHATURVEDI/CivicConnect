@@ -25,9 +25,6 @@ if (howItWorksButton) {
 }
 
 // ---------- LOGIN BUTTON ----------
-// (kept as JS-triggered navigation only if login-btn has no href;
-//  the template already uses {% url 'login' %} as a real link, so
-//  this is a no-op safeguard for any button-based instances)
 
 const loginButtons = document.querySelectorAll(".login-btn");
 
@@ -39,25 +36,10 @@ loginButtons.forEach(btn => {
     }
 });
 
-// ---------- CIVIC CONTRIBUTOR BUTTON ----------
-
-const contributorBtn = document.querySelector(".contributor-btn");
-
-if (contributorBtn) {
-    contributorBtn.addEventListener("click", () => {
-        alert("Civic Contributor registration will be connected by the backend team.");
-    });
-}
-
 // ---------- IMPACT STATISTICS COUNTER ----------
 
 const statNumbers = document.querySelectorAll(".stat-number");
 
-/**
- * Formats a number for display given its target value and suffix.
- * Handles thousands (e.g. 10000 -> "10K+") generically instead of
- * hardcoding specific numbers.
- */
 function formatStatValue(value, suffix) {
     if (value >= 1000) {
         return Math.floor(value / 1000) + "K" + (suffix.includes("+") ? "+" : "");
@@ -76,12 +58,10 @@ function startCounters() {
 
         function updateCounter() {
             current += increment;
-
             if (current >= target) {
                 stat.textContent = formatStatValue(target, suffix);
                 return;
             }
-
             stat.textContent = formatStatValue(current, suffix);
             requestAnimationFrame(updateCounter);
         }
@@ -89,8 +69,6 @@ function startCounters() {
         updateCounter();
     });
 }
-
-// ---------- START COUNTER WHEN IMPACT SECTION APPEARS ----------
 
 const impactSection = document.querySelector(".impact-section");
 
@@ -111,8 +89,6 @@ if (impactSection && statNumbers.length) {
 }
 
 // ---------- SCROLL REVEAL ----------
-// Fades/slides cards into view as the user scrolls past them.
-// Respects prefers-reduced-motion via the CSS side (see .reveal rules).
 
 const revealEls = document.querySelectorAll(".reveal");
 
