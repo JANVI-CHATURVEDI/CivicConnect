@@ -1,5 +1,4 @@
-/* Extra styles for the AI-assisted columns on the dashboard.
-   Kept separate from style.css so it's obvious what's new. */
+/* AI columns for the dashboard table */
 
 .dashboard-search-input {
     padding: 10px 14px 10px 34px;

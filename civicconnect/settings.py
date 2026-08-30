@@ -45,12 +45,6 @@ TEMPLATES = [
     }
 ]
 
-# ---------------------------------------------------------------------------
-# DATABASE
-# Uses Postgres automatically if POSTGRES_DB is set in .env (production /
-# original setup). Otherwise falls back to a local SQLite file so the
-# project runs immediately for a demo/viva with zero extra setup.
-# ---------------------------------------------------------------------------
 if os.getenv("POSTGRES_DB"):
     DATABASES = {
         "default": {
@@ -87,9 +81,6 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Password-reset emails print to the console instead of sending real mail —
-# perfect for a local demo/viva. Swap EMAIL_BACKEND for a real SMTP backend
-# (and set EMAIL_HOST etc. in .env) before deploying for real users.
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
 )

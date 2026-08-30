@@ -38,17 +38,11 @@ class Report(models.Model):
     address = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # ---- AI-assisted fields (see reports/ai_utils.py) ----
-    department = models.CharField(
-        max_length=80,
-        blank=True,
-        help_text="Auto-routed by AI based on category.",
-    )
+    department = models.CharField(max_length=80, blank=True)
     ai_priority_suggested = models.CharField(
         max_length=10,
         choices=[("low", "Low"), ("medium", "Medium"), ("high", "High")],
         blank=True,
-        help_text="What the AI suggested, for transparency vs. the final priority chosen.",
     )
     duplicate_of = models.ForeignKey(
         "self",
@@ -56,7 +50,6 @@ class Report(models.Model):
         null=True,
         blank=True,
         related_name="duplicates",
-        help_text="Set by AI duplicate detection if a very similar nearby report already exists.",
     )
 
     def __str__(self):

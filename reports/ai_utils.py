@@ -1,35 +1,11 @@
-"""
-CivicConnect AI — lightweight, dependency-free "AI" layer.
-
-This module implements the intelligence behind the features advertised on the
-homepage (issue detection, severity analysis, smart routing, duplicate
-detection) using transparent, explainable rule-based techniques instead of a
-black-box ML model. This is a deliberate choice for a project like this:
-
-- It runs instantly, offline, with zero extra dependencies or API keys —
-  important for a college demo where you can't guarantee internet access.
-- It is fully explainable in a viva: you can point at the exact keyword or
-  distance threshold that produced a decision.
-- It is a genuine, working implementation of "AI-assisted" civic triage
-  (keyword-based NLP classification + geospatial clustering), not just a
-  marketing label with nothing behind it.
-
-If you want to swap in a real ML/vision model later (e.g. an image
-classifier for the photo, or a call to an LLM API for the text), every
-function below has a single, clearly-marked entry point
-(`analyze_report`) — replace its internals and nothing else in the app
-needs to change.
-"""
+"""Rule-based AI helpers: category detection, priority scoring,
+department routing, and duplicate detection."""
 
 import math
 from datetime import timedelta
 
 from django.utils import timezone
 
-
-# ---------------------------------------------------------------------------
-# 1. TEXT -> CATEGORY  (keyword-based "AI issue detection")
-# ---------------------------------------------------------------------------
 
 CATEGORY_KEYWORDS = {
     "road": ["pothole", "road", "crack", "asphalt", "highway", "footpath", "pavement", "sinkhole"],
@@ -41,7 +17,6 @@ CATEGORY_KEYWORDS = {
     "traffic": ["signal", "traffic light", "traffic signal", "junction light"],
 }
 
-# Words that suggest urgency / danger — used for severity scoring below.
 HIGH_PRIORITY_KEYWORDS = [
     "urgent", "danger", "dangerous", "emergency", "accident", "injury", "injured",
     "fire", "collapsed", "collapse", "flood", "flooding", "electrocution",
@@ -56,8 +31,6 @@ MEDIUM_PRIORITY_KEYWORDS = [
 
 
 def suggest_category(text: str):
-    """Return the category key whose keywords best match the given text,
-    or None if nothing scores above zero."""
     if not text:
         return None
 
@@ -72,21 +45,12 @@ def suggest_category(text: str):
     return best_category
 
 
-# ---------------------------------------------------------------------------
-# 2. SEVERITY / PRIORITY SCORING
-# ---------------------------------------------------------------------------
-
 def suggest_priority(title: str, description: str, category: str = ""):
-    """Score the combined text for urgency signals and return
-    ('low' | 'medium' | 'high', matched_keywords list)."""
-
     text = f"{title or ''} {description or ''}".lower()
 
     high_hits = [kw for kw in HIGH_PRIORITY_KEYWORDS if kw in text]
     medium_hits = [kw for kw in MEDIUM_PRIORITY_KEYWORDS if kw in text]
 
-    # Some categories are inherently higher risk (open manholes, live traffic
-    # signals, downed trees on roads) even without alarming keywords.
     risky_categories = {"manhole", "traffic"}
 
     if high_hits or (category in risky_categories and medium_hits):
@@ -97,10 +61,6 @@ def suggest_priority(title: str, description: str, category: str = ""):
 
     return "low", []
 
-
-# ---------------------------------------------------------------------------
-# 3. DEPARTMENT ROUTING
-# ---------------------------------------------------------------------------
 
 DEPARTMENT_MAP = {
     "road": "Roads & Infrastructure Dept.",
@@ -118,17 +78,12 @@ def suggest_department(category: str) -> str:
     return DEPARTMENT_MAP.get(category, "General Grievance Cell")
 
 
-# ---------------------------------------------------------------------------
-# 4. GEO-BASED DUPLICATE DETECTION
-# ---------------------------------------------------------------------------
-
 EARTH_RADIUS_M = 6371000
-DUPLICATE_RADIUS_M = 150       # reports within 150m of each other
-DUPLICATE_WINDOW_DAYS = 14     # ...and reported within the last 14 days
+DUPLICATE_RADIUS_M = 150
+DUPLICATE_WINDOW_DAYS = 14
 
 
 def haversine_distance_m(lat1, lon1, lat2, lon2) -> float:
-    """Great-circle distance between two lat/lon points, in meters."""
     lat1, lon1, lat2, lon2 = map(float, (lat1, lon1, lat2, lon2))
 
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
@@ -143,11 +98,7 @@ def haversine_distance_m(lat1, lon1, lat2, lon2) -> float:
 
 
 def find_possible_duplicates(category, latitude, longitude, exclude_pk=None):
-    """Return a list of (report, distance_m) for existing reports of the
-    same category, within DUPLICATE_RADIUS_M meters and reported in the
-    last DUPLICATE_WINDOW_DAYS days."""
-
-    from .models import Report  # local import avoids circular import
+    from .models import Report
 
     if latitude is None or longitude is None:
         return []
@@ -176,14 +127,8 @@ def find_possible_duplicates(category, latitude, longitude, exclude_pk=None):
     return matches
 
 
-# ---------------------------------------------------------------------------
-# 5. SINGLE ENTRY POINT — used by the view and the live-preview API
-# ---------------------------------------------------------------------------
-
 def analyze_report(title="", description="", category="", latitude=None,
                     longitude=None, exclude_pk=None):
-    """Run every AI step and return one combined result dict."""
-
     detected_category = suggest_category(f"{title} {description}")
     priority, matched_keywords = suggest_priority(title, description, category or detected_category)
     department = suggest_department(category or detected_category or "other")

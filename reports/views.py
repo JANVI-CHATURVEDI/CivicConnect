@@ -43,13 +43,10 @@ def new(r):
         x = f.save(commit=False)
         x.citizen = r.user
 
-        # Fold the free-text "other issue" box into the description so the
-        # citizen's words are never silently dropped.
         other_issue = f.cleaned_data.get("other_issue", "").strip()
         if other_issue:
             x.description = (x.description + "\n\n" + other_issue).strip() if x.description else other_issue
 
-        # ---- AI ASSIST: run before saving so every report is enriched ----
         analysis = ai_utils.analyze_report(
             title=x.title,
             description=x.description,
@@ -62,8 +59,6 @@ def new(r):
         x.ai_priority_suggested = analysis["suggested_priority"]
 
         if analysis["duplicates"]:
-            # Link to the closest existing match; staff can still see the
-            # report and override this from the dashboard.
             x.duplicate_of_id = analysis["duplicates"][0]["id"]
 
         x.save()
@@ -83,10 +78,6 @@ def new(r):
 
 @require_GET
 def ai_suggest(r):
-    """Live AI preview used by the report form: as the citizen types, this
-    returns a suggested category/priority/department and flags nearby
-    possible duplicates — before the report is ever submitted."""
-
     title = r.GET.get("title", "")
     description = r.GET.get("description", "")
     category = r.GET.get("category", "")
