@@ -1,0 +1,134 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicConnect AI | Sign Up</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'login.css' %}">
+</head>
+
+<body>
+
+<div class="login-page">
+
+    <div class="login-container">
+
+        <div class="login-left">
+
+            <div class="logo-box">
+                <img src="{% static 'images/civicconnect-logo.png' %}" alt="CivicConnect AI Logo">
+            </div>
+
+            <h1>CivicConnect<span>AI</span></h1>
+            <p class="tagline">Report. Track. Improve Your City with AI.</p>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-location-dot"></i></div>
+                <div>
+                    <h3>Join Your Community</h3>
+                    <p>Create a free account to start reporting civic issues.</p>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-bell"></i></div>
+                <div>
+                    <h3>Track Everything</h3>
+                    <p>Follow every report you file from submission to resolution.</p>
+                </div>
+            </div>
+
+            <div class="left-footer">
+                <span><i class="fa-solid fa-city"></i> Smart City</span>
+                <span><i class="fa-solid fa-microchip"></i> AI Powered</span>
+            </div>
+
+        </div>
+
+        <div class="login-right">
+
+            <div class="login-form-container">
+
+                <h2>Create Account</h2>
+                <p class="login-subtitle">Join CivicConnect AI to start reporting issues</p>
+
+                <form method="post" id="signupForm">
+
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">Username</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user"></i>
+                            <input type="text" name="{{ form.username.html_name }}" id="{{ form.username.id_for_label }}"
+                                placeholder="Choose a username" value="{{ form.username.value|default:'' }}" required>
+                        </div>
+                        {% if form.username.errors %}<div class="django-error">{{ form.username.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email Address</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-envelope"></i>
+                            <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}"
+                                placeholder="Enter your email address" value="{{ form.email.value|default:'' }}" required>
+                        </div>
+                        {% if form.email.errors %}<div class="django-error">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password1.id_for_label }}">Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" name="{{ form.password1.html_name }}" id="{{ form.password1.id_for_label }}"
+                                placeholder="Create a password" required>
+                        </div>
+                        {% if form.password1.errors %}<div class="django-error">{{ form.password1.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" name="{{ form.password2.html_name }}" id="{{ form.password2.id_for_label }}"
+                                placeholder="Re-enter your password" required>
+                        </div>
+                        {% if form.password2.errors %}<div class="django-error">{{ form.password2.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="django-error">{{ form.non_field_errors.0 }}</div>
+                    {% endif %}
+
+                    <button type="submit" class="login-button" id="signupBtn">
+                        <span>Create Account</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <p class="register-text">
+                        Already have an account?
+                        <a href="{% url 'login' %}">Login</a>
+                    </p>
+
+                    <p class="copyright">© 2026 CivicConnect AI</p>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

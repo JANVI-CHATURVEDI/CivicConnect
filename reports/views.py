@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.conf import settings
-from .models import Report, Comment, Vote
+from django.views.decorators.http import require_GET
 import requests
-from .models import Report
-from .forms import ReportForm
 
-import requests
+from .models import Report, Comment, Vote
+from .forms import ReportForm, SignupForm
+from . import ai_utils
 
 
 def home(r):
@@ -17,15 +18,90 @@ def home(r):
     )
 
 
+def signup(r):
+    if r.user.is_authenticated:
+        return redirect("home")
+
+    if r.method == "POST":
+        form = SignupForm(r.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(r, user)
+            messages.success(r, "Welcome to CivicConnect AI! Your account is ready.")
+            return redirect("home")
+    else:
+        form = SignupForm()
+
+    return render(r, "signup.html", {"form": form})
+
+
 @login_required
 def new(r):
     f = ReportForm(r.POST or None, r.FILES or None)
+
     if r.method == "POST" and f.is_valid():
         x = f.save(commit=False)
         x.citizen = r.user
+
+        # Fold the free-text "other issue" box into the description so the
+        # citizen's words are never silently dropped.
+        other_issue = f.cleaned_data.get("other_issue", "").strip()
+        if other_issue:
+            x.description = (x.description + "\n\n" + other_issue).strip() if x.description else other_issue
+
+        # ---- AI ASSIST: run before saving so every report is enriched ----
+        analysis = ai_utils.analyze_report(
+            title=x.title,
+            description=x.description,
+            category=x.category,
+            latitude=x.latitude,
+            longitude=x.longitude,
+        )
+
+        x.department = analysis["department"]
+        x.ai_priority_suggested = analysis["suggested_priority"]
+
+        if analysis["duplicates"]:
+            # Link to the closest existing match; staff can still see the
+            # report and override this from the dashboard.
+            x.duplicate_of_id = analysis["duplicates"][0]["id"]
+
         x.save()
+
+        if analysis["duplicates"]:
+            messages.warning(
+                r,
+                f"Heads up: this looks similar to an existing report "
+                f"(#{analysis['duplicates'][0]['id']}) nearby. We've linked them "
+                f"so authorities don't duplicate work — you can still track yours separately.",
+            )
+
         return redirect("success", x.pk)
+
     return render(r, "form.html", {"form": f})
+
+
+@require_GET
+def ai_suggest(r):
+    """Live AI preview used by the report form: as the citizen types, this
+    returns a suggested category/priority/department and flags nearby
+    possible duplicates — before the report is ever submitted."""
+
+    title = r.GET.get("title", "")
+    description = r.GET.get("description", "")
+    category = r.GET.get("category", "")
+    lat = r.GET.get("lat") or None
+    lon = r.GET.get("lon") or None
+
+    analysis = ai_utils.analyze_report(
+        title=title,
+        description=description,
+        category=category,
+        latitude=lat,
+        longitude=lon,
+    )
+
+    return JsonResponse({"success": True, **analysis})
 
 
 def success(r, pk):
@@ -121,6 +197,7 @@ def dashboard(r):
     c = r.GET.get("category")
     s = r.GET.get("status")
     p = r.GET.get("priority")
+    q = r.GET.get("q")
 
     if c:
         qs = qs.filter(category=c)
@@ -130,6 +207,9 @@ def dashboard(r):
 
     if p:
         qs = qs.filter(priority=p)
+
+    if q:
+        qs = qs.filter(title__icontains=q)
 
     return render(
         r,
@@ -145,6 +225,8 @@ def dashboard(r):
             ],
         },
     )
+
+
 def get_address(request):
     latitude = request.GET.get("lat")
     longitude = request.GET.get("lon")
@@ -156,6 +238,12 @@ def get_address(request):
         }, status=400)
 
     api_key = settings.GEOAPIFY_API_KEY
+
+    if not api_key:
+        return JsonResponse({
+            "success": False,
+            "error": "Location service is not configured on the server."
+        }, status=200)
 
     url = "https://api.geoapify.com/v1/geocode/reverse"
 
