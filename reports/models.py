@@ -56,6 +56,39 @@ class Report(models.Model):
         return f"#{self.id} {self.title}"
 
 
+class UserProfile(models.Model):
+    ROLE_CHOICES = [
+        ("citizen", "Citizen"),
+        ("authority", "Authority"),
+    ]
+
+    DEPARTMENT_CHOICES = [
+        ("garbage", "Garbage"),
+        ("water", "Water"),
+        ("animal", "Animal/Pet Control"),
+        ("roads", "Roads"),
+        ("electricity", "Electricity"),
+        ("traffic", "Traffic"),
+        ("other", "Other"),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default="citizen",
+    )
+    department = models.CharField(
+        max_length=30,
+        choices=DEPARTMENT_CHOICES,
+        blank=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return self.user.username
+
+        
 class Comment(models.Model):
     report = models.ForeignKey(
         Report,

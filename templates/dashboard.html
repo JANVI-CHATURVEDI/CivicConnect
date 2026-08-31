@@ -160,5 +160,48 @@
     </div>
 
 </div>
+<<<<<<< HEAD
+<form class="filters">
+  <select name="category">
+    <option value="">All categories</option>
+    {% for k,v in categories %}
+    <option value="{{k}}">{{v}}</option>
+    {% endfor %}</select
+  ><select name="status">
+    <option value="">All statuses</option>
+    <option value="reported">Reported</option>
+    <option value="progress">In Progress</option>
+    <option value="resolved">Resolved</option></select
+  ><button class="outline">Filter</button>
+</form>
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Issue</th>
+    <th>Category</th>
+    <th>Priority</th>
+    <th>Status</th>
+  </tr>
+  {% for x in reports %}
+  <tr>
+    <td><a href="/reports/{{x.id}}/">#{{x.id}}</a></td>
+    <td>{{x.title}}</td>
+    <td>{{x.get_category_display}}</td>
+    <td>{{x.get_priority_display}}</td>
+    <td>
+      <form method="post" action="/reports/{{x.id}}/status/">
+        {% csrf_token %}
+        <select name="status" onchange="this.form.submit()">
+         <option value="reported" {% if x.status == "reported" %}selected{% endif %}>Reported</option>
+         <option value="progress" {% if x.status == "progress" %}selected{% endif %}>In Progress</option>
+         <option value="resolved" {% if x.status == "resolved" %}selected{% endif %}>Resolved</option>
+        </select>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+=======
 
+>>>>>>> origin/main
 {% endblock %}
