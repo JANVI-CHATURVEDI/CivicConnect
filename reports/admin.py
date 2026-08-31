@@ -1,5 +1,9 @@
 from django.contrib import admin
+<<<<<<< HEAD
 from .models import Report, UserProfile
+=======
+from .models import Report, Comment, Vote
+>>>>>>> origin/main
 
 
 @admin.register(Report)
@@ -9,10 +13,28 @@ class ReportAdmin(admin.ModelAdmin):
         "title",
         "category",
         "priority",
+        "ai_priority_suggested",
+        "department",
         "status",
+        "duplicate_of",
         "citizen",
         "created_at",
     )
+<<<<<<< HEAD
     list_filter = ("category", "priority", "status")
 
 admin.site.register(UserProfile)
+=======
+    list_filter = ("category", "priority", "status", "department")
+    search_fields = ("title", "description", "address")
+
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ("id", "report", "user", "created_at")
+
+
+@admin.register(Vote)
+class VoteAdmin(admin.ModelAdmin):
+    list_display = ("id", "report", "user", "created_at")
+>>>>>>> origin/main

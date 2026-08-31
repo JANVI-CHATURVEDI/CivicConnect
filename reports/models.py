@@ -38,10 +38,25 @@ class Report(models.Model):
     address = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    department = models.CharField(max_length=80, blank=True)
+    ai_priority_suggested = models.CharField(
+        max_length=10,
+        choices=[("low", "Low"), ("medium", "Medium"), ("high", "High")],
+        blank=True,
+    )
+    duplicate_of = models.ForeignKey(
+        "self",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="duplicates",
+    )
+
     def __str__(self):
         return f"#{self.id} {self.title}"
 
 
+<<<<<<< HEAD
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ("citizen", "Citizen"),
@@ -75,3 +90,44 @@ class UserProfile(models.Model):
         return self.user.username
 
         
+=======
+class Comment(models.Model):
+    report = models.ForeignKey(
+        Report,
+        on_delete=models.CASCADE,
+        related_name="comments"
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on Report #{self.report.id}"
+
+
+class Vote(models.Model):
+    report = models.ForeignKey(
+        Report,
+        on_delete=models.CASCADE,
+        related_name="votes"
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["report", "user"],
+                name="unique_report_vote"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} voted for Report #{self.report.id}"
+>>>>>>> origin/main

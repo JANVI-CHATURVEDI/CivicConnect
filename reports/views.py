@@ -1,5 +1,6 @@
 
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.views import LoginView
@@ -7,11 +8,20 @@ from django.urls import reverse
 
 from django.http import JsonResponse
 from django.conf import settings
+<<<<<<< HEAD
 
 import requests
 
 from .models import Report, UserProfile
 from .forms import ReportForm, RegistrationForm
+=======
+from django.views.decorators.http import require_GET
+import requests
+
+from .models import Report, Comment, Vote
+from .forms import ReportForm, SignupForm
+from . import ai_utils
+>>>>>>> origin/main
 
 
 def home(request):
@@ -24,16 +34,88 @@ def home(request):
     )
 
 
+def signup(r):
+    if r.user.is_authenticated:
+        return redirect("home")
+
+    if r.method == "POST":
+        form = SignupForm(r.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(r, user)
+            messages.success(r, "Welcome to CivicConnect AI! Your account is ready.")
+            return redirect("home")
+    else:
+        form = SignupForm()
+
+    return render(r, "signup.html", {"form": form})
+
+
 @login_required
 def new(r):
     f = ReportForm(r.POST or None, r.FILES or None)
+
     if r.method == "POST" and f.is_valid():
         x = f.save(commit=False)
         x.citizen = r.user
+
+        other_issue = f.cleaned_data.get("other_issue", "").strip()
+        if other_issue:
+            x.description = (x.description + "\n\n" + other_issue).strip() if x.description else other_issue
+
+        analysis = ai_utils.analyze_report(
+            title=x.title,
+            description=x.description,
+            category=x.category,
+            latitude=x.latitude,
+            longitude=x.longitude,
+        )
+
+        x.department = analysis["department"]
+        x.ai_priority_suggested = analysis["suggested_priority"]
+
+        if analysis["duplicates"]:
+            x.duplicate_of_id = analysis["duplicates"][0]["id"]
+
         x.save()
-        messages.success(r, "Report submitted successfully.")
-        return redirect("detail", x.pk)
+
+        if analysis["duplicates"]:
+            messages.warning(
+                r,
+                f"Heads up: this looks similar to an existing report "
+                f"(#{analysis['duplicates'][0]['id']}) nearby. We've linked them "
+                f"so authorities don't duplicate work — you can still track yours separately.",
+            )
+
+        return redirect("success", x.pk)
+
     return render(r, "form.html", {"form": f})
+
+
+@require_GET
+def ai_suggest(r):
+    title = r.GET.get("title", "")
+    description = r.GET.get("description", "")
+    category = r.GET.get("category", "")
+    lat = r.GET.get("lat") or None
+    lon = r.GET.get("lon") or None
+
+    analysis = ai_utils.analyze_report(
+        title=title,
+        description=description,
+        category=category,
+        latitude=lat,
+        longitude=lon,
+    )
+
+    return JsonResponse({"success": True, **analysis})
+
+
+def success(r, pk):
+    x = get_object_or_404(Report, pk=pk)
+    if x.citizen != r.user and not r.user.is_staff:
+        return redirect("mine")
+    return render(r, "success.html", {"report": x})
 
 
 @login_required
@@ -53,6 +135,7 @@ def detail(r, pk):
     return render(r, "detail.html", {"report": x})
 
 @login_required
+<<<<<<< HEAD
 def dashboard(request):
     try:
         profile = request.user.userprofile
@@ -61,10 +144,74 @@ def dashboard(request):
         is_authority = False
 
     if not request.user.is_staff and not is_authority:
+=======
+def add_comment(r, pk):
+    report = get_object_or_404(Report, pk=pk)
+
+    if r.method == "POST":
+        text = r.POST.get("text", "").strip()
+
+        if text:
+            Comment.objects.create(
+                report=report,
+                user=r.user,
+                text=text
+            )
+
+    return redirect("detail", pk=pk)
+
+
+@login_required
+def vote_report(r, pk):
+    report = get_object_or_404(Report, pk=pk)
+
+    vote = Vote.objects.filter(
+        report=report,
+        user=r.user
+    ).first()
+
+    if vote:
+        vote.delete()
+    else:
+        Vote.objects.create(
+            report=report,
+            user=r.user
+        )
+
+    return redirect("detail", pk=pk)
+
+
+@login_required
+def update_status(request, pk):
+    if not request.user.is_staff:
+        return redirect("mine")
+
+    report = get_object_or_404(Report, pk=pk)
+
+    if request.method == "POST":
+        new_status = request.POST.get("status")
+        valid_statuses = ["reported", "progress", "resolved"]
+
+        if new_status in valid_statuses:
+            report.status = new_status
+            report.save()
+            messages.success(
+                request,
+                "Report status updated successfully."
+            )
+
+    return redirect("dashboard")
+
+
+@login_required
+def dashboard(r):
+    if not r.user.is_staff:
+>>>>>>> origin/main
         return redirect("mine")
 
     qs = Report.objects.all().order_by("-created_at")
 
+<<<<<<< HEAD
     category = request.GET.get("category")
     status = request.GET.get("status")
 
@@ -73,6 +220,24 @@ def dashboard(request):
 
     if status:
         qs = qs.filter(status=status)
+=======
+    c = r.GET.get("category")
+    s = r.GET.get("status")
+    p = r.GET.get("priority")
+    q = r.GET.get("q")
+
+    if c:
+        qs = qs.filter(category=c)
+
+    if s:
+        qs = qs.filter(status=s)
+
+    if p:
+        qs = qs.filter(priority=p)
+
+    if q:
+        qs = qs.filter(title__icontains=q)
+>>>>>>> origin/main
 
     return render(
         request,
@@ -90,6 +255,7 @@ def dashboard(request):
     )
 
 
+<<<<<<< HEAD
 def register(request):
     #if request.user.is_authenticated:
         #return redirect("home")
@@ -141,6 +307,8 @@ def update_status(request, pk):
 
     return redirect("dashboard")
 
+=======
+>>>>>>> origin/main
 def get_address(request):
     latitude = request.GET.get("lat")
     longitude = request.GET.get("lon")
@@ -152,6 +320,12 @@ def get_address(request):
         }, status=400)
 
     api_key = settings.GEOAPIFY_API_KEY
+
+    if not api_key:
+        return JsonResponse({
+            "success": False,
+            "error": "Location service is not configured on the server."
+        }, status=200)
 
     url = "https://api.geoapify.com/v1/geocode/reverse"
 
@@ -191,6 +365,7 @@ def get_address(request):
             "success": False,
             "error": "Unable to contact location service."
         }, status=500)
+<<<<<<< HEAD
 
 
 class CustomLoginView(LoginView):
@@ -212,3 +387,5 @@ class CustomLoginView(LoginView):
             pass
 
         return reverse("mine")
+=======
+>>>>>>> origin/main

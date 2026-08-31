@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="success-page">
+
+    <div class="success-card">
+
+        <div class="success-icon">
+            <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+
+        <h1>Report Submitted Successfully!</h1>
+
+        <p class="success-message">
+            Thank you for reporting this civic issue.
+            Your report has been analyzed by our AI and routed to
+            <strong>{{ report.department }}</strong>.
+        </p>
+
+        <div class="report-id">
+            Report ID: <strong>#{{ report.id }}</strong>
+        </div>
+
+        <div class="success-actions">
+            <a href="{% url 'detail' report.id %}" class="success-primary-btn">View My Report</a>
+            <a href="{% url 'new' %}" class="success-secondary-btn">Report Another Issue</a>
+        </div>
+
+        <a href="{% url 'mine' %}" class="my-reports-link">Go to My Reports →</a>
+
+    </div>
+
+</div>
+
+{% endblock %}

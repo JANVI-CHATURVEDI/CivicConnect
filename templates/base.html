@@ -19,8 +19,7 @@
     rel="stylesheet"
     href="{% static 'style.css' %}"
 >
-
-
+{% block extra_css %}{% endblock %}
 </head>
 
 <body>
@@ -137,7 +136,6 @@
 
 </header>
 
-
 <!-- ================= MESSAGES ================= -->
 
 {% if messages %}
@@ -146,7 +144,8 @@
 
         {% for message in messages %}
 
-            <div class="alert">
+            <div class="alert alert-{{ message.tags }}">
+                <span class="alert-icon"></span>
                 {{ message }}
             </div>
 
