@@ -9,7 +9,13 @@
     <title>CivicConnect AI | Smart Civic Reporting</title>
 
     <link rel="icon" type="image/png" href="{% static 'images/civicconnect-logo.png' %}">
-      <link rel="stylesheet" href="{% static 'style.css' %}">
+
+    <!-- Proper font import — was missing, CSS referenced Poppins/Inter but no <link> existed -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 
 <body>
@@ -22,10 +28,9 @@
             <img src="{% static 'images/civicconnect-logo.png' %}" alt="CivicConnect AI Logo">
         </div>
 
-        <!-- MOBILE MENU BUTTON -->
-    <button class="menu-toggle" aria-label="Open navigation">
-        ☰
-    </button>
+        <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">
+            <svg class="icon-svg" viewBox="0 0 24 24" width="22" height="22"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
 
         <nav>
             <a href="#" class="active">Home</a>
@@ -35,10 +40,9 @@
         </nav>
 
         <div class="nav-buttons">
-            <button class="login-btn">Login</button>
-            <button class="report-btn">Report Issue</button>
+            <a href="{% url 'login' %}" class="login-btn">Login</a>
+            <a href="{% url 'new' %}" class="report-btn">Report Issue</a>
         </div>
-
     </header>
 
 
@@ -51,7 +55,8 @@
             <div class="hero-content">
 
                 <div class="hero-badge">
-                    ✦ AI-POWERED CIVIC PLATFORM
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="12" height="12"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
+                    AI-POWERED CIVIC PLATFORM
                 </div>
 
                 <h1>
@@ -67,9 +72,10 @@
 
                 <div class="hero-buttons">
 
-                    <button class="primary-btn report-btn">
-                        📍 Report an Issue
-                    </button>
+                    <a href="{% url 'new' %}" class="primary-btn report-btn">
+                        <svg class="icon-svg" viewBox="0 0 24 24" width="16" height="16" style="display:inline-block;vertical-align:-3px;margin-right:6px;"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Report an Issue
+                    </a>
 
                     <button class="secondary-btn">
                         How It Works →
@@ -121,11 +127,13 @@
                     </div>
 
                     <div class="issue-card issue-one">
-                        🚧 Road Issue
+                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.18A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                        Road Issue
                     </div>
 
                     <div class="issue-card issue-two">
-                        💧 Water Leak
+                        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2s6 7.5 6 12a6 6 0 0 1-12 0c0-4.5 6-12 6-12z"/></svg>
+                        Water Leak
                     </div>
 
                 </div>
@@ -135,952 +143,363 @@
         </section>
     </main>
 
-    
-<!-- ================= HOW IT WORKS ================= -->
 
-<section class="how-it-works" id="how-it-works">
+    <!-- ================= HOW IT WORKS ================= -->
 
-    <div class="section-heading">
+    <section class="how-it-works" id="how-it-works">
 
-        <span class="section-label">HOW IT WORKS</span>
-
-        <h2>
-            From Problem to
-            <span>Resolution.</span>
-        </h2>
-
-        <p>
-            CivicConnect AI makes reporting civic issues simple,
-            smart, and transparent.
-        </p>
-
-    </div>
-
-
-    <div class="steps-container">
-
-        <!-- STEP 1 -->
-
-        <div class="step-card">
-
-            <div class="step-number">01</div>
-
-            <div class="step-icon">📸</div>
-
-            <h3>Capture</h3>
-
-            <p>
-                Take a photo of the civic issue you want to report.
-            </p>
-
+        <div class="section-heading">
+            <span class="section-label">HOW IT WORKS</span>
+            <h2>From Problem to <span>Resolution.</span></h2>
+            <p>CivicConnect AI makes reporting civic issues simple, smart, and transparent.</p>
         </div>
 
+        <div class="steps-container">
 
-        <div class="step-line"></div>
-
-
-        <!-- STEP 2 -->
-
-        <div class="step-card">
-
-            <div class="step-number">02</div>
-
-            <div class="step-icon">📍</div>
-
-            <h3>Locate</h3>
-
-            <p>
-                Your location is automatically detected using GPS.
-            </p>
-
-        </div>
-
-
-        <div class="step-line"></div>
-
-
-        <!-- STEP 3 -->
-
-        <div class="step-card featured-step">
-
-            <div class="step-number">03</div>
-
-            <div class="step-icon">🤖</div>
-
-            <h3>AI Analyze</h3>
-
-            <p>
-                AI identifies the issue and estimates its priority.
-            </p>
-
-        </div>
-
-
-        <div class="step-line"></div>
-
-
-        <!-- STEP 4 -->
-
-        <div class="step-card">
-
-            <div class="step-number">04</div>
-
-            <div class="step-icon">🏛️</div>
-
-            <h3>Connect</h3>
-
-            <p>
-                The complaint is routed to the concerned authority.
-            </p>
-
-        </div>
-
-
-        <div class="step-line"></div>
-
-
-        <!-- STEP 5 -->
-
-        <div class="step-card">
-
-            <div class="step-number">05</div>
-
-            <div class="step-icon">✅</div>
-
-            <h3>Resolve</h3>
-
-            <p>
-                Track the complaint until the issue is resolved.
-            </p>
-
-        </div>
-
-    </div>
-
- </section>
-
-
-<!-- ================= AI FEATURES ================= -->
-
-<section class="ai-features" id="features">
-
-    <div class="section-heading">
-
-        <span class="section-label">POWERED BY AI</span>
-
-        <h2>
-            Smarter Reporting.
-            <span>Faster Resolution.</span>
-        </h2>
-
-        <p>
-            CivicConnect AI uses intelligent technology to understand
-            civic problems and help authorities respond more efficiently.
-        </p>
-
-    </div>
-
-
-    <div class="features-grid">
-
-        <!-- FEATURE 1 -->
-
-        <div class="feature-card">
-
-            <div class="feature-icon blue-icon">
-                🤖
+            <div class="step-card reveal">
+                <div class="step-number">01</div>
+                <div class="step-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </div>
+                <h3>Capture</h3>
+                <p>Take a photo of the civic issue you want to report.</p>
             </div>
 
-            <div class="feature-content">
+            <div class="step-line"></div>
 
-                <h3>AI Issue Detection</h3>
+            <div class="step-card reveal">
+                <div class="step-number">02</div>
+                <div class="step-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <h3>Locate</h3>
+                <p>Your location is automatically detected using GPS.</p>
+            </div>
 
-                <p>
-                    Upload a photo and AI automatically identifies
-                    the type of civic issue.
-                </p>
+            <div class="step-line"></div>
 
-                <span class="feature-tag">
-                    Image Intelligence
-                </span>
+            <div class="step-card featured-step reveal">
+                <div class="step-number">03</div>
+                <div class="step-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V4M9 4h6"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/></svg>
+                </div>
+                <h3>AI Analyze</h3>
+                <p>AI identifies the issue and estimates its priority.</p>
+            </div>
 
+            <div class="step-line"></div>
+
+            <div class="step-card reveal">
+                <div class="step-number">04</div>
+                <div class="step-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>
+                </div>
+                <h3>Connect</h3>
+                <p>The complaint is routed to the concerned authority.</p>
+            </div>
+
+            <div class="step-line"></div>
+
+            <div class="step-card reveal">
+                <div class="step-number">05</div>
+                <div class="step-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                </div>
+                <h3>Resolve</h3>
+                <p>Track the complaint until the issue is resolved.</p>
             </div>
 
         </div>
 
+    </section>
 
-        <!-- FEATURE 2 -->
 
-        <div class="feature-card">
+    <!-- ================= AI FEATURES ================= -->
 
-            <div class="feature-icon teal-icon">
-                ⚡
+    <section class="ai-features" id="features">
+
+        <div class="section-heading">
+            <span class="section-label">POWERED BY AI</span>
+            <h2>Smarter Reporting. <span>Faster Resolution.</span></h2>
+            <p>CivicConnect AI uses intelligent technology to understand civic problems and help authorities respond more efficiently.</p>
+        </div>
+
+        <div class="features-grid">
+
+            <div class="feature-card reveal">
+                <div class="feature-icon blue-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="24" height="24"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M12 8V4M9 4h6"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/></svg>
+                </div>
+                <div class="feature-content">
+                    <h3>AI Issue Detection</h3>
+                    <p>Upload a photo and AI automatically identifies the type of civic issue.</p>
+                    <span class="feature-tag">Image Intelligence</span>
+                </div>
             </div>
 
-            <div class="feature-content">
+            <div class="feature-card reveal">
+                <div class="feature-icon teal-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="24" height="24"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg>
+                </div>
+                <div class="feature-content">
+                    <h3>Severity Analysis</h3>
+                    <p>AI estimates whether an issue is minor, moderate, or critical.</p>
+                    <span class="feature-tag">Smart Priority</span>
+                </div>
+            </div>
 
-                <h3>Severity Analysis</h3>
+            <div class="feature-card reveal">
+                <div class="feature-icon purple-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="24" height="24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <div class="feature-content">
+                    <h3>Duplicate Detection</h3>
+                    <p>Similar complaints near the same location can be detected and grouped together.</p>
+                    <span class="feature-tag">Less Duplication</span>
+                </div>
+            </div>
 
-                <p>
-                    AI estimates whether an issue is minor,
-                    moderate, or critical.
-                </p>
+            <div class="feature-card reveal">
+                <div class="feature-icon orange-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="24" height="24"><path d="M3 21h18M5 21V9l7-5 7 5v12M9 21v-6h6v6"/></svg>
+                </div>
+                <div class="feature-content">
+                    <h3>Smart Department Routing</h3>
+                    <p>Complaints can be directed to the department responsible for resolving the issue.</p>
+                    <span class="feature-tag">Smart Routing</span>
+                </div>
+            </div>
 
-                <span class="feature-tag">
-                    Smart Priority
-                </span>
+            <div class="feature-card large-feature reveal">
+                <div class="feature-icon green-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="24" height="24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg>
+                </div>
+                <div class="feature-content">
+                    <h3>Automatic Complaint Description</h3>
+                    <p>AI can generate a clear and concise description from the uploaded image, saving citizens time.</p>
+                    <span class="feature-tag">AI Generated</span>
+                </div>
+            </div>
 
+            <div class="ai-status-card reveal">
+                <div class="ai-status-top">
+                    <div class="status-dot"></div>
+                    <span>AI SYSTEM</span>
+                    <span class="online-text">ONLINE</span>
+                </div>
+                <div class="ai-status-main">
+                    <svg class="icon-svg ai-symbol" viewBox="0 0 24 24" width="28" height="28"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
+                    <h3>Smart Civic Intelligence</h3>
+                    <p>Turning citizen reports into actionable information for better cities.</p>
+                </div>
             </div>
 
         </div>
 
+    </section>
 
-        <!-- FEATURE 3 -->
 
-        <div class="feature-card">
+    <!-- ================= CIVIC ISSUES ================= -->
 
-            <div class="feature-icon purple-icon">
-                🔍
+    <section class="civic-issues" id="issues">
+
+        <div class="section-heading">
+            <span class="section-label">CIVIC ISSUES</span>
+            <h2>See a Problem? <span>Report It.</span></h2>
+            <p>From damaged roads to overflowing garbage, CivicConnect AI helps communities make local problems visible.</p>
+        </div>
+
+        <div class="issues-grid">
+
+            <div class="issue-item reveal">
+                <div class="issue-icon road-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.18A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+                </div>
+                <div>
+                    <h3>Road Damage</h3>
+                    <p>Potholes, cracks and damaged roads.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
             </div>
 
-            <div class="feature-content">
+            <div class="issue-item reveal">
+                <div class="issue-icon water-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M12 2s6 7.5 6 12a6 6 0 0 1-12 0c0-4.5 6-12 6-12z"/></svg>
+                </div>
+                <div>
+                    <h3>Water Leakage</h3>
+                    <p>Report leaking pipes and water wastage.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
+            </div>
 
-                <h3>Duplicate Detection</h3>
+            <div class="issue-item reveal">
+                <div class="issue-icon garbage-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 6"/></svg>
+                </div>
+                <div>
+                    <h3>Garbage Overflow</h3>
+                    <p>Overflowing bins and waste accumulation.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
+            </div>
 
-                <p>
-                    Similar complaints near the same location
-                    can be detected and grouped together.
-                </p>
+            <div class="issue-item reveal">
+                <div class="issue-icon light-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .8 1.7v.6h6.4v-.6c0-.7.3-1.3.8-1.7A7 7 0 0 0 12 2z"/></svg>
+                </div>
+                <div>
+                    <h3>Broken Streetlights</h3>
+                    <p>Help identify dark and unsafe streets.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
+            </div>
 
-                <span class="feature-tag">
-                    Less Duplication
-                </span>
+            <div class="issue-item reveal">
+                <div class="issue-icon tree-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M12 22v-7M9 15h6M7 12l5-9 5 9M5 15l7-12 7 12"/></svg>
+                </div>
+                <div>
+                    <h3>Fallen Trees</h3>
+                    <p>Report fallen or hazardous trees.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
+            </div>
 
+            <div class="issue-item reveal">
+                <div class="issue-icon manhole-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg>
+                </div>
+                <div>
+                    <h3>Open Manholes</h3>
+                    <p>Report dangerous open manholes.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
+            </div>
+
+            <div class="issue-item reveal">
+                <div class="issue-icon traffic-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><rect x="8" y="2" width="8" height="20" rx="3"/><circle cx="12" cy="7" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="17" r="1.4"/></svg>
+                </div>
+                <div>
+                    <h3>Traffic Signals</h3>
+                    <p>Report broken or malfunctioning signals.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
+            </div>
+
+            <div class="issue-item reveal">
+                <div class="issue-icon flood-icon">
+                    <svg class="icon-svg" viewBox="0 0 24 24" width="26" height="26"><path d="M2 12c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0 3-1.5 4.5 0M2 18c1.5 1.5 3 1.5 4.5 0s3-1.5 4.5 0 3 1.5 4.5 0 3-1.5 4.5 0"/></svg>
+                </div>
+                <div>
+                    <h3>Waterlogging</h3>
+                    <p>Report flooded and waterlogged areas.</p>
+                </div>
+                <span class="issue-arrow"><svg class="icon-svg" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
             </div>
 
         </div>
 
-
-        <!-- FEATURE 4 -->
-
-        <div class="feature-card">
-
-            <div class="feature-icon orange-icon">
-                🏛️
-            </div>
-
-            <div class="feature-content">
-
-                <h3>Smart Department Routing</h3>
-
-                <p>
-                    Complaints can be directed to the department
-                    responsible for resolving the issue.
-                </p>
-
-                <span class="feature-tag">
-                    Smart Routing
-                </span>
-
-            </div>
-
+        <div class="issues-cta">
+            <p>Don't see your issue listed? You can still report it — just choose "Other" in the form.</p>
         </div>
 
+    </section>
 
-        <!-- FEATURE 5 -->
 
-        <div class="feature-card large-feature">
+    <!-- ================= IMPACT SECTION ================= -->
 
-            <div class="feature-icon green-icon">
-                ✍️
+    <section class="impact-section">
+
+        <div class="impact-content">
+
+            <div class="impact-text">
+                <span class="section-label">OUR IMPACT</span>
+                <h2>Every Report Can <span>Make a Difference.</span></h2>
+                <p>When citizens and authorities work together, small reports can lead to meaningful changes across an entire community.</p>
+                <button class="primary-btn contributor-btn">Become a Civic Contributor →</button>
             </div>
 
-            <div class="feature-content">
-
-                <h3>Automatic Complaint Description</h3>
-
-                <p>
-                    AI can generate a clear and concise description
-                    from the uploaded image, saving citizens time.
-                </p>
-
-                <span class="feature-tag">
-                    AI Generated
-                </span>
-
-            </div>
-
-        </div>
-
-         <!-- AI STATUS CARD -->
-
-        <div class="ai-status-card">
-
-            <div class="ai-status-top">
-
-                <div class="status-dot"></div>
-
-                <span>AI SYSTEM</span>
-
-                <span class="online-text">ONLINE</span>
-
-            </div>
-
-            <div class="ai-status-main">
-
-                <span class="ai-symbol">✦</span>
-
-                <h3>Smart Civic Intelligence</h3>
-
-                <p>
-                    Turning citizen reports into actionable
-                    information for better cities.
-                </p>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- ================= CIVIC ISSUES ================= -->
-
-<section class="civic-issues" id="issues">
-
-    <div class="section-heading">
-
-        <span class="section-label">CIVIC ISSUES</span>
-
-        <h2>
-            See a Problem?
-            <span>Report It.</span>
-        </h2>
-
-        <p>
-            From damaged roads to overflowing garbage,
-            CivicConnect AI helps communities make local
-            problems visible.
-        </p>
-
-    </div>
-
-
-    <div class="issues-grid">
-
-        <!-- ROAD DAMAGE -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon road-icon">
-                🚧
-            </div>
-
-            <div>
-                <h3>Road Damage</h3>
-
-                <p>
-                    Potholes, cracks and damaged roads.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-
-        <!-- WATER LEAKAGE -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon water-icon">
-                💧
-            </div>
-
-            <div>
-                <h3>Water Leakage</h3>
-
-                <p>
-                    Report leaking pipes and water wastage.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-
-        <!-- GARBAGE -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon garbage-icon">
-                🗑️
-            </div>
-
-            <div>
-                <h3>Garbage Overflow</h3>
-
-                <p>
-                    Overflowing bins and waste accumulation.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-
-        <!-- STREETLIGHT -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon light-icon">
-                💡
-            </div>
-
-            <div>
-                <h3>Broken Streetlights</h3>
-
-                <p>
-                    Help identify dark and unsafe streets.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-
-        <!-- FALLEN TREE -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon tree-icon">
-                🌳
-            </div>
-
-            <div>
-                <h3>Fallen Trees</h3>
-
-                <p>
-                    Report fallen or hazardous trees.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-
-        <!-- OPEN MANHOLE -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon manhole-icon">
-                🕳️
-            </div>
-
-            <div>
-                <h3>Open Manholes</h3>
-
-                <p>
-                    Report dangerous open manholes.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-
-        <!-- TRAFFIC SIGNAL -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon traffic-icon">
-                🚦
-            </div>
-
-            <div>
-                <h3>Traffic Signals</h3>
-
-                <p>
-                    Report broken or malfunctioning signals.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-
-        <!-- WATERLOGGING -->
-
-        <div class="issue-item">
-
-            <div class="issue-icon flood-icon">
-                🌊
-            </div>
-
-            <div>
-                <h3>Waterlogging</h3>
-
-                <p>
-                    Report flooded and waterlogged areas.
-                </p>
-            </div>
-
-            <span class="issue-arrow">↗</span>
-
-        </div>
-
-    </div>
-
-
-    <div class="issues-cta">
-
-        <p>
-            Don't see your issue?
-        </p>
-
-        <button class="primary-btn report-btn">
-            Report Other Issue →
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- ================= IMPACT SECTION ================= -->
-
-<section class="impact-section">
-
-    <div class="impact-content">
-
-        <div class="impact-text">
-
-            <span class="section-label">
-                OUR IMPACT
-            </span>
-
-            <h2>
-                Every Report Can
-                <span>Make a Difference.</span>
-            </h2>
-
-            <p>
-                When citizens and authorities work together,
-                small reports can lead to meaningful changes
-                across an entire community.
-            </p>
-
-            <button class="primary-btn contributor-btn">
-                Become a Civic Contributor →
-            </button>
-
-        </div>
-
-
-        <div class="impact-stats">
-
-            <div class="stat-card">
-
-                <div class="stat-icon">📋</div>
-
-                <strong class="stat-number" data-target="10000" data-suffix="K+">
-                    0
-                </strong>
-
-                <span>
-                    Issues Reported*
-                </span>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">✅</div>
-
-                <strong class="stat-number" data-target="8000" data-suffix="K+">
-                    0
-                </strong>
-
-                <span>
-                    Issues Resolved*
-                </span>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">📍</div>
-
-                <strong class="stat-number" data-target="95" data-suffix="%">
-                    0
-                </strong>
-
-                <span>
-                    Location Accuracy*
-                </span>
-
-            </div>
-
-
-            <div class="stat-card">
-
-                <div class="stat-icon">🏙️</div>
-
-                <strong class="stat-number" data-target="50" data-suffix="+">
-                    0
-                </strong>
-
-                <span>
-                    Communities Connected*
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <p class="demo-note">
-        *Illustrative platform metrics for demonstration purposes.
-    </p>
-
-</section>
-
-
-<!-- ================= FINAL CTA ================= -->
-
-<section class="final-cta">
-
-    <div class="cta-content">
-
-        <div class="cta-icon">
-            📍
-        </div>
-
-        <span class="section-label">
-            MAKE YOUR CITY BETTER
-        </span>
-
-        <h2>
-            See a Problem?
-            <span>Make It Visible.</span>
-        </h2>
-
-        <p>
-            Your report can help authorities identify problems faster
-            and make your community safer, cleaner, and better.
-        </p>
-
-        <button class="primary-btn cta-button report-btn">
-            Report a Civic Issue →
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- ================= FOOTER ================= -->
-
-<footer class="footer">
-
-    <div class="footer-main">
-
-        <!-- BRAND -->
-
-        <div class="footer-brand">
-
-            <img
-                src="{% static 'images/civicconnect-logo.png' %}"
-                alt="CivicConnect AI Logo"
-            >
-
-            <p>
-                AI-powered civic reporting for cleaner,
-                safer, and smarter communities.
-            </p>
-
-        </div>
-
-
-        <!-- NAVIGATION -->
-
-        <div class="footer-column">
-
-            <h4>Explore</h4>
-
-            <a href="#">Home</a>
-
-            <a href="#how-it-works">
-                How It Works
-            </a>
-
-            <a href="#features">
-                AI Features
-            </a>
-
-            <a href="#issues">
-                Civic Issues
-            </a>
-
-        </div>
-
-
-        <!-- ISSUES -->
-
-        <div class="footer-column">
-
-            <h4>Report</h4>
-
-            <a href="#issues">
-                Road Damage
-            </a>
-
-            <a href="#issues">
-                Water Leakage
-            </a>
-
-            <a href="#issues">
-                Garbage Overflow
-            </a>
-
-            <a href="#issues">
-                Streetlight Issues
-            </a>
-
-        </div>
-
-
-        <!-- CTA -->
-
-        <div class="footer-action">
-
-            <h4>Make a Difference</h4>
-
-            <p>
-                See a civic problem?
-                Help make it visible.
-            </p>
-
-            <button class="footer-report-btn report-btn">
-                Report an Issue →
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- FOOTER BOTTOM -->
-
-    <div class="footer-bottom">
-
-        <p>
-            © 2026 CivicConnect AI. All rights reserved.
-        </p>
-
-        <span>
-            Built for smarter communities.
-        </span>
-
-    </div>
-
-</footer>
-
-
-  <!-- ================= REPORT ISSUE MODAL ================= -->
-
-
-<div class="report-modal" id="reportModal">
-
-    <div class="report-box">
-
-        <button
-            type="button"
-            class="close-report"
-            id="closeReport"
-            aria-label="Close"
-        >
-            ×
-        </button>
-
-        <div class="report-header">
-
-            <span class="section-label">
-                REPORT AN ISSUE
-            </span>
-
-            <h2>
-                Help Improve Your <span>City.</span>
-            </h2>
-
-            <p>
-                Tell us about the civic problem and we'll help connect it
-                to the right authority.
-            </p>
-
-        </div>
-
-        <form id="reportForm">
-
-            <!-- CATEGORY -->
-
-            <div class="form-group">
-
-                <label for="issueCategory">
-                    Issue Category
-                </label>
-
-                <select
-                    id="issueCategory"
-                    required
-                >
-
-                    <option value="">
-                        Select an issue
-                    </option>
-
-                    <option value="Road Issue">
-                        🚧 Road Issue
-                    </option>
-
-                    <option value="Water Leak">
-                        💧 Water Leak
-                    </option>
-
-                    <option value="Street Light">
-                        💡 Street Light
-                    </option>
-
-                    <option value="Garbage Overflow">
-                        🗑️ Garbage Overflow
-                    </option>
-
-                    <option value="Traffic Signal">
-                        🚦 Traffic Signal
-                    </option>
-
-                    <option value="Waterlogging">
-                        🌊 Waterlogging
-                    </option>
-
-                    <option value="Fallen Tree">
-                        🌳 Fallen Tree
-                    </option>
-
-                    <option value="Open Manhole">
-                        🕳️ Open Manhole
-                    </option>
-
-                    <option value="Other">
-                        Other Issue
-                    </option>
-
-                </select>
-
-            </div>
-
-
-            <!-- DESCRIPTION -->
-
-            <div class="form-group">
-
-                <label for="issueDescription">
-                    Describe the Issue
-                </label>
-
-                <textarea
-                    id="issueDescription"
-                    rows="4"
-                    placeholder="Describe the civic problem..."
-                    required
-                ></textarea>
-
-            </div>
-
-
-            <!-- PHOTO -->
-
-            <div class="form-group">
-
-                <label for="issuePhoto">
-                    Upload Photo
-                </label>
-
-                <input
-                    type="file"
-                    id="issuePhoto"
-                    accept="image/*"
-                    required
-                >
-
-                <small>
-                    Upload a clear photo of the civic issue.
-                </small>
-
-                <div id="photoPreview"></div>
-
-            </div>
-
-
-            <!-- LOCATION -->
-
-            <div class="form-group">
-
-                <label for="issueLocation">
-                    Location
-                </label>
-
-                <div class="location-row">
-
-                    <input
-                        type="text"
-                        id="issueLocation"
-                        placeholder="Click Detect Location"
-                        readonly
-                        required
-                    >
-
-                    <button
-                        type="button"
-                        class="location-btn"
-                        id="getLocation"
-                    >
-                        📍 Detect
-                    </button>
-
+            <div class="impact-stats">
+
+                <div class="stat-card reveal">
+                    <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M9 12h6M9 16h6M9 8h1M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></div>
+                    <strong class="stat-number" data-target="10000" data-suffix="K+">0</strong>
+                    <span>Issues Reported*</span>
+                </div>
+
+                <div class="stat-card reveal">
+                    <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
+                    <strong class="stat-number" data-target="8000" data-suffix="K+">0</strong>
+                    <span>Issues Resolved*</span>
+                </div>
+
+                <div class="stat-card reveal">
+                    <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                    <strong class="stat-number" data-target="95" data-suffix="%">0</strong>
+                    <span>Location Accuracy*</span>
+                </div>
+
+                <div class="stat-card reveal">
+                    <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M3 21h18M5 21V7l6-4 6 4v14M9 9h1M9 13h1M14 9h1M14 13h1M9 21v-4h6v4"/></svg></div>
+                    <strong class="stat-number" data-target="50" data-suffix="+">0</strong>
+                    <span>Communities Connected*</span>
                 </div>
 
             </div>
 
+        </div>
 
-            <!-- SUBMIT -->
+        <p class="demo-note">*Illustrative platform metrics for demonstration purposes.</p>
 
-            <button
-                type="submit"
-                class="submit-report"
-            >
-                Submit Report →
-            </button>
+    </section>
 
-        </form>
 
-    </div>
+    <!-- ================= FOOTER ================= -->
 
- </div>
+    <footer class="footer">
 
-<script src="{% static 'script.js' %}"></script>
+        <div class="footer-main">
+
+            <div class="footer-brand">
+                <img src="{% static 'images/civicconnect-logo.png' %}" alt="CivicConnect AI Logo">
+                <p>AI-powered civic reporting for cleaner, safer, and smarter communities.</p>
+            </div>
+
+            <div class="footer-column">
+                <h4>Explore</h4>
+                <a href="#">Home</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#features">AI Features</a>
+                <a href="#issues">Civic Issues</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>Report</h4>
+                <a href="#issues">Road Damage</a>
+                <a href="#issues">Water Leakage</a>
+                <a href="#issues">Garbage Overflow</a>
+                <a href="#issues">Streetlight Issues</a>
+            </div>
+
+            <div class="footer-action">
+                <h4>Make a Difference</h4>
+                <p>See a civic problem? Help make it visible.</p>
+                <a href="{% url 'new' %}" class="footer-report-btn">Report an Issue →</a>
+            </div>
+
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 CivicConnect AI. All rights reserved.</p>
+            <span>Built for smarter communities.</span>
+        </div>
+
+    </footer>
+
+    <script src="{% static 'script.js' %}"></script>
 
 </body>
+
 </html>
