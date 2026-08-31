@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Report
+from .models import Report, UserProfile
 
 
 @admin.register(Report)
@@ -14,3 +14,5 @@ class ReportAdmin(admin.ModelAdmin):
         "created_at",
     )
     list_filter = ("category", "priority", "status")
+
+admin.site.register(UserProfile)

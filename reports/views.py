@@ -1,17 +1,26 @@
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.views import LoginView
+from django.urls import reverse
+
 from django.http import JsonResponse
 from django.conf import settings
+
 import requests
 
-from .models import Report
+from .models import Report, UserProfile
 from .forms import ReportForm, RegistrationForm
 
 
-def home(r):
+def home(request):
     return render(
-        r, "home.html", {"latest": Report.objects.filter(status="resolved")[:6]}
+        request,
+        "home.html",
+        {
+            "latest": Report.objects.filter(status="resolved")[:6]
+        }
     )
 
 
@@ -43,20 +52,30 @@ def detail(r, pk):
         return redirect("mine")
     return render(r, "detail.html", {"report": x})
 
-
 @login_required
-def dashboard(r):
-    if not r.user.is_staff:
+def dashboard(request):
+    try:
+        profile = request.user.userprofile
+        is_authority = profile.role == "authority"
+    except UserProfile.DoesNotExist:
+        is_authority = False
+
+    if not request.user.is_staff and not is_authority:
         return redirect("mine")
+
     qs = Report.objects.all().order_by("-created_at")
-    c = r.GET.get("category")
-    s = r.GET.get("status")
-    if c:
-        qs = qs.filter(category=c)
-    if s:
-        qs = qs.filter(status=s)
+
+    category = request.GET.get("category")
+    status = request.GET.get("status")
+
+    if category:
+        qs = qs.filter(category=category)
+
+    if status:
+        qs = qs.filter(status=status)
+
     return render(
-        r,
+        request,
         "dashboard.html",
         {
             "reports": qs,
@@ -72,14 +91,16 @@ def dashboard(r):
 
 
 def register(request):
-    if request.user.is_authenticated:
-        return redirect("home")
+    #if request.user.is_authenticated:
+        #return redirect("home")
 
     if request.method == "POST":
         form = RegistrationForm(request.POST)
 
         if form.is_valid():
             user = form.save()
+
+            UserProfile.objects.get_or_create(user=user)
 
             messages.success(
                 request,
@@ -97,18 +118,24 @@ def register(request):
     )
 
 @login_required
-def update_status(r, pk):
-    if not r.user.is_staff:
+def update_status(request, pk):
+    try:
+        profile = request.user.userprofile
+        is_authority = profile.role == "authority"
+    except UserProfile.DoesNotExist:
+        is_authority = False
+
+    if not request.user.is_staff and not is_authority:
         return redirect("mine")
 
-    x = get_object_or_404(Report, pk=pk)
+    report = get_object_or_404(Report, pk=pk)
 
-    if r.method == "POST":
-        status = r.POST.get("status")
+    if request.method == "POST":
+        status = request.POST.get("status")
 
         if status in ["reported", "progress", "resolved"]:
-            x.status = status
-            x.save()
+            report.status = status
+            report.save()
 
         return redirect("dashboard")
 
@@ -164,3 +191,24 @@ def get_address(request):
             "success": False,
             "error": "Unable to contact location service."
         }, status=500)
+
+
+class CustomLoginView(LoginView):
+    template_name = "login.html"
+
+    def get_success_url(self):
+        user = self.request.user
+
+        if user.is_staff:
+            return reverse("dashboard")
+
+        try:
+            profile = user.userprofile
+
+            if profile.role == "authority":
+                return reverse("dashboard")
+
+        except UserProfile.DoesNotExist:
+            pass
+
+        return reverse("mine")
