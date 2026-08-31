@@ -8,20 +8,17 @@ from django.urls import reverse
 
 from django.http import JsonResponse
 from django.conf import settings
-<<<<<<< HEAD
 
 import requests
 
 from .models import Report, UserProfile
 from .forms import ReportForm, RegistrationForm
-=======
 from django.views.decorators.http import require_GET
 import requests
 
 from .models import Report, Comment, Vote
 from .forms import ReportForm, SignupForm
 from . import ai_utils
->>>>>>> origin/main
 
 
 def home(request):
@@ -135,7 +132,6 @@ def detail(r, pk):
     return render(r, "detail.html", {"report": x})
 
 @login_required
-<<<<<<< HEAD
 def dashboard(request):
     try:
         profile = request.user.userprofile
@@ -144,7 +140,7 @@ def dashboard(request):
         is_authority = False
 
     if not request.user.is_staff and not is_authority:
-=======
+        return redirect("mine")
 def add_comment(r, pk):
     report = get_object_or_404(Report, pk=pk)
 
@@ -206,21 +202,10 @@ def update_status(request, pk):
 @login_required
 def dashboard(r):
     if not r.user.is_staff:
->>>>>>> origin/main
         return redirect("mine")
 
     qs = Report.objects.all().order_by("-created_at")
 
-<<<<<<< HEAD
-    category = request.GET.get("category")
-    status = request.GET.get("status")
-
-    if category:
-        qs = qs.filter(category=category)
-
-    if status:
-        qs = qs.filter(status=status)
-=======
     c = r.GET.get("category")
     s = r.GET.get("status")
     p = r.GET.get("priority")
@@ -237,10 +222,9 @@ def dashboard(r):
 
     if q:
         qs = qs.filter(title__icontains=q)
->>>>>>> origin/main
 
     return render(
-        request,
+        r,
         "dashboard.html",
         {
             "reports": qs,
@@ -254,8 +238,6 @@ def dashboard(r):
         },
     )
 
-
-<<<<<<< HEAD
 def register(request):
     #if request.user.is_authenticated:
         #return redirect("home")
@@ -307,8 +289,6 @@ def update_status(request, pk):
 
     return redirect("dashboard")
 
-=======
->>>>>>> origin/main
 def get_address(request):
     latitude = request.GET.get("lat")
     longitude = request.GET.get("lon")
@@ -365,7 +345,6 @@ def get_address(request):
             "success": False,
             "error": "Unable to contact location service."
         }, status=500)
-<<<<<<< HEAD
 
 
 class CustomLoginView(LoginView):
@@ -387,5 +366,3 @@ class CustomLoginView(LoginView):
             pass
 
         return reverse("mine")
-=======
->>>>>>> origin/main

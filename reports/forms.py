@@ -1,16 +1,12 @@
 
 from django import forms
-<<<<<<< HEAD
-=======
 from django.contrib.auth.forms import UserCreationForm
->>>>>>> origin/main
 from django.contrib.auth.models import User
 from .models import Report
 
 
 class ReportForm(forms.ModelForm):
-<<<<<<< HEAD
-=======
+
     other_issue = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={"rows": 3}),
@@ -21,7 +17,7 @@ class ReportForm(forms.ModelForm):
         required=False,
         widget=forms.Textarea(attrs={"rows": 4}),
     )
->>>>>>> origin/main
+
 
     class Meta:
         model = Report
@@ -41,7 +37,7 @@ class ReportForm(forms.ModelForm):
             "longitude": forms.HiddenInput(),
         }
 
-<<<<<<< HEAD
+
 
 class RegistrationForm(forms.ModelForm):
     password = forms.CharField(
@@ -86,7 +82,7 @@ class RegistrationForm(forms.ModelForm):
             )
 
         return user
-=======
+
     def clean(self):
         cleaned_data = super().clean()
         category = cleaned_data.get("category")
@@ -121,4 +117,3 @@ class SignupForm(UserCreationForm):
         if commit:
             user.save()
         return user
->>>>>>> origin/main

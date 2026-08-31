@@ -56,7 +56,6 @@ class Report(models.Model):
         return f"#{self.id} {self.title}"
 
 
-<<<<<<< HEAD
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ("citizen", "Citizen"),
@@ -90,7 +89,6 @@ class UserProfile(models.Model):
         return self.user.username
 
         
-=======
 class Comment(models.Model):
     report = models.ForeignKey(
         Report,
@@ -130,4 +128,3 @@ class Vote(models.Model):
 
     def __str__(self):
         return f"{self.user.username} voted for Report #{self.report.id}"
->>>>>>> origin/main

@@ -37,7 +37,7 @@ loginButtons.forEach(btn => {
     }
 });
 
-<<<<<<< HEAD
+
 // ---------- CIVIC CONTRIBUTOR BUTTON ----------
 const loginButton = document.querySelector(".login-btn");
 
@@ -60,8 +60,6 @@ if (contributorBtn) {
     });
 }
 
-=======
->>>>>>> origin/main
 // ---------- IMPACT STATISTICS COUNTER ----------
 
 const statNumbers = document.querySelectorAll(".stat-number");
