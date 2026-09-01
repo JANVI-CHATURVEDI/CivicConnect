@@ -1,9 +1,5 @@
 from django.contrib import admin
-
-from .models import Report, UserProfile
-
 from .models import Report, Comment, Vote
-
 
 
 @admin.register(Report)
@@ -20,13 +16,8 @@ class ReportAdmin(admin.ModelAdmin):
         "citizen",
         "created_at",
     )
-
-    list_filter = ("category", "priority", "status")
-
-admin.site.register(UserProfile)
-
-list_filter = ("category", "priority", "status", "department")
-search_fields = ("title", "description", "address")
+    list_filter = ("category", "priority", "status", "department")
+    search_fields = ("title", "description", "address")
 
 
 @admin.register(Comment)
