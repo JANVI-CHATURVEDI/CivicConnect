@@ -1,18 +1,9 @@
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.views import LoginView
-from django.urls import reverse
-
 from django.http import JsonResponse
 from django.conf import settings
-
-import requests
-
-from .models import Report, UserProfile
-from .forms import ReportForm, RegistrationForm
 from django.views.decorators.http import require_GET
 import requests
 
@@ -21,13 +12,9 @@ from .forms import ReportForm, SignupForm
 from . import ai_utils
 
 
-def home(request):
+def home(r):
     return render(
-        request,
-        "home.html",
-        {
-            "latest": Report.objects.filter(status="resolved")[:6]
-        }
+        r, "home.html", {"latest": Report.objects.filter(status="resolved")[:6]}
     )
 
 
@@ -131,16 +118,8 @@ def detail(r, pk):
         return redirect("mine")
     return render(r, "detail.html", {"report": x})
 
-@login_required
-def dashboard(request):
-    try:
-        profile = request.user.userprofile
-        is_authority = profile.role == "authority"
-    except UserProfile.DoesNotExist:
-        is_authority = False
 
-    if not request.user.is_staff and not is_authority:
-        return redirect("mine")
+@login_required
 def add_comment(r, pk):
     report = get_object_or_404(Report, pk=pk)
 
@@ -238,56 +217,6 @@ def dashboard(r):
         },
     )
 
-def register(request):
-    #if request.user.is_authenticated:
-        #return redirect("home")
-
-    if request.method == "POST":
-        form = RegistrationForm(request.POST)
-
-        if form.is_valid():
-            user = form.save()
-
-            UserProfile.objects.get_or_create(user=user)
-
-            messages.success(
-                request,
-                "Registration successful. You can now log in."
-            )
-
-            return redirect("login")
-    else:
-        form = RegistrationForm()
-
-    return render(
-        request,
-        "register.html",
-        {"form": form}
-    )
-
-@login_required
-def update_status(request, pk):
-    try:
-        profile = request.user.userprofile
-        is_authority = profile.role == "authority"
-    except UserProfile.DoesNotExist:
-        is_authority = False
-
-    if not request.user.is_staff and not is_authority:
-        return redirect("mine")
-
-    report = get_object_or_404(Report, pk=pk)
-
-    if request.method == "POST":
-        status = request.POST.get("status")
-
-        if status in ["reported", "progress", "resolved"]:
-            report.status = status
-            report.save()
-
-        return redirect("dashboard")
-
-    return redirect("dashboard")
 
 def get_address(request):
     latitude = request.GET.get("lat")
@@ -345,24 +274,3 @@ def get_address(request):
             "success": False,
             "error": "Unable to contact location service."
         }, status=500)
-
-
-class CustomLoginView(LoginView):
-    template_name = "login.html"
-
-    def get_success_url(self):
-        user = self.request.user
-
-        if user.is_staff:
-            return reverse("dashboard")
-
-        try:
-            profile = user.userprofile
-
-            if profile.role == "authority":
-                return reverse("dashboard")
-
-        except UserProfile.DoesNotExist:
-            pass
-
-        return reverse("mine")

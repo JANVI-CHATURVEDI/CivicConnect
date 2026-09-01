@@ -28,7 +28,6 @@ if (howItWorksButton) {
 
 const loginButtons = document.querySelectorAll(".login-btn");
 
-
 loginButtons.forEach(btn => {
     if (btn.tagName === "BUTTON") {
         btn.addEventListener("click", () => {
@@ -36,29 +35,6 @@ loginButtons.forEach(btn => {
         });
     }
 });
-
-
-// ---------- CIVIC CONTRIBUTOR BUTTON ----------
-const loginButton = document.querySelector(".login-btn");
-
-if (loginButton) {
-    loginButton.addEventListener("click", function () {
-        window.location.href = "/login/";
-    });
-}
-
-
-// ===============================
-// CIVIC CONTRIBUTOR BUTTON
-// ===============================
-
-const contributorBtn = document.querySelector(".contributor-btn");
-
-if (contributorBtn) {
-    contributorBtn.addEventListener("click", () => {
-        alert("Civic Contributor registration will be connected by the backend team.");
-    });
-}
 
 // ---------- IMPACT STATISTICS COUNTER ----------
 
