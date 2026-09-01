@@ -20,6 +20,33 @@ A Django-based civic issue reporting platform with a lightweight, rule-based
 - **SQLite fallback** — the app now runs immediately with `python manage.py migrate` and no Postgres setup. Set `POSTGRES_DB` etc. in `.env` to use Postgres instead (original behavior).
 - Dashboard search box (`?q=`) alongside the existing category/status/priority filters.
 
+## Role hierarchy
+
+Three roles now exist, driven by a `Profile` model (`role` + `state`):
+
+| Role | Scope | How it's granted |
+|---|---|---|
+| **Citizen** | Own reports only | Default for anyone who signs up |
+| **State Admin** | Reports from their assigned state only | Created by a Super Admin via `/manage-admins/` |
+| **Super Admin** | Every report, every state | `python manage.py createsuperuser` auto-grants this; can also be granted via `/manage-admins/` |
+
+Citizens pick their state when submitting a report (auto-filled from
+reverse geocoding when available, editable otherwise). State Admins only
+see and can update reports tagged with their own state; Super Admins see
+everything and can filter by state, plus manage who has admin access at
+`/manage-admins/`.
+
+## Gemini AI integration
+
+Set `GEMINI_API_KEY` in `.env` (get one free at
+https://aistudio.google.com/apikey) and report triage — category,
+priority, and department — is handled by Gemini instead of the rule
+engine. If the key is missing, the request fails, or Gemini's response
+doesn't parse cleanly, `analyze_report()` automatically falls back to the
+rule-based engine described below — the app never breaks either way. The
+live suggestion panel on the report form shows which one produced the
+result ("via Gemini AI" vs "via rule engine").
+
 ## The "AI" features — how they actually work
 
 This project advertises AI-powered issue detection, severity analysis,
@@ -62,8 +89,7 @@ Then visit `http://127.0.0.1:8000/`.
 
 ## Still not implemented (documented honestly for your report)
 
-- Real image-based AI (the "photo → auto description/category" features are
-  text-based only; no computer vision model is used).
+- Real image-based AI (Gemini is used for text triage only; no photo is sent to it).
 - Google OAuth login (button shows a clear "not enabled" message instead of pretending to work).
 - Editing/deleting a report after submission.
 - Automated test suite beyond `smoke_test.py` (a manual end-to-end script — not wired into `manage.py test`).

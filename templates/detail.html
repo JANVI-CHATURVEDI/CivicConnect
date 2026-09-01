@@ -22,7 +22,7 @@
 
 
   <!-- Main Card -->
-  <div class="report-detail-card">
+  <div class="report-detail-card anim-fade-up">
 
     <!-- Title + Status -->
     <div class="report-title-section">
@@ -121,6 +121,13 @@
         <span class="info-label">AI-Routed Department</span>
         <strong>{{ report.department|default:"Not assigned" }}</strong>
       </div>
+
+      {% if report.get_state_display %}
+      <div class="info-box">
+        <span class="info-label">State</span>
+        <strong>{{ report.get_state_display }}</strong>
+      </div>
+      {% endif %}
 
       {% if report.address %}
       <div class="info-box">

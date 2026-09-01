@@ -1,0 +1,126 @@
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes softPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(-14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.anim-fade-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-fade {
+    animation: fadeIn 0.6s ease both;
+}
+
+.anim-scale-in {
+    animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.anim-delay-1 { animation-delay: 0.08s; }
+.anim-delay-2 { animation-delay: 0.16s; }
+.anim-delay-3 { animation-delay: 0.24s; }
+.anim-delay-4 { animation-delay: 0.32s; }
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease infinite;
+}
+
+.role-badge.superadmin {
+    background-image: linear-gradient(120deg, #7c3aed, #2563eb, #7c3aed);
+    color: white;
+}
+
+.role-badge.admin {
+    background-image: linear-gradient(120deg, #0891b2, #2563eb, #0891b2);
+    color: white;
+}
+
+.role-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ffffff;
+    animation: softPulse 1.6s ease infinite;
+}
+
+.ai-thinking {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ai-thinking span {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #2563eb;
+    animation: softPulse 0.9s ease infinite;
+}
+
+.ai-thinking span:nth-child(2) { animation-delay: 0.15s; }
+.ai-thinking span:nth-child(3) { animation-delay: 0.3s; }
+
+.toast-stack {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+}
+
+.toast-stack .alert {
+    animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow: 0 10px 30px rgba(20, 40, 70, 0.15);
+}
+
+.btn-press {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-press:active {
+    transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .anim-fade-up, .anim-fade, .anim-scale-in, .role-badge, .role-badge .dot,
+    .ai-thinking span, .toast-stack .alert {
+        animation: none !important;
+    }
+}

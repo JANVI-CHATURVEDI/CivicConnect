@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from .constants import STATES, ROLES
 
 
 class Report(models.Model):
@@ -36,6 +37,7 @@ class Report(models.Model):
         max_digits=10, decimal_places=7, blank=True, null=True
     )
     address = models.CharField(max_length=255, blank=True)
+    state = models.CharField(max_length=30, choices=STATES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     department = models.CharField(max_length=80, blank=True)
@@ -44,6 +46,7 @@ class Report(models.Model):
         choices=[("low", "Low"), ("medium", "Medium"), ("high", "High")],
         blank=True,
     )
+    ai_source = models.CharField(max_length=10, blank=True)
     duplicate_of = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -54,6 +57,15 @@ class Report(models.Model):
 
     def __str__(self):
         return f"#{self.id} {self.title}"
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    role = models.CharField(max_length=12, choices=ROLES, default="citizen")
+    state = models.CharField(max_length=30, choices=STATES, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} ({self.role})"
 
 
 class Comment(models.Model):

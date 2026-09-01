@@ -1,5 +1,11 @@
 /* AI columns for the dashboard table */
 
+.dashboard-scope {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 13px;
+}
+
 .dashboard-search-input {
     padding: 10px 14px 10px 34px;
     border: 1px solid #d8e0eb;

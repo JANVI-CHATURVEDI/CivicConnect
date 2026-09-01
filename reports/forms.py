@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Report
+from .constants import STATES
 
 
 class ReportForm(forms.ModelForm):
@@ -16,6 +17,8 @@ class ReportForm(forms.ModelForm):
         widget=forms.Textarea(attrs={"rows": 4}),
     )
 
+    state = forms.ChoiceField(choices=[("", "— Select State —")] + STATES)
+
     class Meta:
         model = Report
         fields = [
@@ -27,6 +30,7 @@ class ReportForm(forms.ModelForm):
             "latitude",
             "longitude",
             "address",
+            "state",
         ]
         widgets = {
             "latitude": forms.HiddenInput(),
@@ -67,3 +71,19 @@ class SignupForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+class CreateAdminForm(UserCreationForm):
+    email = forms.EmailField(required=True)
+    role = forms.ChoiceField(choices=[("admin", "State Admin"), ("superadmin", "Super Admin")])
+    state = forms.ChoiceField(choices=[("", "— Select State —")] + STATES, required=False)
+
+    class Meta:
+        model = User
+        fields = ["username", "email", "password1", "password2"]
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data.get("role") == "admin" and not cleaned_data.get("state"):
+            self.add_error("state", "Select a state for a State Admin.")
+        return cleaned_data
