@@ -1,14 +1,17 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.http import require_GET
 import requests
 
-from .models import Report, Comment, Vote
-from .forms import ReportForm, SignupForm
+from .models import Report, Comment, Vote, Profile
+from .forms import ReportForm, SignupForm, CreateAdminForm
+from .constants import STATES, STATE_NAME_LOOKUP
+from .roles import get_profile
 from . import ai_utils
 
 
@@ -57,6 +60,7 @@ def new(r):
 
         x.department = analysis["department"]
         x.ai_priority_suggested = analysis["suggested_priority"]
+        x.ai_source = analysis["ai_source"]
 
         if analysis["duplicates"]:
             x.duplicate_of_id = analysis["duplicates"][0]["id"]
@@ -73,7 +77,7 @@ def new(r):
 
         return redirect("success", x.pk)
 
-    return render(r, "form.html", {"form": f})
+    return render(r, "form.html", {"form": f, "states": STATES})
 
 
 @require_GET
@@ -158,10 +162,15 @@ def vote_report(r, pk):
 
 @login_required
 def update_status(request, pk):
-    if not request.user.is_staff:
+    profile = get_profile(request.user)
+    if profile.role == "citizen":
         return redirect("mine")
 
     report = get_object_or_404(Report, pk=pk)
+
+    if profile.role == "admin" and report.state != profile.state:
+        messages.error(request, "You can only update reports from your own state.")
+        return redirect("dashboard")
 
     if request.method == "POST":
         new_status = request.POST.get("status")
@@ -180,15 +189,20 @@ def update_status(request, pk):
 
 @login_required
 def dashboard(r):
-    if not r.user.is_staff:
+    profile = get_profile(r.user)
+    if profile.role == "citizen":
         return redirect("mine")
 
     qs = Report.objects.all().order_by("-created_at")
+
+    if profile.role == "admin":
+        qs = qs.filter(state=profile.state)
 
     c = r.GET.get("category")
     s = r.GET.get("status")
     p = r.GET.get("priority")
     q = r.GET.get("q")
+    state_filter = r.GET.get("state")
 
     if c:
         qs = qs.filter(category=c)
@@ -202,20 +216,81 @@ def dashboard(r):
     if q:
         qs = qs.filter(title__icontains=q)
 
+    if profile.role == "superadmin" and state_filter:
+        qs = qs.filter(state=state_filter)
+
     return render(
         r,
         "dashboard.html",
         {
             "reports": qs,
             "categories": Report.CATEGORIES,
+            "states": STATES,
+            "profile": profile,
             "stats": [
-                Report.objects.count(),
-                Report.objects.filter(status="reported").count(),
-                Report.objects.filter(status="progress").count(),
-                Report.objects.filter(status="resolved").count(),
+                Report.objects.count() if profile.role == "superadmin" else Report.objects.filter(state=profile.state).count(),
+                qs.filter(status="reported").count(),
+                qs.filter(status="progress").count(),
+                qs.filter(status="resolved").count(),
             ],
         },
     )
+
+
+@login_required
+def manage_admins(r):
+    profile = get_profile(r.user)
+    if profile.role != "superadmin":
+        return redirect("dashboard")
+
+    if r.method == "POST":
+        form = CreateAdminForm(r.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.is_staff = True
+            role = form.cleaned_data["role"]
+            state = form.cleaned_data.get("state", "")
+
+            if role == "superadmin":
+                user.is_superuser = True
+
+            user.save()
+            Profile.objects.update_or_create(
+                user=user, defaults={"role": role, "state": state if role == "admin" else ""}
+            )
+            messages.success(r, f"{user.username} added as {dict(form.fields['role'].choices)[role]}.")
+            return redirect("manage_admins")
+    else:
+        form = CreateAdminForm()
+
+    admins = Profile.objects.filter(role__in=["admin", "superadmin"]).select_related("user").order_by("role", "state")
+
+    return render(r, "manage_admins.html", {"form": form, "admins": admins, "profile": profile})
+
+
+@login_required
+def demote_admin(r, user_id):
+    profile = get_profile(r.user)
+    if profile.role != "superadmin":
+        return redirect("dashboard")
+
+    target = get_object_or_404(User, pk=user_id)
+
+    if target == r.user:
+        messages.error(r, "You can't remove your own admin access.")
+        return redirect("manage_admins")
+
+    target_profile = get_profile(target)
+    target_profile.role = "citizen"
+    target_profile.state = ""
+    target_profile.save()
+
+    target.is_staff = False
+    target.is_superuser = False
+    target.save()
+
+    messages.success(r, f"{target.username} is now a regular citizen.")
+    return redirect("manage_admins")
 
 
 def get_address(request):
@@ -259,9 +334,13 @@ def get_address(request):
                 or "Address not found"
             )
 
+            state_name = (properties.get("state") or "").strip().lower()
+            state_code = STATE_NAME_LOOKUP.get(state_name, "")
+
             return JsonResponse({
                 "success": True,
-                "address": address
+                "address": address,
+                "state": state_code,
             })
 
         return JsonResponse({

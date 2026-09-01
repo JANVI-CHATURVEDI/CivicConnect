@@ -15,6 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{% static 'style.css' %}">
+    <link rel="stylesheet" href="{% static 'animations.css' %}">
 </head>
 
 <body>
@@ -56,11 +57,20 @@
     </header>
 
     {% if messages %}
-    <div class="messages">
+    <div class="toast-stack" id="toastStack">
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}"><span class="alert-icon"></span>{{ message }}</div>
         {% endfor %}
     </div>
+    <script>
+        setTimeout(function () {
+            const stack = document.getElementById("toastStack");
+            if (!stack) return;
+            stack.style.transition = "opacity 0.4s ease";
+            stack.style.opacity = "0";
+            setTimeout(function () { stack.remove(); }, 400);
+        }, 4500);
+    </script>
     {% endif %}
 
     <!-- ================= HERO SECTION ================= -->
@@ -69,7 +79,7 @@
 
         <section class="hero">
 
-            <div class="hero-content">
+            <div class="hero-content anim-fade-up">
 
                 <div class="hero-badge">
                     <svg class="icon-svg" viewBox="0 0 24 24" width="12" height="12"><path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z"/></svg>
@@ -124,7 +134,7 @@
 
             <!-- HERO VISUAL -->
 
-            <div class="hero-visual">
+            <div class="hero-visual anim-fade anim-delay-2">
 
                 <div class="city-card">
 

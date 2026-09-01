@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard_extra.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <div class="dashboard-header anim-fade-up">
+        <p class="eyebrow">NATIONAL CONSOLE</p>
+        <h1>Manage Admins</h1>
+        <p class="dashboard-scope">Create State Admins or Super Admins, and see who currently has access.</p>
+    </div>
+
+    <div class="admin-create-card anim-fade-up anim-delay-1">
+
+        <h3>Add a new admin</h3>
+
+        <form method="post" class="admin-create-form">
+            {% csrf_token %}
+
+            <div class="admin-form-row">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.username.id_for_label }}">Username</label>
+                    <input type="text" name="{{ form.username.html_name }}" id="{{ form.username.id_for_label }}" class="form-control" required>
+                    {% if form.username.errors %}<div class="field-error-text">{{ form.username.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.email.id_for_label }}">Email</label>
+                    <input type="email" name="{{ form.email.html_name }}" id="{{ form.email.id_for_label }}" class="form-control" required>
+                    {% if form.email.errors %}<div class="field-error-text">{{ form.email.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="admin-form-row">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.password1.id_for_label }}">Password</label>
+                    <input type="password" name="{{ form.password1.html_name }}" id="{{ form.password1.id_for_label }}" class="form-control" required>
+                    {% if form.password1.errors %}<div class="field-error-text">{{ form.password1.errors.0 }}</div>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                    <input type="password" name="{{ form.password2.html_name }}" id="{{ form.password2.id_for_label }}" class="form-control" required>
+                    {% if form.password2.errors %}<div class="field-error-text">{{ form.password2.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="admin-form-row">
+                <div class="form-group">
+                    <label class="form-label" for="{{ form.role.id_for_label }}">Role</label>
+                    <select name="{{ form.role.html_name }}" id="{{ form.role.id_for_label }}" class="form-control" onchange="document.getElementById('stateFieldWrap').style.display = this.value === 'admin' ? 'block' : 'none';">
+                        {% for value, label in form.fields.role.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group" id="stateFieldWrap">
+                    <label class="form-label" for="{{ form.state.id_for_label }}">State (for State Admin)</label>
+                    <select name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}" class="form-control">
+                        {% for value, label in form.fields.state.choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.state.errors %}<div class="field-error-text">{{ form.state.errors.0 }}</div>{% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit btn-press" style="max-width:220px;">Create Account</button>
+        </form>
+
+    </div>
+
+    <div class="dashboard-table-wrap anim-fade-up anim-delay-2">
+
+        <table class="dashboard-table">
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>State</th>
+                <th>Action</th>
+            </tr>
+
+            {% for a in admins %}
+            <tr>
+                <td>{{ a.user.username }} <span style="color:#98a7bb;">({{ a.user.email }})</span></td>
+                <td>
+                    <span class="role-badge {{ a.role }}" style="animation:none;">
+                        {% if a.role == "superadmin" %}Super Admin{% else %}State Admin{% endif %}
+                    </span>
+                </td>
+                <td>{{ a.get_state_display|default:"— All India —" }}</td>
+                <td>
+                    {% if a.user != request.user %}
+                    <form method="post" action="{% url 'demote_admin' a.user.id %}" onsubmit="return confirm('Remove admin access for {{ a.user.username }}?');">
+                        {% csrf_token %}
+                        <button type="submit" class="detect-btn btn-press">Remove Access</button>
+                    </form>
+                    {% else %}
+                    <span style="color:#98a7bb; font-size:12px;">This is you</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="no-results"><div class="no-results-content"><strong>No admins yet</strong></div></td></tr>
+            {% endfor %}
+        </table>
+
+    </div>
+
+</div>
+
+<style>
+.admin-create-card {
+    background: white;
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+.admin-create-card h3 { margin: 0 0 16px; color: #0f172a; }
+.admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media (max-width: 600px) { .admin-form-row { grid-template-columns: 1fr; } }
+</style>
+
+{% endblock %}
