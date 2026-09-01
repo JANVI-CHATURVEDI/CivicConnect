@@ -9,30 +9,39 @@
 <div class="dashboard-page">
 
 
-    <div class="dashboard-header">
-        <p class="eyebrow">AUTHORITY CONSOLE</p>
+    <div class="dashboard-header anim-fade-up">
+        <p class="eyebrow">
+            {% if profile.role == "superadmin" %}NATIONAL CONSOLE{% else %}STATE CONSOLE{% endif %}
+        </p>
         <h1>Operations Dashboard</h1>
+        <p class="dashboard-scope">
+            {% if profile.role == "superadmin" %}
+                Viewing reports across all states.
+            {% else %}
+                Viewing reports for <strong>{{ profile.get_state_display }}</strong> only.
+            {% endif %}
+        </p>
     </div>
 
     <!-- Statistics -->
     <div class="dashboard-stats">
 
-        <div class="dashboard-stat-card">
+        <div class="dashboard-stat-card anim-fade-up anim-delay-1">
             <span class="dashboard-stat-value">{{ stats.0 }}</span>
             <span class="dashboard-stat-label">Total Reports</span>
         </div>
 
-        <div class="dashboard-stat-card stat-reported">
+        <div class="dashboard-stat-card stat-reported anim-fade-up anim-delay-2">
             <span class="dashboard-stat-value">{{ stats.1 }}</span>
             <span class="dashboard-stat-label">Reported</span>
         </div>
 
-        <div class="dashboard-stat-card stat-progress">
+        <div class="dashboard-stat-card stat-progress anim-fade-up anim-delay-3">
             <span class="dashboard-stat-value">{{ stats.2 }}</span>
             <span class="dashboard-stat-label">In Progress</span>
         </div>
 
-        <div class="dashboard-stat-card stat-resolved">
+        <div class="dashboard-stat-card stat-resolved anim-fade-up anim-delay-4">
             <span class="dashboard-stat-value">{{ stats.3 }}</span>
             <span class="dashboard-stat-label">Resolved</span>
         </div>
@@ -48,6 +57,17 @@
             <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search by title..."
                 class="dashboard-search-input" onchange="this.form.submit()">
         </div>
+
+        {% if profile.role == "superadmin" %}
+        <div class="filter-group">
+            <select name="state" onchange="this.form.submit()">
+                <option value="">All states</option>
+                {% for k,v in states %}
+                <option value="{{ k }}" {% if request.GET.state == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
 
         <div class="filter-group">
             <svg class="icon-svg filter-icon" viewBox="0 0 24 24" width="15" height="15"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
@@ -82,7 +102,7 @@
 
 
     <!-- Reports Table -->
-    <div class="dashboard-table-wrap">
+    <div class="dashboard-table-wrap anim-fade-up">
 
         <table class="dashboard-table">
 
@@ -90,6 +110,7 @@
                 <th>ID</th>
                 <th>Issue</th>
                 <th>Category</th>
+                {% if profile.role == "superadmin" %}<th>State</th>{% endif %}
                 <th>AI Department</th>
                 <th>Priority</th>
                 <th>Status</th>
@@ -114,12 +135,16 @@
 
                 <td>{{ x.get_category_display }}</td>
 
+                {% if profile.role == "superadmin" %}<td>{{ x.get_state_display|default:"—" }}</td>{% endif %}
+
                 <td><span class="dept-tag">{{ x.department|default:"—" }}</span></td>
 
                 <td>
                     <span class="priority-tag priority-{{ x.priority }}">{{ x.get_priority_display }}</span>
                     {% if x.ai_priority_suggested and x.ai_priority_suggested != x.priority %}
-                    <span class="ai-hint" title="AI originally suggested this priority">AI: {{ x.get_ai_priority_suggested_display }}</span>
+                    <span class="ai-hint" title="AI originally suggested this priority">
+                        AI ({{ x.ai_source|default:"rules" }}): {{ x.get_ai_priority_suggested_display }}
+                    </span>
                     {% endif %}
                 </td>
 
@@ -144,7 +169,7 @@
             {% empty %}
 
             <tr>
-                <td colspan="6" class="no-results">
+                <td colspan="7" class="no-results">
                     <div class="no-results-content">
                         <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                         <strong>No issues found</strong>
