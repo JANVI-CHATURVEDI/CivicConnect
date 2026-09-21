@@ -1,7 +1,9 @@
 """AI helpers: category detection, priority scoring, department routing,
-and duplicate detection. Uses the Gemini API when GEMINI_API_KEY is set,
-and falls back to a rule-based engine when it isn't (or the call fails)."""
+quality flagging, and duplicate detection. Uses the Gemini API (text and,
+when a photo is attached, vision) when GEMINI_API_KEY is set, and falls
+back to a rule-based engine when it isn't (or the call fails)."""
 
+import base64
 import json
 import math
 from datetime import timedelta
@@ -23,6 +25,7 @@ CATEGORY_KEYWORDS = {
 
 VALID_CATEGORIES = set(CATEGORY_KEYWORDS) | {"other"}
 VALID_PRIORITIES = {"low", "medium", "high"}
+VALID_FLAGS = {"ok", "vague", "spam"}
 
 HIGH_PRIORITY_KEYWORDS = [
     "urgent", "danger", "dangerous", "emergency", "accident", "injury", "injured",
@@ -71,6 +74,13 @@ def suggest_priority(title: str, description: str, category: str = ""):
     return "low", []
 
 
+def suggest_flag(title: str, description: str):
+    text = f"{title or ''} {description or ''}".strip()
+    if len(text) < 12:
+        return "vague"
+    return "ok"
+
+
 DEPARTMENT_MAP = {
     "road": "Roads & Infrastructure Dept.",
     "water": "Water Supply Dept.",
@@ -87,9 +97,9 @@ def suggest_department(category: str) -> str:
     return DEPARTMENT_MAP.get(category, "General Grievance Cell")
 
 
-def gemini_analyze(title: str, description: str):
+def gemini_analyze(title: str, description: str, image_bytes: bytes = None, image_mime_type: str = None):
     api_key = getattr(settings, "GEMINI_API_KEY", "")
-    if not api_key or not (title or description):
+    if not api_key or not (title or description or image_bytes):
         return None
 
     prompt = (
@@ -98,9 +108,21 @@ def gemini_analyze(title: str, description: str):
         "with exactly these keys:\n"
         '"category": one of road, water, garbage, light, tree, manhole, traffic, other\n'
         '"priority": one of low, medium, high\n'
-        '"department": short name of the government department responsible\n\n'
+        '"department": short name of the government department responsible\n'
+        '"flag": one of ok, vague, spam (vague = too little real information, '
+        "spam = nonsensical or unrelated to a civic issue)\n\n"
         f"Title: {title}\nDescription: {description}"
     )
+
+    parts = [{"text": prompt}]
+    if image_bytes and image_mime_type:
+        parts.append({
+            "inline_data": {
+                "mime_type": image_mime_type,
+                "data": base64.b64encode(image_bytes).decode("ascii"),
+            }
+        })
+        parts[0]["text"] += "\n\nA photo of the issue is attached — use it to inform your answer."
 
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
@@ -110,8 +132,8 @@ def gemini_analyze(title: str, description: str):
     try:
         response = requests.post(
             url,
-            json={"contents": [{"parts": [{"text": prompt}]}]},
-            timeout=8,
+            json={"contents": [{"parts": parts}]},
+            timeout=12,
         )
         response.raise_for_status()
         text = response.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
@@ -124,6 +146,8 @@ def gemini_analyze(title: str, description: str):
         result = json.loads(text)
 
         if result.get("category") in VALID_CATEGORIES and result.get("priority") in VALID_PRIORITIES:
+            if result.get("flag") not in VALID_FLAGS:
+                result["flag"] = "ok"
             return result
 
     except Exception:
@@ -182,19 +206,21 @@ def find_possible_duplicates(category, latitude, longitude, exclude_pk=None):
 
 
 def analyze_report(title="", description="", category="", latitude=None,
-                    longitude=None, exclude_pk=None):
-    gemini_result = gemini_analyze(title, description)
+                    longitude=None, exclude_pk=None, image_bytes=None, image_mime_type=None):
+    gemini_result = gemini_analyze(title, description, image_bytes, image_mime_type)
 
     if gemini_result:
         detected_category = gemini_result["category"]
         priority = gemini_result["priority"]
         department = gemini_result.get("department") or suggest_department(category or detected_category)
+        flag = gemini_result.get("flag", "ok")
         matched_keywords = []
         source = "gemini"
     else:
         detected_category = suggest_category(f"{title} {description}")
         priority, matched_keywords = suggest_priority(title, description, category or detected_category)
         department = suggest_department(category or detected_category or "other")
+        flag = suggest_flag(title, description)
         source = "rules"
 
     duplicates = find_possible_duplicates(category, latitude, longitude, exclude_pk)
@@ -205,6 +231,7 @@ def analyze_report(title="", description="", category="", latitude=None,
         "matched_keywords": matched_keywords,
         "department": department,
         "ai_source": source,
+        "flag": flag,
         "duplicates": [
             {
                 "id": report.pk,

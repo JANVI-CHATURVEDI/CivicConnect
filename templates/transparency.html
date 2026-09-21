@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard_extra.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <div class="dashboard-header anim-fade-up">
+        <p class="eyebrow">PUBLIC TRANSPARENCY</p>
+        <h1>Civic Issues Across India</h1>
+        <p class="dashboard-scope">A live, public view of reports citizens have filed — no login needed.</p>
+    </div>
+
+    <form class="filters" method="get">
+        <div class="filter-group">
+            <select name="state" onchange="this.form.submit()">
+                <option value="">All states</option>
+                {% for k,v in states %}
+                <option value="{{ k }}" {% if request.GET.state == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <select name="category" onchange="this.form.submit()">
+                <option value="">All categories</option>
+                {% for k,v in categories %}
+                <option value="{{ k }}" {% if request.GET.category == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+
+    <div id="publicMap" class="dashboard-map anim-fade-up" style="height:480px;"></div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(async function () {
+    const map = L.map("publicMap").setView([22.9734, 78.6569], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    const statusColors = { reported: "#2563eb", progress: "#7c3aed", resolved: "#16c7b7" };
+
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const response = await fetch(`/api/public-map-data/?${params.toString()}`);
+        const data = await response.json();
+
+        data.reports.forEach(function (rep) {
+            const marker = L.circleMarker([rep.lat, rep.lng], {
+                radius: 7,
+                color: statusColors[rep.status] || "#2563eb",
+                fillColor: statusColors[rep.status] || "#2563eb",
+                fillOpacity: 0.7,
+                weight: 2,
+            }).addTo(map);
+            marker.bindPopup(`<strong>${rep.title}</strong><br>${rep.category} · ${rep.status_display}${rep.state ? " · " + rep.state : ""}`);
+        });
+
+        if (data.reports.length > 0) {
+            map.fitBounds(data.reports.map(r => [r.lat, r.lng]), { padding: [30, 30], maxZoom: 10 });
+        }
+    } catch (error) {
+        console.error("Public map error:", error);
+    }
+})();
+</script>
+
+{% endblock %}

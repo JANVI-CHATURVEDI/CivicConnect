@@ -39,6 +39,7 @@ class Report(models.Model):
     address = models.CharField(max_length=255, blank=True)
     state = models.CharField(max_length=30, choices=STATES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
 
     department = models.CharField(max_length=80, blank=True)
     ai_priority_suggested = models.CharField(
@@ -47,6 +48,8 @@ class Report(models.Model):
         blank=True,
     )
     ai_source = models.CharField(max_length=10, blank=True)
+    needs_review = models.BooleanField(default=False)
+    flag_reason = models.CharField(max_length=120, blank=True)
     duplicate_of = models.ForeignKey(
         "self",
         on_delete=models.SET_NULL,

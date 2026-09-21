@@ -61,6 +61,10 @@
             Issues
         </a>
 
+        <a href="{% url 'public_reports' %}">
+            Transparency
+        </a>
+
     </nav>
 
 
@@ -91,6 +95,10 @@
                     class="login-btn"
                 >
                     Dashboard
+                </a>
+
+                <a href="{% url 'analytics' %}" class="login-btn">
+                    Analytics
                 </a>
 
                 {% if user_profile.role == "superadmin" %}

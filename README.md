@@ -47,6 +47,16 @@ rule-based engine described below — the app never breaks either way. The
 live suggestion panel on the report form shows which one produced the
 result ("via Gemini AI" vs "via rule engine").
 
+## Hackathon-grade additions
+
+- **Interactive map** — every dashboard and the public transparency page shows reports as color-coded pins on a Leaflet/OpenStreetMap map (no API key needed, free tile server).
+- **Gemini Vision** — when a citizen uploads a photo, it's sent to Gemini alongside the text so category/priority/department can be informed by the image itself, not just the description. Falls back to text-only Gemini or the rule engine if no photo, no key, or the call fails.
+- **AI quality flagging** — Gemini (or a length-based rule fallback) marks vague/spam-looking reports with a `needs_review` flag, surfaced as a badge on the dashboard rather than silently rejecting anything.
+- **Public transparency page** (`/transparency/`) — an unauthenticated map of all reports nationwide, filterable by state/category, with no citizen-identifying information exposed.
+- **Analytics** (`/analytics/`) — Chart.js dashboards: reports by category/status/state, a 30-day trend line, and average resolution time (using a new `resolved_at` timestamp set automatically when a report moves to "Resolved" and cleared if it's reopened).
+- **Status-change email notifications** — citizens get emailed (via the same console/SMTP backend already configured) whenever their report's status changes.
+- **Stale high-priority escalation** — a high-priority report still sitting in "Reported" after 48 hours is automatically flagged and surfaced at the top of the admin's attention (computed live on each dashboard load, not a background job — see caveat below).
+
 ## The "AI" features — how they actually work
 
 This project advertises AI-powered issue detection, severity analysis,
@@ -89,10 +99,11 @@ Then visit `http://127.0.0.1:8000/`.
 
 ## Still not implemented (documented honestly for your report)
 
-- Real image-based AI (Gemini is used for text triage only; no photo is sent to it).
 - Google OAuth login (button shows a clear "not enabled" message instead of pretending to work).
 - Editing/deleting a report after submission.
 - Automated test suite beyond `smoke_test.py` (a manual end-to-end script — not wired into `manage.py test`).
+- True background-job escalation: the 48-hour stale-report flag is computed live whenever a dashboard page loads, not via a scheduled task (no Celery/cron in this project), so it won't proactively email anyone at hour 49 — it just shows up the next time someone opens the dashboard.
+- Gemini Vision has been tested end-to-end with a mocked API response (confirmed the image is correctly attached to the request), but not against Gemini's real servers, since this environment can't reach `generativelanguage.googleapis.com` — verify with a real `GEMINI_API_KEY` locally.
 
 ## Project structure
 

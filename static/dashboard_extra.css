@@ -47,3 +47,63 @@
     color: #8493a7;
     font-style: italic;
 }
+
+.dashboard-map {
+    height: 340px;
+    border-radius: 14px;
+    margin-bottom: 24px;
+    border: 1px solid #e2e8f0;
+    z-index: 1;
+}
+
+.dashboard-alert-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.dashboard-alert {
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dashboard-alert.escalated {
+    background: #fdeaea;
+    color: #b91c1c;
+    border: 1px solid #f5c2c2;
+}
+
+.dashboard-alert.review {
+    background: #fff7ed;
+    color: #9a5b12;
+    border: 1px solid #fcd9a8;
+}
+
+.review-badge {
+    display: inline-block;
+    margin-top: 4px;
+    margin-left: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #fff7ed;
+    color: #9a5b12;
+    border: 1px solid #fcd9a8;
+}
+
+.escalated-badge {
+    display: inline-block;
+    margin-top: 4px;
+    margin-left: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #fdeaea;
+    color: #b91c1c;
+    border: 1px solid #f5c2c2;
+}
