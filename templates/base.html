@@ -19,6 +19,7 @@
     rel="stylesheet"
     href="{% static 'style.css' %}"
 >
+<link rel="stylesheet" href="{% static 'animations.css' %}">
 {% block extra_css %}{% endblock %}
 </head>
 
@@ -92,6 +93,18 @@
                     Dashboard
                 </a>
 
+                {% if user_profile.role == "superadmin" %}
+                <a href="{% url 'manage_admins' %}" class="login-btn">
+                    Manage Admins
+                </a>
+                {% endif %}
+
+                <span class="role-badge {{ user_profile.role }}">
+                    <span class="dot"></span>
+                    {% if user_profile.role == "superadmin" %}Super Admin — All India
+                    {% else %}State Admin — {{ user_profile.get_state_display }}{% endif %}
+                </span>
+
             {% endif %}
 
 
@@ -140,7 +153,7 @@
 
 {% if messages %}
 
-    <div class="messages">
+    <div class="toast-stack" id="toastStack">
 
         {% for message in messages %}
 
@@ -152,6 +165,16 @@
         {% endfor %}
 
     </div>
+
+    <script>
+        setTimeout(function () {
+            const stack = document.getElementById("toastStack");
+            if (!stack) return;
+            stack.style.transition = "opacity 0.4s ease";
+            stack.style.opacity = "0";
+            setTimeout(function () { stack.remove(); }, 400);
+        }, 4500);
+    </script>
 
 {% endif %}
 

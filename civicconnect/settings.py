@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 GEOAPIFY_API_KEY = os.getenv("GEOAPIFY_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-this-secret-key")
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
@@ -41,6 +42,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "reports.context_processors.user_profile",
             ]
         },
     }

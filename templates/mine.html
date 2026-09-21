@@ -4,9 +4,9 @@
 
 <div class="my-reports-page">
 
-    <div class="my-reports-header">
+    <div class="my-reports-header anim-fade-up">
         <h1>My Reports</h1>
-        <a class="my-reports-new-btn" href="{% url 'new' %}">
+        <a class="my-reports-new-btn btn-press" href="{% url 'new' %}">
             <svg class="icon-svg" viewBox="0 0 24 24" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             New Report
         </a>
@@ -16,12 +16,13 @@
 
         {% for x in reports %}
 
-        <a class="report-row" href="{% url 'detail' x.id %}">
+        <a class="report-row anim-fade-up" href="{% url 'detail' x.id %}">
 
             <span class="report-row-content">
                 <span class="report-row-title">#{{ x.id }} · {{ x.title }}</span>
                 <span class="report-row-meta">
                     {{ x.get_category_display }} · {{ x.created_at|date:'d M Y' }}
+                    {% if x.get_state_display %} · {{ x.get_state_display }}{% endif %}
                     {% if x.department %} · Routed to {{ x.department }}{% endif %}
                 </span>
             </span>

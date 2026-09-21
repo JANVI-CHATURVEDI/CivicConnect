@@ -1,9 +1,13 @@
-"""Rule-based AI helpers: category detection, priority scoring,
-department routing, and duplicate detection."""
+"""AI helpers: category detection, priority scoring, department routing,
+and duplicate detection. Uses the Gemini API when GEMINI_API_KEY is set,
+and falls back to a rule-based engine when it isn't (or the call fails)."""
 
+import json
 import math
 from datetime import timedelta
 
+import requests
+from django.conf import settings
 from django.utils import timezone
 
 
@@ -17,6 +21,9 @@ CATEGORY_KEYWORDS = {
     "traffic": ["signal", "traffic light", "traffic signal", "junction light"],
 }
 
+VALID_CATEGORIES = set(CATEGORY_KEYWORDS) | {"other"}
+VALID_PRIORITIES = {"low", "medium", "high"}
+
 HIGH_PRIORITY_KEYWORDS = [
     "urgent", "danger", "dangerous", "emergency", "accident", "injury", "injured",
     "fire", "collapsed", "collapse", "flood", "flooding", "electrocution",
@@ -28,6 +35,8 @@ MEDIUM_PRIORITY_KEYWORDS = [
     "large", "big", "heavy traffic", "overflowing", "broken", "cracked",
     "several days", "weeks", "repeated", "worsening", "smell", "stagnant",
 ]
+
+GEMINI_MODEL = "gemini-2.0-flash"
 
 
 def suggest_category(text: str):
@@ -76,6 +85,51 @@ DEPARTMENT_MAP = {
 
 def suggest_department(category: str) -> str:
     return DEPARTMENT_MAP.get(category, "General Grievance Cell")
+
+
+def gemini_analyze(title: str, description: str):
+    api_key = getattr(settings, "GEMINI_API_KEY", "")
+    if not api_key or not (title or description):
+        return None
+
+    prompt = (
+        "Classify this civic issue report for a city government app. "
+        "Respond with ONLY a JSON object, no markdown, no extra text, "
+        "with exactly these keys:\n"
+        '"category": one of road, water, garbage, light, tree, manhole, traffic, other\n'
+        '"priority": one of low, medium, high\n'
+        '"department": short name of the government department responsible\n\n'
+        f"Title: {title}\nDescription: {description}"
+    )
+
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+        f"?key={api_key}"
+    )
+
+    try:
+        response = requests.post(
+            url,
+            json={"contents": [{"parts": [{"text": prompt}]}]},
+            timeout=8,
+        )
+        response.raise_for_status()
+        text = response.json()["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+        if text.startswith("```"):
+            text = text.strip("`")
+            if text.startswith("json"):
+                text = text[4:]
+
+        result = json.loads(text)
+
+        if result.get("category") in VALID_CATEGORIES and result.get("priority") in VALID_PRIORITIES:
+            return result
+
+    except Exception:
+        pass
+
+    return None
 
 
 EARTH_RADIUS_M = 6371000
@@ -129,9 +183,20 @@ def find_possible_duplicates(category, latitude, longitude, exclude_pk=None):
 
 def analyze_report(title="", description="", category="", latitude=None,
                     longitude=None, exclude_pk=None):
-    detected_category = suggest_category(f"{title} {description}")
-    priority, matched_keywords = suggest_priority(title, description, category or detected_category)
-    department = suggest_department(category or detected_category or "other")
+    gemini_result = gemini_analyze(title, description)
+
+    if gemini_result:
+        detected_category = gemini_result["category"]
+        priority = gemini_result["priority"]
+        department = gemini_result.get("department") or suggest_department(category or detected_category)
+        matched_keywords = []
+        source = "gemini"
+    else:
+        detected_category = suggest_category(f"{title} {description}")
+        priority, matched_keywords = suggest_priority(title, description, category or detected_category)
+        department = suggest_department(category or detected_category or "other")
+        source = "rules"
+
     duplicates = find_possible_duplicates(category, latitude, longitude, exclude_pk)
 
     return {
@@ -139,6 +204,7 @@ def analyze_report(title="", description="", category="", latitude=None,
         "suggested_priority": priority,
         "matched_keywords": matched_keywords,
         "department": department,
+        "ai_source": source,
         "duplicates": [
             {
                 "id": report.pk,

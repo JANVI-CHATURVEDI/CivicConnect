@@ -9,6 +9,8 @@ urlpatterns = [
     path("reports/", views.mine, name="mine"),
     path("reports/<int:pk>/", views.detail, name="detail"),
     path("dashboard/", views.dashboard, name="dashboard"),
+    path("manage-admins/", views.manage_admins, name="manage_admins"),
+    path("manage-admins/<int:user_id>/demote/", views.demote_admin, name="demote_admin"),
 
     path("api/get-address/", views.get_address, name="get_address"),
     path("api/ai-suggest/", views.ai_suggest, name="ai_suggest"),
