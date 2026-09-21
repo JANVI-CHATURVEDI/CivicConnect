@@ -17,7 +17,7 @@ class ReportForm(forms.ModelForm):
         widget=forms.Textarea(attrs={"rows": 4}),
     )
 
-    state = forms.ChoiceField(choices=[("", "— Select State —")] + STATES)
+    state = forms.ChoiceField(choices=[("", "— Select State —")] + list(STATES))
 
     class Meta:
         model = Report
@@ -76,7 +76,7 @@ class SignupForm(UserCreationForm):
 class CreateAdminForm(UserCreationForm):
     email = forms.EmailField(required=True)
     role = forms.ChoiceField(choices=[("admin", "State Admin"), ("superadmin", "Super Admin")])
-    state = forms.ChoiceField(choices=[("", "— Select State —")] + STATES, required=False)
+    state = forms.ChoiceField(choices=[("", "— Select State —")] + list(STATES), required=False)
 
     class Meta:
         model = User
