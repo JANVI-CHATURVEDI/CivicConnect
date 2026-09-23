@@ -9,6 +9,10 @@ urlpatterns = [
     path("reports/", views.mine, name="mine"),
     path("reports/<int:pk>/", views.detail, name="detail"),
     path("dashboard/", views.dashboard, name="dashboard"),
+    path("dashboard/map-data/", views.dashboard_map_data, name="dashboard_map_data"),
+    path("analytics/", views.analytics, name="analytics"),
+    path("transparency/", views.public_reports, name="public_reports"),
+    path("api/public-map-data/", views.public_map_data, name="public_map_data"),
     path("manage-admins/", views.manage_admins, name="manage_admins"),
     path("manage-admins/<int:user_id>/demote/", views.demote_admin, name="demote_admin"),
 

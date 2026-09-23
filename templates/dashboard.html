@@ -2,6 +2,7 @@
 {% load static %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'dashboard_extra.css' %}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 {% endblock %}
 
 {% block content %}
@@ -20,8 +21,24 @@
             {% else %}
                 Viewing reports for <strong>{{ profile.get_state_display }}</strong> only.
             {% endif %}
+            <a href="{% url 'analytics' %}" class="detect-btn" style="margin-left:12px;">View Analytics →</a>
         </p>
     </div>
+
+    {% if escalated_count > 0 or needs_review_count > 0 %}
+    <div class="dashboard-alert-row anim-fade-up">
+        {% if escalated_count > 0 %}
+        <div class="dashboard-alert escalated">
+            ⏰ {{ escalated_count }} high-priority report{{ escalated_count|pluralize }} unresolved for over {{ escalation_hours }}h
+        </div>
+        {% endif %}
+        {% if needs_review_count > 0 %}
+        <div class="dashboard-alert review">
+            ⚠ {{ needs_review_count }} report{{ needs_review_count|pluralize }} flagged by AI for review
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
 
     <!-- Statistics -->
     <div class="dashboard-stats">
@@ -48,6 +65,7 @@
 
     </div>
 
+    <div id="dashboardMap" class="dashboard-map anim-fade-up"></div>
 
     <!-- Filters -->
     <form class="filters" method="get">
@@ -131,6 +149,12 @@
                         Possible duplicate of #{{ x.duplicate_of.id }}
                     </span>
                     {% endif %}
+                    {% if x.needs_review %}
+                    <span class="review-badge" title="AI flagged this: {{ x.flag_reason }}">⚠ Needs Review</span>
+                    {% endif %}
+                    {% if x.priority == "high" and x.status == "reported" and x.created_at < escalation_cutoff %}
+                    <span class="escalated-badge">⏰ Escalated</span>
+                    {% endif %}
                 </td>
 
                 <td>{{ x.get_category_display }}</td>
@@ -185,5 +209,44 @@
     </div>
 
 </div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(async function () {
+    const mapEl = document.getElementById("dashboardMap");
+    const map = L.map(mapEl).setView([22.9734, 78.6569], 5);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+
+    const priorityColors = { low: "#16c7b7", medium: "#f59e0b", high: "#dc2626" };
+
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const response = await fetch(`/dashboard/map-data/?${params.toString()}`);
+        const data = await response.json();
+
+        data.reports.forEach(function (rep) {
+            const marker = L.circleMarker([rep.lat, rep.lng], {
+                radius: 8,
+                color: priorityColors[rep.priority] || "#2563eb",
+                fillColor: priorityColors[rep.priority] || "#2563eb",
+                fillOpacity: 0.75,
+                weight: 2,
+            }).addTo(map);
+            marker.bindPopup(
+                `<strong>#${rep.id} ${rep.title}</strong><br>${rep.category} · ${rep.status_display}${rep.state ? " · " + rep.state : ""}`
+            );
+        });
+
+        if (data.reports.length > 0) {
+            const bounds = data.reports.map(r => [r.lat, r.lng]);
+            map.fitBounds(bounds, { padding: [30, 30], maxZoom: 10 });
+        }
+    } catch (error) {
+        console.error("Map data error:", error);
+    }
+})();
+</script>
 
 {% endblock %}

@@ -3,9 +3,14 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.conf import settings
+from django.db.models import Count, Avg, F, ExpressionWrapper, DurationField
+from django.db.models.functions import TruncDate
+from django.utils import timezone
 from django.views.decorators.http import require_GET
+from datetime import timedelta
 import requests
 
 from .models import Report, Comment, Vote, Profile
@@ -13,6 +18,8 @@ from .forms import ReportForm, SignupForm, CreateAdminForm
 from .constants import STATES, STATE_NAME_LOOKUP
 from .roles import get_profile
 from . import ai_utils
+
+ESCALATION_HOURS = 48
 
 
 def home(r):
@@ -50,17 +57,30 @@ def new(r):
         if other_issue:
             x.description = (x.description + "\n\n" + other_issue).strip() if x.description else other_issue
 
+        image_bytes = None
+        image_mime_type = None
+        uploaded_image = f.cleaned_data.get("image")
+        if uploaded_image:
+            uploaded_image.seek(0)
+            image_bytes = uploaded_image.read()
+            image_mime_type = getattr(uploaded_image, "content_type", None) or "image/jpeg"
+            uploaded_image.seek(0)
+
         analysis = ai_utils.analyze_report(
             title=x.title,
             description=x.description,
             category=x.category,
             latitude=x.latitude,
             longitude=x.longitude,
+            image_bytes=image_bytes,
+            image_mime_type=image_mime_type,
         )
 
         x.department = analysis["department"]
         x.ai_priority_suggested = analysis["suggested_priority"]
         x.ai_source = analysis["ai_source"]
+        x.needs_review = analysis["flag"] != "ok"
+        x.flag_reason = analysis["flag"] if x.needs_review else ""
 
         if analysis["duplicates"]:
             x.duplicate_of_id = analysis["duplicates"][0]["id"]
@@ -160,6 +180,25 @@ def vote_report(r, pk):
     return redirect("detail", pk=pk)
 
 
+def notify_status_change(report):
+    if not report.citizen.email:
+        return
+    try:
+        send_mail(
+            subject=f"Your report #{report.id} is now {report.get_status_display()}",
+            message=(
+                f"Hi {report.citizen.username},\n\n"
+                f"Your report \"{report.title}\" has been updated to: {report.get_status_display()}.\n\n"
+                f"View it at /reports/{report.id}/\n\nCivicConnect AI"
+            ),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[report.citizen.email],
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
+
 @login_required
 def update_status(request, pk):
     profile = get_profile(request.user)
@@ -176,9 +215,11 @@ def update_status(request, pk):
         new_status = request.POST.get("status")
         valid_statuses = ["reported", "progress", "resolved"]
 
-        if new_status in valid_statuses:
+        if new_status in valid_statuses and new_status != report.status:
             report.status = new_status
+            report.resolved_at = timezone.now() if new_status == "resolved" else None
             report.save()
+            notify_status_change(report)
             messages.success(
                 request,
                 "Report status updated successfully."
@@ -187,17 +228,14 @@ def update_status(request, pk):
     return redirect("dashboard")
 
 
-@login_required
-def dashboard(r):
-    profile = get_profile(r.user)
-    if profile.role == "citizen":
-        return redirect("mine")
-
-    qs = Report.objects.all().order_by("-created_at")
-
+def _scoped_reports(profile):
+    qs = Report.objects.all()
     if profile.role == "admin":
         qs = qs.filter(state=profile.state)
+    return qs
 
+
+def _apply_common_filters(qs, r, profile):
     c = r.GET.get("category")
     s = r.GET.get("status")
     p = r.GET.get("priority")
@@ -206,18 +244,29 @@ def dashboard(r):
 
     if c:
         qs = qs.filter(category=c)
-
     if s:
         qs = qs.filter(status=s)
-
     if p:
         qs = qs.filter(priority=p)
-
     if q:
         qs = qs.filter(title__icontains=q)
-
     if profile.role == "superadmin" and state_filter:
         qs = qs.filter(state=state_filter)
+
+    return qs
+
+
+@login_required
+def dashboard(r):
+    profile = get_profile(r.user)
+    if profile.role == "citizen":
+        return redirect("mine")
+
+    qs = _apply_common_filters(_scoped_reports(profile), r, profile).order_by("-created_at")
+
+    escalation_cutoff = timezone.now() - timedelta(hours=ESCALATION_HOURS)
+    escalated_count = qs.filter(priority="high", status="reported", created_at__lt=escalation_cutoff).count()
+    needs_review_count = qs.filter(needs_review=True).count()
 
     return render(
         r,
@@ -227,14 +276,99 @@ def dashboard(r):
             "categories": Report.CATEGORIES,
             "states": STATES,
             "profile": profile,
+            "escalation_hours": ESCALATION_HOURS,
+            "escalation_cutoff": escalation_cutoff,
+            "escalated_count": escalated_count,
+            "needs_review_count": needs_review_count,
             "stats": [
-                Report.objects.count() if profile.role == "superadmin" else Report.objects.filter(state=profile.state).count(),
+                qs.count(),
                 qs.filter(status="reported").count(),
                 qs.filter(status="progress").count(),
                 qs.filter(status="resolved").count(),
             ],
         },
     )
+
+
+def _report_geo_payload(qs):
+    return [
+        {
+            "id": rep.id,
+            "title": rep.title,
+            "category": rep.get_category_display(),
+            "status": rep.status,
+            "status_display": rep.get_status_display(),
+            "priority": rep.priority,
+            "state": rep.get_state_display(),
+            "lat": float(rep.latitude),
+            "lng": float(rep.longitude),
+        }
+        for rep in qs.filter(latitude__isnull=False, longitude__isnull=False)
+    ]
+
+
+@login_required
+def dashboard_map_data(r):
+    profile = get_profile(r.user)
+    if profile.role == "citizen":
+        return JsonResponse({"reports": []})
+    qs = _apply_common_filters(_scoped_reports(profile), r, profile)
+    return JsonResponse({"reports": _report_geo_payload(qs)})
+
+
+def public_reports(r):
+    return render(r, "transparency.html", {"states": STATES, "categories": Report.CATEGORIES})
+
+
+def public_map_data(r):
+    qs = Report.objects.all()
+    state_filter = r.GET.get("state")
+    category_filter = r.GET.get("category")
+    if state_filter:
+        qs = qs.filter(state=state_filter)
+    if category_filter:
+        qs = qs.filter(category=category_filter)
+    return JsonResponse({"reports": _report_geo_payload(qs)})
+
+
+@login_required
+def analytics(r):
+    profile = get_profile(r.user)
+    if profile.role == "citizen":
+        return redirect("mine")
+
+    qs = _scoped_reports(profile)
+
+    by_category = list(qs.values("category").annotate(count=Count("id")).order_by("-count"))
+    by_status = list(qs.values("status").annotate(count=Count("id")).order_by("status"))
+    by_state = (
+        list(qs.exclude(state="").values("state").annotate(count=Count("id")).order_by("-count"))
+        if profile.role == "superadmin" else []
+    )
+
+    resolved_qs = qs.filter(status="resolved", resolved_at__isnull=False)
+    avg_resolution = resolved_qs.annotate(
+        duration=ExpressionWrapper(F("resolved_at") - F("created_at"), output_field=DurationField())
+    ).aggregate(avg=Avg("duration"))["avg"]
+    avg_resolution_hours = round(avg_resolution.total_seconds() / 3600, 1) if avg_resolution else None
+
+    since = timezone.now() - timedelta(days=30)
+    trend = list(
+        qs.filter(created_at__gte=since)
+        .annotate(day=TruncDate("created_at"))
+        .values("day")
+        .annotate(count=Count("id"))
+        .order_by("day")
+    )
+
+    return render(r, "analytics.html", {
+        "profile": profile,
+        "by_category": by_category,
+        "by_status": by_status,
+        "by_state": by_state,
+        "avg_resolution_hours": avg_resolution_hours,
+        "trend": trend,
+    })
 
 
 @login_required

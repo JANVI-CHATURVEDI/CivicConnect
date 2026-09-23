@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard_extra.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-page">
+
+    <div class="dashboard-header anim-fade-up">
+        <p class="eyebrow">{% if profile.role == "superadmin" %}NATIONAL{% else %}STATE{% endif %} ANALYTICS</p>
+        <h1>Insights</h1>
+        <p class="dashboard-scope"><a href="{% url 'dashboard' %}" class="detect-btn">← Back to Dashboard</a></p>
+    </div>
+
+    <div class="dashboard-stats">
+        <div class="dashboard-stat-card anim-fade-up anim-delay-1">
+            <span class="dashboard-stat-value">{{ avg_resolution_hours|default:"—" }}</span>
+            <span class="dashboard-stat-label">Avg. Hours to Resolve</span>
+        </div>
+    </div>
+
+    <div class="analytics-grid">
+        <div class="analytics-card anim-fade-up anim-delay-1">
+            <h3>Reports by Category</h3>
+            <canvas id="categoryChart"></canvas>
+        </div>
+
+        <div class="analytics-card anim-fade-up anim-delay-2">
+            <h3>Reports by Status</h3>
+            <canvas id="statusChart"></canvas>
+        </div>
+
+        {% if by_state %}
+        <div class="analytics-card anim-fade-up anim-delay-3">
+            <h3>Reports by State</h3>
+            <canvas id="stateChart"></canvas>
+        </div>
+        {% endif %}
+
+        <div class="analytics-card anim-fade-up anim-delay-4" style="grid-column: 1 / -1;">
+            <h3>Reports Over the Last 30 Days</h3>
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+{{ by_category|json_script:"byCategoryData" }}
+{{ by_status|json_script:"byStatusData" }}
+{{ by_state|json_script:"byStateData" }}
+{{ trend|json_script:"trendData" }}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+const byCategory = JSON.parse(document.getElementById("byCategoryData").textContent);
+const byStatus = JSON.parse(document.getElementById("byStatusData").textContent);
+const byState = JSON.parse(document.getElementById("byStateData").textContent);
+const trend = JSON.parse(document.getElementById("trendData").textContent);
+
+const palette = ["#2563eb", "#16c7b7", "#f59e0b", "#dc2626", "#7c3aed", "#0891b2", "#ea8a2c", "#34a853"];
+
+new Chart(document.getElementById("categoryChart"), {
+    type: "bar",
+    data: {
+        labels: byCategory.map(d => d.category),
+        datasets: [{ label: "Reports", data: byCategory.map(d => d.count), backgroundColor: palette }],
+    },
+    options: { plugins: { legend: { display: false } } },
+});
+
+new Chart(document.getElementById("statusChart"), {
+    type: "doughnut",
+    data: {
+        labels: byStatus.map(d => d.status),
+        datasets: [{ data: byStatus.map(d => d.count), backgroundColor: palette }],
+    },
+});
+
+if (byState.length) {
+    new Chart(document.getElementById("stateChart"), {
+        type: "bar",
+        data: {
+            labels: byState.map(d => d.state),
+            datasets: [{ label: "Reports", data: byState.map(d => d.count), backgroundColor: "#2563eb" }],
+        },
+        options: { indexAxis: "y", plugins: { legend: { display: false } } },
+    });
+}
+
+new Chart(document.getElementById("trendChart"), {
+    type: "line",
+    data: {
+        labels: trend.map(d => d.day),
+        datasets: [{ label: "New Reports", data: trend.map(d => d.count), borderColor: "#2563eb", tension: 0.3, fill: false }],
+    },
+});
+</script>
+
+<style>
+.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.analytics-card { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; }
+.analytics-card h3 { margin: 0 0 14px; color: #0f172a; font-size: 15px; }
+@media (max-width: 800px) { .analytics-grid { grid-template-columns: 1fr; } }
+</style>
+
+{% endblock %}
