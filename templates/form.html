@@ -207,7 +207,7 @@
     <div class="report-container">
 
         <header class="report-header anim-fade-up">
-            <h1>Submit a Civic Issue</h1>
+            <h1>{% if editing %}Edit Your Report{% else %}Submit a Civic Issue{% endif %}</h1>
             <p>Help improve your community by reporting public maintenance issues with useful details and location.</p>
         </header>
 
@@ -247,8 +247,8 @@
                         <input type="file" name="{{ form.image.html_name }}" id="id_image" accept="image/*">
                     </div>
 
-                    <div class="preview-card" id="previewWrap">
-                        <img id="previewImg" src="" alt="Selected image preview">
+                    <div class="preview-card" id="previewWrap" {% if editing and report.image %}style="display:block;"{% endif %}>
+                        <img id="previewImg" src="{% if editing and report.image %}{{ report.image.url }}{% endif %}" alt="Selected image preview">
                         <button type="button" class="preview-remove-btn" id="removePhotoBtn">Remove</button>
                     </div>
 
@@ -405,7 +405,7 @@
                     {% if form.description.errors %}<div class="field-error-text">{{ form.description.errors.0 }}</div>{% endif %}
                 </div>
 
-                <button type="submit" class="btn-submit">Submit Report</button>
+                <button type="submit" class="btn-submit btn-press">{% if editing %}Update Report{% else %}Submit Report{% endif %}</button>
 
             </form>
 
