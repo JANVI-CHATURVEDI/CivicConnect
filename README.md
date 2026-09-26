@@ -114,6 +114,10 @@ Citizens can edit or delete their own report from its detail page, but only whil
 0 * * * * cd /path/to/project && /path/to/venv/bin/python manage.py escalate_stale_reports
 ```
 
+## Demo data
+
+For a live demo or screenshots, run `python manage.py seed_demo_data` — it creates a Super Admin, five State Admins (UP, MH, KA, TN, DL), six citizens, and 30 realistic reports spread across 8 states, statuses, and priorities (including some deliberately stale high-priority ones so the escalation banner has something to show, and a couple flagged `needs_review`). All demo accounts share the password `DemoPass123!`, printed at the end of the command along with the usernames. Run with `--reset` to wipe and reseed fresh.
+
 ## Tests
 
 `python manage.py test` now runs a real, committed suite (`reports/tests.py`, 23 tests) covering the AI utilities, role hierarchy, the full report workflow, edit/delete permissions, and the public pages. This replaces the old manual `smoke_test.py` script from earlier iterations.
