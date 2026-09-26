@@ -427,6 +427,69 @@ def demote_admin(r, user_id):
     return redirect("manage_admins")
 
 
+@login_required
+def edit_report(r, pk):
+    report = get_object_or_404(Report, pk=pk)
+    if report.citizen != r.user:
+        return redirect("mine")
+    if report.status != "reported":
+        messages.error(r, "This report can no longer be edited since it's already being worked on.")
+        return redirect("detail", pk=pk)
+
+    f = ReportForm(r.POST or None, r.FILES or None, instance=report)
+
+    if r.method == "POST" and f.is_valid():
+        x = f.save(commit=False)
+
+        other_issue = f.cleaned_data.get("other_issue", "").strip()
+        if other_issue:
+            x.description = (x.description + "\n\n" + other_issue).strip() if x.description else other_issue
+
+        image_bytes = None
+        image_mime_type = None
+        uploaded_image = f.cleaned_data.get("image")
+        if uploaded_image and hasattr(uploaded_image, "read"):
+            uploaded_image.seek(0)
+            image_bytes = uploaded_image.read()
+            image_mime_type = getattr(uploaded_image, "content_type", None) or "image/jpeg"
+            uploaded_image.seek(0)
+
+        analysis = ai_utils.analyze_report(
+            title=x.title, description=x.description, category=x.category,
+            latitude=x.latitude, longitude=x.longitude, exclude_pk=x.pk,
+            image_bytes=image_bytes, image_mime_type=image_mime_type,
+        )
+
+        x.department = analysis["department"]
+        x.ai_priority_suggested = analysis["suggested_priority"]
+        x.ai_source = analysis["ai_source"]
+        x.needs_review = analysis["flag"] != "ok"
+        x.flag_reason = analysis["flag"] if x.needs_review else ""
+        x.save()
+
+        messages.success(r, "Report updated successfully.")
+        return redirect("detail", pk=pk)
+
+    return render(r, "form.html", {"form": f, "states": STATES, "editing": True, "report": report})
+
+
+@login_required
+def delete_report(r, pk):
+    report = get_object_or_404(Report, pk=pk)
+    if report.citizen != r.user:
+        return redirect("mine")
+    if report.status != "reported":
+        messages.error(r, "This report can no longer be deleted since it's already being worked on.")
+        return redirect("detail", pk=pk)
+
+    if r.method == "POST":
+        report.delete()
+        messages.success(r, "Report deleted.")
+        return redirect("mine")
+
+    return render(r, "confirm_delete.html", {"report": report})
+
+
 def get_address(request):
     latitude = request.GET.get("lat")
     longitude = request.GET.get("lon")

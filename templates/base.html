@@ -20,6 +20,13 @@
     href="{% static 'style.css' %}"
 >
 <link rel="stylesheet" href="{% static 'animations.css' %}">
+<link rel="stylesheet" href="{% static 'theme.css' %}">
+<script>
+    (function () {
+        var saved = localStorage.getItem("cc-theme");
+        if (saved === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    })();
+</script>
 {% block extra_css %}{% endblock %}
 </head>
 
@@ -69,6 +76,11 @@
 
 
     <div class="nav-buttons">
+
+        <button type="button" class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <svg class="icon-svg icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg class="icon-svg icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
 
         {% if user.is_authenticated %}
 
@@ -298,6 +310,22 @@
 
 
 <script src="{% static 'login.js' %}"></script>
+<script>
+    (function () {
+        var toggle = document.getElementById("themeToggle");
+        if (!toggle) return;
+        toggle.addEventListener("click", function () {
+            var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+            if (isDark) {
+                document.documentElement.removeAttribute("data-theme");
+                localStorage.setItem("cc-theme", "light");
+            } else {
+                document.documentElement.setAttribute("data-theme", "dark");
+                localStorage.setItem("cc-theme", "dark");
+            }
+        });
+    })();
+</script>
 
 </body>
 

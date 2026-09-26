@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="success-page">
+    <div class="success-card anim-scale-in">
+        <div class="success-icon" style="background:#fdeaea; color:#dc2626;">
+            <svg class="icon-svg" viewBox="0 0 24 24" width="32" height="32"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </div>
+        <h1>Delete this report?</h1>
+        <p class="success-message">
+            "{{ report.title }}" will be permanently removed. This can't be undone.
+        </p>
+        <form method="post" class="success-actions" style="margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="success-primary-btn btn-press" style="background:#dc2626; border:none; cursor:pointer;">
+                Yes, Delete It
+            </button>
+            <a href="{% url 'detail' report.id %}" class="success-secondary-btn">Cancel</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

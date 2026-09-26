@@ -56,6 +56,12 @@
     z-index: 1;
 }
 
+.owner-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
 .dashboard-alert-row {
     display: flex;
     flex-wrap: wrap;

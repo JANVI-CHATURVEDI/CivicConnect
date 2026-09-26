@@ -22,24 +22,24 @@
     </div>
 
     <div class="analytics-grid">
-        <div class="analytics-card anim-fade-up anim-delay-1">
+        <div class="analytics-card card-hover anim-fade-up anim-delay-1">
             <h3>Reports by Category</h3>
             <canvas id="categoryChart"></canvas>
         </div>
 
-        <div class="analytics-card anim-fade-up anim-delay-2">
+        <div class="analytics-card card-hover anim-fade-up anim-delay-2">
             <h3>Reports by Status</h3>
             <canvas id="statusChart"></canvas>
         </div>
 
         {% if by_state %}
-        <div class="analytics-card anim-fade-up anim-delay-3">
+        <div class="analytics-card card-hover anim-fade-up anim-delay-3">
             <h3>Reports by State</h3>
             <canvas id="stateChart"></canvas>
         </div>
         {% endif %}
 
-        <div class="analytics-card anim-fade-up anim-delay-4" style="grid-column: 1 / -1;">
+        <div class="analytics-card card-hover anim-fade-up anim-delay-4" style="grid-column: 1 / -1;">
             <h3>Reports Over the Last 30 Days</h3>
             <canvas id="trendChart"></canvas>
         </div>

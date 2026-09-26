@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'dashboard_extra.css' %}">
+{% endblock %}
 
 {% block content %}
 
@@ -37,6 +41,13 @@
       </span>
 
     </div>
+
+    {% if report.citizen == request.user and report.status == "reported" %}
+    <div class="owner-actions">
+        <a href="{% url 'edit_report' report.id %}" class="detect-btn btn-press">✎ Edit Report</a>
+        <a href="{% url 'delete_report' report.id %}" class="detect-btn btn-press" style="color:#dc2626; border-color:#f5c2c2;">🗑 Delete Report</a>
+    </div>
+    {% endif %}
 
     {% if report.duplicate_of %}
     <div class="detail-section" style="background:#fff7ed;border:1px solid #fcd9a8;border-radius:10px;padding:14px 16px;">

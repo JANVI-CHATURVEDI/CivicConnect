@@ -97,12 +97,35 @@ Then visit `http://127.0.0.1:8000/`.
 - Sign up as a normal citizen at `/signup/`.
 - Log in as the superuser you created to access `/dashboard/` (staff-only).
 
+## UI overhaul
+
+- **Dark mode** — a toggle in the nav (and on the homepage) switches the whole site between light/dark, persisted in `localStorage`. Applied consistently across every page, including login/signup.
+- Refined buttons with a subtle animated sheen on hover, consistent card hover-lift on dashboard/analytics/admin cards, a sticky blurred navbar, and a redesigned "AI Suggestion" panel on the report form with an animated gradient border.
+- Nicer empty states (icon in a soft circle instead of a bare outline icon).
+
+## Report editing and deletion
+
+Citizens can edit or delete their own report from its detail page, but only while it's still in the "Reported" state (once staff start working on it, it's locked to preserve the audit trail). Editing re-runs the full AI analysis in case the new title/description/photo changes the right category, priority, or department.
+
+## Escalation, for real this time
+
+`python manage.py escalate_stale_reports` finds every high-priority report still "Reported" after 48 hours and emails a digest to the relevant state admin(s) and all superadmins. It's not a background job — run it on a schedule yourself (cron on Linux/Mac, Task Scheduler on Windows) since this project has no Celery/job-runner setup. Example cron line to run it hourly:
+```
+0 * * * * cd /path/to/project && /path/to/venv/bin/python manage.py escalate_stale_reports
+```
+
+## Demo data
+
+For a live demo or screenshots, run `python manage.py seed_demo_data` — it creates a Super Admin, five State Admins (UP, MH, KA, TN, DL), six citizens, and 30 realistic reports spread across 8 states, statuses, and priorities (including some deliberately stale high-priority ones so the escalation banner has something to show, and a couple flagged `needs_review`). All demo accounts share the password `DemoPass123!`, printed at the end of the command along with the usernames. Run with `--reset` to wipe and reseed fresh.
+
+## Tests
+
+`python manage.py test` now runs a real, committed suite (`reports/tests.py`, 23 tests) covering the AI utilities, role hierarchy, the full report workflow, edit/delete permissions, and the public pages. This replaces the old manual `smoke_test.py` script from earlier iterations.
+
 ## Still not implemented (documented honestly for your report)
 
 - Google OAuth login (button shows a clear "not enabled" message instead of pretending to work).
-- Editing/deleting a report after submission.
-- Automated test suite beyond `smoke_test.py` (a manual end-to-end script — not wired into `manage.py test`).
-- True background-job escalation: the 48-hour stale-report flag is computed live whenever a dashboard page loads, not via a scheduled task (no Celery/cron in this project), so it won't proactively email anyone at hour 49 — it just shows up the next time someone opens the dashboard.
+- True background-job escalation: `escalate_stale_reports` must be scheduled externally (cron/Task Scheduler) — nothing runs it automatically on its own.
 - Gemini Vision has been tested end-to-end with a mocked API response (confirmed the image is correctly attached to the request), but not against Gemini's real servers, since this environment can't reach `generativelanguage.googleapis.com` — verify with a real `GEMINI_API_KEY` locally.
 
 ## Project structure
