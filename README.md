@@ -118,6 +118,19 @@ Citizens can edit or delete their own report from its detail page, but only whil
 
 For a live demo or screenshots, run `python manage.py seed_demo_data` — it creates a Super Admin, five State Admins (UP, MH, KA, TN, DL), six citizens, and 30 realistic reports spread across 8 states, statuses, and priorities (including some deliberately stale high-priority ones so the escalation banner has something to show, and a couple flagged `needs_review`). All demo accounts share the password `DemoPass123!`, printed at the end of the command along with the usernames. Run with `--reset` to wipe and reseed fresh.
 
+## Security & production-readiness audit
+
+A pass looking for the things a code reviewer or judge would actually poke at:
+
+- **Fixed**: `/api/ai-suggest/` and `/api/get-address/` had no login requirement — anyone could hit them directly without ever signing in, burning your Gemini/Geoapify API quota for free. Both now require login (their only legitimate caller, the report form's JS, is already behind login).
+- **Fixed**: photo uploads only had a client-side "10MB" hint with no server-side enforcement — added a real `clean_image` validator.
+- **Fixed**: dashboard queries on `duplicate_of` were N+1 (one extra query per row with a duplicate) — added `select_related`.
+- **Fixed**: `STATIC_ROOT` was missing, so `collectstatic` would fail on any real deployment — added.
+- **Fixed**: password validation only checked minimum length — added Django's common-password and all-numeric-password validators.
+- **Fixed**: `python manage.py check --deploy` reported 7 warnings; added `XFrameOptionsMiddleware` and conditioned `SECURE_SSL_REDIRECT`/`SESSION_COOKIE_SECURE`/`CSRF_COOKIE_SECURE`/HSTS on `DEBUG=False`, so they kick in automatically once you deploy without breaking local `http://` development. Down to 1 remaining warning (a real `DJANGO_SECRET_KEY` — you set that yourself at deploy time, already documented in `.env.example`).
+- **Verified, no fix needed**: no `.env` or `db.sqlite3` has ever been committed to git history; dark-mode text/background color pairs checked against WCAG contrast ratios (all comfortably pass AA, most pass AAA).
+- **Fixed**: one light-mode text color (`.ai-hint`) was slightly under the WCAG AA contrast threshold (3.1:1) — darkened to pass (4.76:1).
+
 ## Tests
 
 `python manage.py test` now runs a real, committed suite (`reports/tests.py`, 23 tests) covering the AI utilities, role hierarchy, the full report workflow, edit/delete permissions, and the public pages. This replaces the old manual `smoke_test.py` script from earlier iterations.

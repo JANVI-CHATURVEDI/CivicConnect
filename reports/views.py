@@ -100,6 +100,7 @@ def new(r):
     return render(r, "form.html", {"form": f, "states": STATES})
 
 
+@login_required
 @require_GET
 def ai_suggest(r):
     title = r.GET.get("title", "")
@@ -229,7 +230,7 @@ def update_status(request, pk):
 
 
 def _scoped_reports(profile):
-    qs = Report.objects.all()
+    qs = Report.objects.select_related("duplicate_of")
     if profile.role == "admin":
         qs = qs.filter(state=profile.state)
     return qs
@@ -490,6 +491,7 @@ def delete_report(r, pk):
     return render(r, "confirm_delete.html", {"report": report})
 
 
+@login_required
 def get_address(request):
     latitude = request.GET.get("lat")
     longitude = request.GET.get("lon")

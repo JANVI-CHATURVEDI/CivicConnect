@@ -225,3 +225,36 @@ class PublicPagesTests(TestCase):
         self.client.login(username="citizen3", password="CitizenPass123")
         resp = self.client.get("/analytics/")
         self.assertEqual(resp.status_code, 302)
+
+    def test_ai_suggest_requires_login(self):
+        resp = self.client.get("/api/ai-suggest/?title=pothole&description=big+pothole&category=road")
+        self.assertEqual(resp.status_code, 302)
+
+    def test_ai_suggest_works_when_logged_in(self):
+        User.objects.create_user("citizen4", "c4@example.com", "CitizenPass123")
+        self.client.login(username="citizen4", password="CitizenPass123")
+        resp = self.client.get("/api/ai-suggest/?title=pothole&description=big+pothole&category=road")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_get_address_requires_login(self):
+        resp = self.client.get("/api/get-address/?lat=26.4&lon=80.3")
+        self.assertEqual(resp.status_code, 302)
+
+
+class ImageUploadValidationTests(TestCase):
+    def test_oversized_image_rejected(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from .forms import ReportForm
+
+        oversized = SimpleUploadedFile(
+            "big.jpg", b"0" * (11 * 1024 * 1024), content_type="image/jpeg"
+        )
+        form = ReportForm(
+            data={
+                "title": "Test", "description": "desc", "category": "road",
+                "priority": "medium", "state": "UP", "latitude": "", "longitude": "", "address": "",
+            },
+            files={"image": oversized},
+        )
+        form.is_valid()
+        self.assertIn("image", form.errors)

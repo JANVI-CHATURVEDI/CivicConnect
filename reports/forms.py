@@ -37,6 +37,13 @@ class ReportForm(forms.ModelForm):
             "longitude": forms.HiddenInput(),
         }
 
+    def clean_image(self):
+        image = self.cleaned_data.get("image")
+        max_size = 10 * 1024 * 1024
+        if image and hasattr(image, "size") and image.size > max_size:
+            raise forms.ValidationError("Image must be under 10MB.")
+        return image
+
     def clean(self):
         cleaned_data = super().clean()
         category = cleaned_data.get("category")
