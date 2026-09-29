@@ -215,8 +215,10 @@
 (async function () {
     const mapEl = document.getElementById("dashboardMap");
     const map = L.map(mapEl).setView([22.9734, 78.6569], 5);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        subdomains: "abcd",
+        maxZoom: 19,
     }).addTo(map);
 
     const priorityColors = { low: "#16c7b7", medium: "#f59e0b", high: "#dc2626" };
