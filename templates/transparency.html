@@ -42,8 +42,10 @@
 <script>
 (async function () {
     const map = L.map("publicMap").setView([22.9734, 78.6569], 5);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+        subdomains: "abcd",
+        maxZoom: 19,
     }).addTo(map);
 
     const statusColors = { reported: "#2563eb", progress: "#7c3aed", resolved: "#16c7b7" };
