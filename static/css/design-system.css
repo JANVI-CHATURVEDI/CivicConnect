@@ -1,0 +1,65 @@
+/* CivicConnect design tokens — single source of truth.
+   Imported first by base templates; older files (style.css, theme.css,
+   dashboard_extra.css) remain for compatibility and layer on top. */
+:root {
+  --cc-bg: #f6f8fc;
+  --cc-surface: #ffffff;
+  --cc-text: #0f1e33;
+  --cc-muted: #5b6b82;
+  --cc-border: #e3e9f4;
+  --cc-accent: #2563eb;
+  --cc-accent-2: #7c3aed;
+  --cc-gradient: linear-gradient(135deg, #2563eb, #7c3aed 60%, #db2777);
+  --cc-success: #16a34a;
+  --cc-warning: #d97706;
+  --cc-danger: #dc2626;
+  --cc-radius: 14px;
+  --cc-shadow: 0 10px 30px rgba(15, 30, 51, 0.08);
+  --cc-font-display: "Space Grotesk", system-ui, sans-serif;
+  --cc-font-body: "Inter", "DM Sans", system-ui, sans-serif;
+  --cc-space-1: 8px; --cc-space-2: 16px; --cc-space-3: 24px; --cc-space-4: 32px;
+  font-size: 16px;
+}
+[data-theme="dark"] {
+  --cc-bg: #0b1220;
+  --cc-surface: #121c30;
+  --cc-text: #eaf0fa;
+  --cc-muted: #9fb0c9;
+  --cc-border: #22314d;
+  --cc-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--cc-font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  background: var(--cc-bg);
+  color: var(--cc-text);
+}
+h1, h2, h3, .display { font-family: var(--cc-font-display); letter-spacing: -0.01em; }
+small, .small { font-size: 0.875rem; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--cc-accent); outline-offset: 2px; border-radius: 6px;
+}
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { left: 8px; top: 8px; z-index: 9999; background: var(--cc-surface); padding: 8px 12px; border-radius: 8px; }
+/* components */
+.btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 12px; padding: 10px 18px; font-weight: 600;
+  border: 1px solid var(--cc-border); background: var(--cc-surface); color: var(--cc-text); cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.btn:hover { transform: translateY(-1px); box-shadow: var(--cc-shadow); }
+.btn-primary { background: var(--cc-gradient); color: #fff; border: none; }
+.card { background: var(--cc-surface); border: 1px solid var(--cc-border); border-radius: var(--cc-radius); box-shadow: var(--cc-shadow); }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.8rem; font-weight: 600; border: 1px solid var(--cc-border); }
+.skeleton { border-radius: 8px; background: linear-gradient(90deg, var(--cc-border), var(--cc-surface), var(--cc-border)); background-size: 200% 100%; animation: cc-shimmer 1.4s infinite; }
+@keyframes cc-shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+.timeline { border-left: 3px solid var(--cc-border); margin-left: 8px; padding-left: 16px; }
+.timeline-event { position: relative; padding: 8px 0; }
+.timeline-event::before { content: ""; position: absolute; left: -23px; top: 14px; width: 11px; height: 11px; border-radius: 50%; background: var(--cc-accent); }
+.gauge { height: 10px; border-radius: 999px; background: var(--cc-border); overflow: hidden; }
+.gauge > span { display: block; height: 100%; background: var(--cc-gradient); }
+.pulse-pin { animation: cc-pulse 1.8s infinite; }
+@keyframes cc-pulse { 0% { opacity: 1; } 50% { opacity: 0.45; } 100% { opacity: 1; } }

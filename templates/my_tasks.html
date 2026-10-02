@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card" style="padding:24px;max-width:1000px;margin:24px auto;">
+<h1>My Tasks</h1>
+<p>Field-officer queue ordered by SLA deadline.</p>
+{% for r in reports %}
+<div class="card" style="padding:12px;margin:10px 0;">
+<strong>#{{ r.id }} {{ r.title }}</strong> — {{ r.get_status_display }} · {{ r.priority|upper }} · SLA {% if r.sla_due %}{{ r.sla_due|date:"d M H:i" }}{% else %}—{% endif %}
+{% if r.is_overdue %}<span class="badge" style="color:red;">OVERDUE</span>{% endif %}
+<a href="{% url 'detail' r.id %}">Open</a>
+</div>
+{% empty %}<p>No tasks assigned.</p>{% endfor %}
+</div>
+{% endblock %}

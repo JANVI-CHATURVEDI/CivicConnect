@@ -29,7 +29,7 @@
     <div class="dashboard-alert-row anim-fade-up">
         {% if escalated_count > 0 %}
         <div class="dashboard-alert escalated">
-            ⏰ {{ escalated_count }} high-priority report{{ escalated_count|pluralize }} unresolved for over {{ escalation_hours }}h
+            ⏰ Escalated: {{ escalated_count }} high-priority report{{ escalated_count|pluralize }} unresolved for over {{ escalation_hours }}h
         </div>
         {% endif %}
         {% if needs_review_count > 0 %}
@@ -152,9 +152,9 @@
                     {% if x.needs_review %}
                     <span class="review-badge" title="AI flagged this: {{ x.flag_reason }}">⚠ Needs Review</span>
                     {% endif %}
-                    {% if x.priority == "high" and x.status == "reported" and x.created_at < escalation_cutoff %}
+                    {% if x.status == "reported" and x.created_at < escalation_cutoff %}{% if x.priority == "high" or x.priority == "critical" %}
                     <span class="escalated-badge">⏰ Escalated</span>
-                    {% endif %}
+                    {% endif %}{% endif %}
                 </td>
 
                 <td>{{ x.get_category_display }}</td>

@@ -623,3 +623,11 @@ body {
         min-height: auto;
     }
 }
+
+/* === a11y fix: minimum readable sizes (WCAG AA) === */
+body{font-size:15px;line-height:1.55}
+.login-page,.login-container,.login-right,.login-left{font-size:15px}
+.login-right p,.login-right span,.login-right label,.login-right a,.login-right button{font-size:14px !important}
+.copyright,.security-info,.security-info span,.divider,.divider span{font-size:12px !important}
+.django-error{font-size:14px !important}
+

@@ -15,12 +15,18 @@
 
 <title>CivicConnect AI</title>
 
+<link rel="stylesheet" href="{% static 'css/design-system.css' %}">
 <link
     rel="stylesheet"
     href="{% static 'style.css' %}"
 >
 <link rel="stylesheet" href="{% static 'animations.css' %}">
 <link rel="stylesheet" href="{% static 'theme.css' %}">
+<link rel="stylesheet" href="{% static 'dashboard_extra.css' %}">
+<meta name="description" content="CivicConnect AI — report civic issues, AI triage, transparent resolution tracking.">
+<meta property="og:title" content="CivicConnect AI">
+<meta property="og:description" content="Report civic issues. Track resolution transparently.">
+<meta property="og:type" content="website">
 <script>
     (function () {
         var saved = localStorage.getItem("cc-theme");
@@ -31,6 +37,7 @@
 </head>
 
 <body>
+<a class="skip-link" href="#content">Skip to content</a>
 
 <!-- ================= NAVBAR ================= -->
 

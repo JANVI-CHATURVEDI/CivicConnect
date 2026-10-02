@@ -1,9 +1,14 @@
-from django.urls import path
-
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
+from .api import ReportViewSet, StatsView
+
+router = DefaultRouter()
+router.register(r"reports", ReportViewSet, basename="api-reports")
 
 urlpatterns = [
     path("", views.home, name="home"),
+    path("healthz", views.healthz, name="healthz"),
     path("signup/", views.signup, name="signup"),
     path("report/new/", views.new, name="new"),
     path("reports/", views.mine, name="mine"),
@@ -20,23 +25,21 @@ urlpatterns = [
 
     path("api/get-address/", views.get_address, name="get_address"),
     path("api/ai-suggest/", views.ai_suggest, name="ai_suggest"),
+    path("api/assistant/", views.assistant_api, name="assistant_api"),
+    path("api/briefing/", views.briefing_api, name="briefing_api"),
+    path("api/ai-status/<int:pk>/", views.ai_status_api, name="ai_status_api"),
+    path("api/notifications/", views.notifications_api, name="notifications_api"),
+    path("api/stats/", StatsView.as_view(), name="api_stats"),
+    path("api/", include(router.urls)),
     path("success/<int:pk>/", views.success, name="success"),
 
-    path(
-        "reports/<int:pk>/comment/",
-        views.add_comment,
-        name="add_comment"
-    ),
-
-    path(
-        "reports/<int:pk>/vote/",
-        views.vote_report,
-        name="vote_report"
-    ),
-
-    path(
-        "reports/<int:pk>/status/",
-        views.update_status,
-        name="update_status"
-    ),
+    path("reports/<int:pk>/comment/", views.add_comment, name="add_comment"),
+    path("reports/<int:pk>/vote/", views.vote_report, name="vote_report"),
+    path("reports/<int:pk>/status/", views.update_status, name="update_status"),
+    path("reports/<int:pk>/assign/", views.assign_report, name="assign_report"),
+    path("reports/<int:pk>/suggest-assignee/", views.suggest_assignee, name="suggest_assignee"),
+    path("reports/<int:pk>/confirm/", views.confirm_report, name="confirm_report"),
+    path("reports/<int:pk>/reopen/", views.reopen_report, name="reopen_report"),
+    path("my-tasks/", views.my_tasks, name="my_tasks"),
+    path("notifications/", views.notifications, name="notifications"),
 ]

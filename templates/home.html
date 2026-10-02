@@ -463,33 +463,33 @@
 
                 <div class="stat-card reveal">
                     <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M9 12h6M9 16h6M9 8h1M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/></svg></div>
-                    <strong class="stat-number" data-target="10000" data-suffix="K+">0</strong>
-                    <span>Issues Reported*</span>
+                    <strong class="stat-number" data-target="{{ stats.total }}" data-suffix="">0</strong>
+                    <span>Issues Reported (live)</span>
                 </div>
 
                 <div class="stat-card reveal">
                     <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg></div>
-                    <strong class="stat-number" data-target="8000" data-suffix="K+">0</strong>
-                    <span>Issues Resolved*</span>
+                    <strong class="stat-number" data-target="{{ stats.resolved }}" data-suffix="">0</strong>
+                    <span>Issues Resolved (live)</span>
                 </div>
 
                 <div class="stat-card reveal">
                     <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-                    <strong class="stat-number" data-target="95" data-suffix="%">0</strong>
-                    <span>Location Accuracy*</span>
+                    <strong class="stat-number" data-target="{{ stats.in_progress }}" data-suffix="">0</strong>
+                    <span>In Progress Now (live)</span>
                 </div>
 
                 <div class="stat-card reveal">
                     <div class="stat-icon"><svg class="icon-svg" viewBox="0 0 24 24" width="19" height="19"><path d="M3 21h18M5 21V7l6-4 6 4v14M9 9h1M9 13h1M14 9h1M14 13h1M9 21v-4h6v4"/></svg></div>
-                    <strong class="stat-number" data-target="50" data-suffix="+">0</strong>
-                    <span>Communities Connected*</span>
+                    <strong class="stat-number" data-target="{{ stats.states }}" data-suffix="">0</strong>
+                    <span>States With Reports (live)</span>
                 </div>
 
             </div>
 
         </div>
 
-        <p class="demo-note">*Illustrative platform metrics for demonstration purposes.</p>
+        <p class="demo-note">Live counts from the database{% if stats.avg_h %} · avg resolution {{ stats.avg_h }}h{% endif %}.</p>
 
     </section>
 

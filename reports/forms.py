@@ -75,15 +75,22 @@ class SignupForm(UserCreationForm):
 
 class CreateAdminForm(UserCreationForm):
     email = forms.EmailField(required=True)
-    role = forms.ChoiceField(choices=[("admin", "State Admin"), ("superadmin", "Super Admin")])
+    role = forms.ChoiceField(choices=[("officer", "Field Officer"), ("admin", "State Admin"), ("superadmin", "Super Admin")])
     state = forms.ChoiceField(choices=[("", "— Select State —")] + list(STATES), required=False)
+    department = forms.CharField(required=False)
 
     class Meta:
         model = User
         fields = ["username", "email", "password1", "password2"]
 
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
+
     def clean(self):
         cleaned_data = super().clean()
-        if cleaned_data.get("role") == "admin" and not cleaned_data.get("state"):
-            self.add_error("state", "Select a state for a State Admin.")
+        if cleaned_data.get("role") in ("admin", "officer") and not cleaned_data.get("state"):
+            self.add_error("state", "Select a state.")
         return cleaned_data

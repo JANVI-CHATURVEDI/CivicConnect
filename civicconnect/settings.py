@@ -8,10 +8,26 @@ load_dotenv(BASE_DIR / ".env")
 
 GEOAPIFY_API_KEY = os.getenv("GEOAPIFY_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_TIMEOUT_S = float(os.getenv("GEMINI_TIMEOUT_S", "12"))
+AI_SUGGEST_RATE_LIMIT = os.getenv("AI_SUGGEST_RATE_LIMIT", "30/h")
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-this-secret-key")
+_DEFAULT_SECRET = "change-this-secret-key"
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", _DEFAULT_SECRET)
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
-ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h] or ["*"]
+if not DEBUG and SECRET_KEY in (_DEFAULT_SECRET, "change-this-to-a-random-string", ""):
+    raise RuntimeError("Refusing to run with DEBUG=False and default DJANGO_SECRET_KEY. Set a strong value.")
+ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h] or (["*"] if DEBUG else ["localhost", "127.0.0.1"])
+CSRF_TRUSTED_ORIGINS = [h for h in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if h]
+SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
+SESSION_COOKIE_SECURE = not DEBUG or os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
+CSRF_COOKIE_SECURE = not DEBUG or os.getenv("CSRF_COOKIE_SECURE", "False") == "True"
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = not DEBUG
+SECURE_HSTS_PRELOAD = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -20,10 +36,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
+    "rest_framework",
     "reports",
 ]
+try:
+    import whitenoise  # noqa: F401
+    _HAS_WHITE = True
+except ImportError:
+    _HAS_WHITE = False
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+] + (["whitenoise.middleware.WhiteNoiseMiddleware"] if _HAS_WHITE else []) + [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -49,11 +73,13 @@ TEMPLATES = [
 ]
 
 if os.getenv("DATABASE_URL"):
+    _db_url = os.getenv("DATABASE_URL")
+    _ssl = _db_url.startswith("postgres") and "localhost" not in _db_url and "127.0.0.1" not in _db_url
     DATABASES = {
         "default": dj_database_url.parse(
-            os.getenv("DATABASE_URL"),
+            _db_url,
             conn_max_age=600,
-            ssl_require=True,
+            ssl_require=_ssl,
         )
     }
 elif os.getenv("POSTGRES_DB"):
@@ -85,12 +111,47 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage" if _HAS_WHITE else "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+}
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"std": {"format": "%(asctime)s %(levelname)s %(name)s %(message)s"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "std"}},
+    "root": {"handlers": ["console"], "level": os.getenv("LOG_LEVEL", "INFO")},
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "user": os.getenv("API_THROTTLE_USER", "300/hour"),
+        "anon": os.getenv("API_THROTTLE_ANON", "60/hour"),
+    },
+}
+
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.1)
+    except ImportError:
+        pass
 
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
