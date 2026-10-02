@@ -185,7 +185,7 @@
             <span class="live-strip-head"><span class="pulse-dot"></span>Live issues</span>
             <div class="live-cards">
                 {% for i in live_issues %}
-                <a class="live-card" href="{% url 'transparency' %}">
+                <a class="live-card" href="{% url 'public_reports' %}">
                     <strong>#{{ i.id }} · {{ i.title|truncatechars:48 }}</strong>
                     <span class="chip {{ i.priority }}">{{ i.get_status_display }}</span>
                 </a>
