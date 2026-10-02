@@ -26,7 +26,7 @@ flowchart LR
 | Super Admin | all states; leaderboard, audit, health |
 
 ## AI pipeline
-`reports/ai/service.py::analyze_report_full` → Gemini (vision+text, `x-goog-api-key`, `GEMINI_MODEL`, structured JSON, 3 retries, timeout) → fallback rules. Priority Score 0–100 → Low/Medium/High/Critical with reasons. Duplicates: bbox prefilter + Haversine + token similarity. Every analysis stored in `AIAnalysis`. Invalid/missing key → instant offline fallback (keys must look like `AIza...`; anything else skips network).
+`reports/ai/service.py::analyze_report_full` → Gemini (vision+text, `x-goog-api-key`, `GEMINI_MODEL`, structured JSON, 3 retries, timeout) → fallback rules. Priority Score 0–100 → Low/Medium/High/Critical with reasons. Duplicates: bbox prefilter + Haversine + token similarity. Every analysis stored in `AIAnalysis`. Missing/failing key → rule-engine fallback so the demo works offline. Reverse-geocoding uses free OpenStreetMap Nominatim (no key; `GEOAPIFY_API_KEY` optional fallback).
 
 ## Setup
 ```bash

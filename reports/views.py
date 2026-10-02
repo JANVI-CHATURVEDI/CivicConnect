@@ -465,30 +465,53 @@ def get_address(request):
     latitude = request.GET.get("lat"); longitude = request.GET.get("lon")
     if not latitude or not longitude:
         return JsonResponse({"success": False, "error": "Location coordinates are missing."}, status=400)
-    # cache reverse-geocode by rounded coords
+    # cache reverse-geocode by rounded coords (also respects Nominatim's 1 req/s policy)
     try:
         key = f"geo:{round(float(latitude),3)}:{round(float(longitude),3)}"
         hit = cache.get(key)
         if hit: return JsonResponse({"success": True, **hit})
     except (TypeError, ValueError):
         pass
-    api_key = settings.GEOAPIFY_API_KEY
-    if not api_key:
-        return JsonResponse({"success": False, "error": "Location service is not configured on the server."})
     try:
-        response = requests.get("https://api.geoapify.com/v1/geocode/reverse", params={"lat": latitude, "lon": longitude, "apiKey": api_key}, timeout=10)
-        response.raise_for_status()
-        data = response.json()
-        if data.get("features"):
-            props = data["features"][0].get("properties", {})
-            address = props.get("formatted") or props.get("address_line1") or "Address not found"
-            state_code = STATE_NAME_LOOKUP.get((props.get("state") or "").strip().lower(), "")
-            payload = {"address": address, "state": state_code}
-            cache.set(key, payload, 86400)
-            return JsonResponse({"success": True, **payload})
-        return JsonResponse({"success": False, "error": "Address not found."})
+        resp = requests.get(
+            "https://nominatim.openstreetmap.org/reverse",
+            params={"format": "jsonv2", "lat": latitude, "lon": longitude},
+            headers={"User-Agent": "CivicConnectAI/1.0 (contact: noreply@civicconnect.local)"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        d = resp.json()
+        a = d.get("address") or {}
+        pretty = ", ".join(p for p in [
+            " ".join(p for p in [a.get("house_number"), a.get("road")] if p).strip(),
+            a.get("suburb") or a.get("neighbourhood"),
+            a.get("city") or a.get("town") or a.get("village") or a.get("county"),
+        ] if p and p.strip())
+        payload = {
+            "address": pretty or d.get("display_name") or "Address not found",
+            "state": STATE_NAME_LOOKUP.get((a.get("state") or "").strip().lower(), ""),
+        }
+        cache.set(key, payload, 86400)
+        return JsonResponse({"success": True, **payload})
     except requests.RequestException:
-        return JsonResponse({"success": False, "error": "Unable to contact location service."}, status=500)
+        # optional Geoapify fallback if a key is configured
+        api_key = settings.GEOAPIFY_API_KEY
+        if not api_key:
+            return JsonResponse({"success": False, "error": "Unable to contact location service."}, status=500)
+        try:
+            response = requests.get("https://api.geoapify.com/v1/geocode/reverse",
+                                    params={"lat": latitude, "lon": longitude, "apiKey": api_key}, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            if data.get("features"):
+                props = data["features"][0].get("properties", {})
+                payload = {"address": props.get("formatted") or "Address not found",
+                           "state": STATE_NAME_LOOKUP.get((props.get("state") or "").strip().lower(), "")}
+                cache.set(key, payload, 86400)
+                return JsonResponse({"success": True, **payload})
+            return JsonResponse({"success": False, "error": "Address not found."})
+        except requests.RequestException:
+            return JsonResponse({"success": False, "error": "Unable to contact location service."}, status=500)
 
 
 # ---- new workflows ----
