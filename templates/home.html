@@ -181,10 +181,18 @@
 
         </section>
 
-        <div class="ticker" aria-label="Live issues near you">
-            <style>.ticker{display:flex;align-items:center;gap:0;overflow:hidden;white-space:nowrap;border:1px solid var(--cc-border);border-radius:12px;background:var(--cc-surface);margin:16px 0}.ticker .live-dot{flex-shrink:0;font-weight:800;background:var(--cc-surface);padding:10px 12px 10px 14px;z-index:2;position:relative;box-shadow:8px 0 12px -4px var(--cc-surface)}.ticker .track{display:inline-flex;white-space:nowrap;animation:tickmove 45s linear infinite;will-change:transform}.ticker .track>span{padding-right:48px}@keyframes tickmove{to{transform:translateX(-50%)}}@media(prefers-reduced-motion:reduce){.ticker .track{animation:none}}</style>
-            <span class="live-dot">🔴 LIVE</span>
-            <div class="track"><span>{% for i in live_issues %}#{{ i.id }} · {{ i.title }} · {{ i.get_status_display }} &nbsp;&nbsp;✦&nbsp;&nbsp; {% empty %}no open issues right now — file the first one!{% endfor %}</span><span>{% for i in live_issues %}#{{ i.id }} · {{ i.title }} · {{ i.get_status_display }} &nbsp;&nbsp;✦&nbsp;&nbsp; {% endfor %}</span></div>
+        <div class="live-strip" aria-label="Live issues near you">
+            <span class="live-strip-head"><span class="pulse-dot"></span>Live issues</span>
+            <div class="live-cards">
+                {% for i in live_issues %}
+                <a class="live-card" href="{% url 'transparency' %}">
+                    <strong>#{{ i.id }} · {{ i.title|truncatechars:48 }}</strong>
+                    <span class="chip {{ i.priority }}">{{ i.get_status_display }}</span>
+                </a>
+                {% empty %}
+                <span class="live-card">No open issues right now — file the first one!</span>
+                {% endfor %}
+            </div>
         </div>
     </main>
 

@@ -31,14 +31,14 @@ CITIES = [
 ]
 
 TITLES = [
-    ("road", "Sadak par bada gaddha hai {loc}", "Bahut bada pothole hai {loc} me, bike wale gir rahe hain. Please jaldi repair karo."),
-    ("water", "Paani ki pipe leak {loc}", "Pipeline burst near {loc}, paani sadak par beh raha hai since 3 days."),
-    ("garbage", "Kachra overflow at {loc}", "Bins haven't been cleared for a week near {loc}, badboo aa rahi hai."),
-    ("light", "Streetlight bandh {loc}", "Street batti not working in {loc}, andhera rehta hai raat me."),
-    ("tree", "Ped gir gaya {loc}", "A tree fell across the lane near {loc} after storm."),
-    ("manhole", "Khula manhole near school {loc}", "Open manhole near school at {loc}, bachon ke liye khatra! Urgent!"),
-    ("traffic", "Signal kharab {loc} crossing", "Traffic signal stuck on red at {loc} crossing, heavy jam."),
-    ("other", "Park bench toota {loc}", "Damaged bench near {loc} park entrance."),
+    ("road", "Large pothole on {loc} main road", "A deep pothole has opened up on the main road near {loc}. Two-wheelers are at risk, especially after dark."),
+    ("water", "Burst water pipeline near {loc}", "A pipeline has burst near {loc}. Water is flooding the street and has been flowing for days."),
+    ("garbage", "Garbage bins overflowing at {loc}", "Bins near {loc} have not been cleared for a week. Waste is spilling onto the footpath and smells bad."),
+    ("light", "Streetlights not working in {loc}", "The streetlights in {loc} are not working. The whole stretch stays dark at night and feels unsafe."),
+    ("tree", "Fallen tree blocking lane near {loc}", "A tree fell across the lane near {loc} after the storm and is blocking traffic."),
+    ("manhole", "Open manhole near school at {loc}", "An uncovered manhole near the school at {loc} is a serious danger to children. Needs urgent cover!"),
+    ("traffic", "Traffic signal malfunction at {loc} crossing", "The traffic signal at {loc} crossing is stuck on red in all directions, causing heavy congestion."),
+    ("other", "Damaged park bench near {loc}", "A bench near the {loc} park entrance is broken and needs repair."),
     ("road", "test", "bad"),  # vague/spam examples
     ("other", "Buy now lottery", "click here free money http://spam"),
 ]
@@ -139,7 +139,7 @@ class Command(BaseCommand):
             if status != "reported":
                 StatusEvent.objects.create(report=rep, old_status="reported", new_status=status, actor=rnd.choice(officers) if officers else sup, note="workflow")
             if rnd.random() < 0.3:
-                Comment.objects.create(report=rep, user=rnd.choice(citizens), text=rnd.choice(["Same issue near me.", "Please fix soon.", "Dhanyavaad for reporting.", "Facing this daily."]))
+                Comment.objects.create(report=rep, user=rnd.choice(citizens), text=rnd.choice(["Same issue near me.", "Please fix soon.", "Thanks for reporting.", "Facing this daily."]))
             if rnd.random() < 0.4:
                 for v in rnd.sample(citizens, k=rnd.randint(1, 4)):
                     Vote.objects.get_or_create(report=rep, user=v)
@@ -163,9 +163,9 @@ class Command(BaseCommand):
 
     def _hero(self, citizen, officers, sup, rnd):
         heroes = [
-            ("manhole", "CRITICAL: Open manhole near City Montessori School, Gomti Nagar", "Bachche school jaate hain yahan, bahut khatra! Open manhole, urgent cover needed.", "UP", 26.85, 80.95),
-            ("water", "Burst pipeline flooding MG Road Kanpur", "Major pipeline burst, paani waste ho raha hai, road flooded.", "UP", 26.45, 80.33),
-            ("road", "Deep potholes outside Andheri station", "Multiple deep potholes causing accidents near station.", "MH", 19.11, 72.85),
+            ("manhole", "CRITICAL: Open manhole near City Montessori School, Gomti Nagar", "An uncovered manhole on the footpath where schoolchildren walk every day. Urgent cover needed.", "UP", 26.85, 80.95),
+            ("water", "Burst pipeline flooding MG Road Kanpur", "A major pipeline burst is wasting water and flooding the road.", "UP", 26.45, 80.33),
+            ("road", "Deep potholes outside Andheri station", "Multiple deep potholes near the station are causing accidents.", "MH", 19.11, 72.85),
         ]
         for cat, title, desc, st, la, lo in heroes:
             full = analyze_report_full(title=title, description=desc, category=cat, latitude=la, longitude=lo)
