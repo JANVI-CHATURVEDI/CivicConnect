@@ -1,0 +1,83 @@
+/* CivicConnect AUTH v2 — premium split screen. Loads after login.css. */
+.login-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 32px 16px; position: relative; overflow: hidden;
+  background:
+    radial-gradient(600px 400px at 10% 10%, rgba(37, 99, 235, 0.16), transparent 60%),
+    radial-gradient(600px 420px at 90% 90%, rgba(124, 58, 237, 0.18), transparent 60%),
+    var(--cc-bg, #f6f8fc);
+}
+.login-container {
+  display: grid; grid-template-columns: 1fr 1fr; max-width: 1020px; width: 100%;
+  border-radius: 28px; overflow: hidden; border: 1px solid var(--cc-border, #e3e9f4);
+  box-shadow: 0 32px 80px -24px rgba(37, 99, 235, 0.4); background: var(--cc-surface, #fff);
+}
+.login-left {
+  position: relative; padding: 48px 40px; color: #fff; overflow: hidden;
+  background: linear-gradient(150deg, #1d4ed8 0%, #7c3aed 60%, #db2777 100%);
+}
+.login-left::before, .login-left::after {
+  content: ""; position: absolute; border-radius: 50%; filter: blur(60px);
+}
+.login-left::before { width: 280px; height: 280px; top: -80px; right: -60px; background: rgba(255, 255, 255, 0.25); animation: authFloat 8s ease-in-out infinite; }
+.login-left::after { width: 220px; height: 220px; bottom: -60px; left: -40px; background: rgba(0, 0, 0, 0.18); animation: authFloat 10s ease-in-out infinite reverse; }
+@keyframes authFloat { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-20px, 20px); } }
+.login-left > * { position: relative; z-index: 1; }
+.login-left h1 { font-family: "Space Grotesk", sans-serif; font-size: 2rem; letter-spacing: -0.02em; }
+.login-left h1 span { opacity: 0.75; font-weight: 500; }
+.login-left .tagline { opacity: 0.9; margin-bottom: 28px; }
+.login-left .feature-card {
+  display: flex; gap: 12px; align-items: flex-start; padding: 14px;
+  background: rgba(255, 255, 255, 0.14); border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px; margin-bottom: 12px; backdrop-filter: blur(8px);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.login-left .feature-card:hover { transform: translateX(6px); background: rgba(255, 255, 255, 0.2); }
+.login-left .feature-icon {
+  width: 40px; height: 40px; flex-shrink: 0; display: grid; place-items: center;
+  border-radius: 12px; background: rgba(255, 255, 255, 0.2); color: #fff;
+}
+.login-left .feature-card h3 { margin: 0 0 4px; font-size: 0.95rem; }
+.login-left .feature-card p { margin: 0; font-size: 0.82rem; opacity: 0.85; }
+.login-left .left-footer { display: flex; gap: 16px; margin-top: 24px; font-size: 0.8rem; opacity: 0.9; }
+.login-left .logo-box img { width: 52px; height: 52px; border-radius: 14px; background: #fff; padding: 6px; }
+.login-right { padding: 48px 44px; display: flex; align-items: center; }
+.login-form-container { width: 100%; }
+.login-form-container h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.7rem; letter-spacing: -0.02em; margin: 0 0 4px; }
+.login-subtitle { color: var(--cc-muted, #5b6b82); margin: 0 0 24px; font-size: 0.92rem; }
+.login-right .form-group { margin-bottom: 16px; }
+.login-right label { display: block; font-size: 0.82rem; font-weight: 700; margin-bottom: 6px; }
+.input-wrapper { position: relative; }
+.input-wrapper > i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--cc-muted, #5b6b82); }
+.input-wrapper input {
+  width: 100%; box-sizing: border-box; padding: 13px 14px 13px 42px;
+  border: 1.5px solid var(--cc-border, #e3e9f4); border-radius: 14px; font-size: 0.95rem;
+  background: var(--cc-bg, #f6f8fc); color: var(--cc-text, #0f1e33);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.input-wrapper input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15); background: var(--cc-surface, #fff); }
+.password-toggle { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); border: none; background: none; cursor: pointer; color: var(--cc-muted, #5b6b82); padding: 8px; }
+.login-options { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin: 4px 0 18px; }
+.login-button {
+  width: 100%; padding: 14px; border: none; border-radius: 14px; cursor: pointer;
+  background: linear-gradient(135deg, #2563eb, #7c3aed 60%, #db2777); color: #fff;
+  font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 14px 30px -10px rgba(124, 58, 237, 0.6); transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.login-button:hover { transform: translateY(-2px); box-shadow: 0 20px 38px -10px rgba(124, 58, 237, 0.7); }
+.divider { display: flex; align-items: center; gap: 12px; color: var(--cc-muted, #5b6b82); font-size: 0.78rem; margin: 20px 0 8px; }
+.divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--cc-border, #e3e9f4); }
+.register-text { text-align: center; font-size: 0.9rem; }
+.register-text a { font-weight: 700; color: #2563eb; }
+.security-info { display: flex; justify-content: center; gap: 16px; font-size: 0.75rem; color: var(--cc-muted, #5b6b82); margin-top: 18px; }
+.copyright { text-align: center; font-size: 0.75rem; color: var(--cc-muted, #5b6b82); margin-top: 14px; }
+.django-error { background: #fef2f2; border: 1px solid #f5c2c2; color: #b91c1c; border-radius: 12px; padding: 10px 14px; font-size: 0.85rem; margin-bottom: 14px; }
+[data-theme="dark"] .login-page { background: radial-gradient(600px 400px at 10% 10%, rgba(124,58,237,.22), transparent 60%), radial-gradient(600px 420px at 90% 90%, rgba(37,99,235,.2), transparent 60%), #0b1220; }
+[data-theme="dark"] .login-container { background: #121c30; border-color: #22314d; }
+[data-theme="dark"] .input-wrapper input { background: #0b1220; border-color: #22314d; color: #eaf0fa; }
+@media (max-width: 860px) {
+  .login-container { grid-template-columns: 1fr; }
+  .login-left { padding: 36px 28px; }
+  .login-right { padding: 36px 24px; }
+}
+@media (prefers-reduced-motion: reduce) { .login-left::before, .login-left::after { animation: none; } }

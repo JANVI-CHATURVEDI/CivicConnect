@@ -193,3 +193,118 @@ h1, h2, h3, .display, .hero h1, .dashboard-header h1 {
   .hero::before, .hero::after, .issue-card, .location-pin, .ai-circle, .pulse-dot { animation: none !important; }
   * { transition-duration: 0.01ms !important; }
 }
+
+/* ================= GLOW v2: upgraded whole-UI pass ================= */
+::selection { background: rgba(124, 58, 237, 0.28); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #2563eb, #7c3aed); border-radius: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+body { animation: pageIn 0.35s ease; }
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* pipeline band */
+.pipeline { padding: 72px 24px; max-width: 1100px; margin: 0 auto; }
+.pipeline-track { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 32px; position: relative; }
+.pipeline-track::before {
+  content: ""; position: absolute; top: 34px; left: 8%; right: 8%; height: 3px; border-radius: 3px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed, #db2777);
+  background-size: 200% 100%; animation: pipeFlow 3s linear infinite;
+}
+@keyframes pipeFlow { to { background-position: 200% 0; } }
+.pipe-step {
+  background: var(--cc-surface); border: 1px solid var(--cc-border); border-radius: 20px;
+  padding: 28px 18px 22px; text-align: center; position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pipe-step:hover { transform: translateY(-6px); box-shadow: var(--glow-shadow-lg); }
+.pipe-num {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--glow-gradient); color: #fff; font-family: "Space Grotesk", sans-serif;
+  font-weight: 700; font-size: 1.1rem; margin-bottom: 12px; position: relative; z-index: 1;
+  box-shadow: 0 10px 24px -8px rgba(124, 58, 237, 0.6);
+}
+.pipe-step h3 { margin: 0 0 6px; font-size: 1.02rem; }
+.pipe-step p { margin: 0; font-size: 0.85rem; color: var(--cc-muted); line-height: 1.55; }
+
+/* stories */
+.stories { padding: 72px 24px; max-width: 1100px; margin: 0 auto; }
+.stories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; margin-top: 32px; }
+.story-card {
+  background: var(--cc-surface); border: 1px solid var(--cc-border); border-radius: 20px; overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.story-card:hover { transform: translateY(-6px) rotate(-0.3deg); box-shadow: var(--glow-shadow-lg); }
+.story-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+.story-body { padding: 16px 18px 20px; }
+.story-body h3 { margin: 10px 0 4px; font-size: 0.98rem; line-height: 1.45; }
+.story-body p { margin: 0; font-size: 0.83rem; color: var(--cc-muted); }
+.story-rating { color: #b45309 !important; font-weight: 700 !important; margin-top: 6px !important; }
+
+/* CTA band */
+.cta-band {
+  max-width: 1100px; margin: 24px auto 72px; padding: 56px 32px; text-align: center;
+  border-radius: 28px; color: #fff; position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #1d4ed8, #7c3aed 55%, #db2777);
+  box-shadow: 0 32px 70px -20px rgba(124, 58, 237, 0.55);
+}
+.cta-band::before {
+  content: ""; position: absolute; width: 420px; height: 420px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14); filter: blur(70px); top: -160px; right: -100px;
+}
+.cta-band h2 { margin: 0 0 8px; font-size: clamp(1.5rem, 3.4vw, 2.3rem); }
+.cta-band p { opacity: 0.9; margin: 0 0 24px; }
+.cta-band .primary-btn { background: #fff !important; color: #4c1d95 !important; box-shadow: 0 14px 30px -10px rgba(0,0,0,.4) !important; }
+
+/* impact: gradient-border stat cards */
+.stat-card {
+  position: relative; background: var(--cc-surface);
+  border: 1px solid transparent !important;
+  background: linear-gradient(var(--cc-surface), var(--cc-surface)) padding-box,
+    linear-gradient(135deg, rgba(37,99,235,.4), rgba(124,58,237,.4), rgba(219,39,119,.4)) border-box !important;
+}
+.stat-icon {
+  background: linear-gradient(135deg, rgba(37,99,235,.14), rgba(124,58,237,.14)) !important;
+  border-radius: 14px !important;
+}
+
+/* issues: arrow slide */
+.issue-item .issue-arrow { transition: transform 0.2s ease; }
+.issue-item:hover .issue-arrow { transform: translate(4px, -4px); }
+.issue-item:hover { border-color: var(--glow-accent) !important; }
+
+/* dashboard shell: gradient page head + glass KPIs */
+.dashboard-page { animation: pageIn 0.35s ease; }
+.dashboard-header {
+  border-radius: 24px; padding: 28px 28px; margin-bottom: 18px; color: #fff;
+  background: linear-gradient(135deg, #1e3a8a 0%, #6d28d9 60%, #be185d 100%) !important;
+  position: relative; overflow: hidden; box-shadow: var(--glow-shadow-lg);
+}
+.dashboard-header::after {
+  content: ""; position: absolute; width: 380px; height: 380px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12); filter: blur(60px); top: -140px; right: -80px;
+}
+.dashboard-header .eyebrow { color: rgba(255, 255, 255, 0.75) !important; -webkit-text-fill-color: rgba(255,255,255,.75) !important; }
+.dashboard-header h1, .dashboard-header .dashboard-scope, .dashboard-header strong { color: #fff !important; }
+.dashboard-header .detect-btn { background: rgba(255,255,255,.16) !important; border: 1px solid rgba(255,255,255,.35) !important; color: #fff !important; }
+.dashboard-stat-card { backdrop-filter: blur(6px); }
+.dashboard-map { border-radius: 20px !important; overflow: hidden; border: 1px solid var(--cc-border); }
+
+/* detail + form rhythm */
+.detail-page, .report-page { animation: pageIn 0.35s ease; }
+.ai-panel { border-radius: 18px !important; }
+.wstep { border-radius: 12px !important; }
+.wstep.active { box-shadow: 0 10px 24px -8px rgba(124, 58, 237, 0.55); }
+
+/* footer columns */
+.footer-column a { transition: color 0.15s ease, padding-left 0.2s ease; }
+.footer-column a:hover { color: var(--glow-accent) !important; padding-left: 4px; }
+
+@media (max-width: 860px) {
+  .pipeline-track { grid-template-columns: 1fr 1fr; }
+  .pipeline-track::before { display: none; }
+  .cta-band { margin: 16px 16px 56px; padding: 40px 20px; }
+}
+@media (max-width: 560px) { .pipeline-track { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) {
+  .pipeline-track::before { animation: none; }
+}

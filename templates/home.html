@@ -270,6 +270,25 @@
     </section>
 
 
+    <!-- ================= AI PIPELINE ================= -->
+
+    <section class="pipeline" id="pipeline">
+
+        <div class="section-heading">
+            <span class="section-label">HOW AI HELPS</span>
+            <h2>From Photo to <span>Fix in Four Steps.</span></h2>
+        </div>
+
+        <div class="pipeline-track">
+            <div class="pipe-step reveal"><span class="pipe-num">1</span><h3>Capture</h3><p>Photo, voice or text — in Hindi, Hinglish or English.</p></div>
+            <div class="pipe-step reveal"><span class="pipe-num">2</span><h3>Triage</h3><p>Gemini vision + text sets category, severity 0–100 and priority.</p></div>
+            <div class="pipe-step reveal"><span class="pipe-num">3</span><h3>Route</h3><p>Auto-assigned to the right department and officer, with SLA.</p></div>
+            <div class="pipe-step reveal"><span class="pipe-num">4</span><h3>Resolve</h3><p>Before/after verified, citizen confirms and rates the fix.</p></div>
+        </div>
+
+    </section>
+
+
     <!-- ================= AI FEATURES ================= -->
 
     <section class="ai-features" id="features">
@@ -508,6 +527,48 @@
 
         <p class="demo-note">Live counts from the database{% if stats.avg_h %} · avg resolution {{ stats.avg_h }}h{% endif %}.</p>
 
+    </section>
+
+
+    <!-- ================= RESOLVED STORIES ================= -->
+
+    <section class="stories" id="stories">
+
+        <div class="section-heading">
+            <span class="section-label">PROOF IT WORKS</span>
+            <h2>Recently <span>Resolved.</span></h2>
+            <p>Real reports from the live database, fixed and confirmed.</p>
+        </div>
+
+        <div class="stories-grid">
+            {% for r in latest %}
+            <article class="story-card reveal">
+                {% if r.image %}<img src="{{ r.image.url }}" alt="" loading="lazy">{% endif %}
+                <div class="story-body">
+                    <span class="chip">{{ r.get_category_display }}</span>
+                    <h3>#{{ r.id }} · {{ r.title|truncatechars:64 }}</h3>
+                    <p>{{ r.address|default:r.get_state_display }}</p>
+                    {% if r.rating %}<p class="story-rating">Rated {{ r.rating }}/5 by the citizen</p>{% endif %}
+                </div>
+            </article>
+            {% empty %}
+            <p>No resolved stories yet — be the first to report and resolve.</p>
+            {% endfor %}
+        </div>
+
+        <div class="issues-cta">
+            <a href="{% url 'public_reports' %}" class="secondary-btn">Explore the transparency map →</a>
+        </div>
+
+    </section>
+
+
+    <!-- ================= CTA ================= -->
+
+    <section class="cta-band reveal">
+        <h2>See a problem? Make it visible in 60 seconds.</h2>
+        <p>Photo, location, done — AI routes it to the right authority.</p>
+        <a href="{% url 'new' %}" class="primary-btn report-btn">Report an Issue</a>
     </section>
 
 
