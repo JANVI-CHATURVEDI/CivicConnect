@@ -47,5 +47,5 @@ Docker: `docker compose up --build`. Prod env: `DJANGO_DEBUG=False`, strong `DJA
 ## Limitations (honest)
 - Google OAuth removed (was fake button).
 - Escalation is a management command, not a background worker.
-- Gemini Vision verified with mocked responses; live vision needs a real `AIza...` key (the key provided in chat is not Google-format, so the app runs on the rule engine).
+- Gemini Vision verified live (`gemini-2.5-flash`, 200 OK); rule-engine fallback covers missing-key/offline.
 - Seed images are procedural Pillow placeholders, not real photos.

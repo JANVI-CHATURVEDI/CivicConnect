@@ -8,7 +8,7 @@ load_dotenv(BASE_DIR / ".env")
 
 GEOAPIFY_API_KEY = os.getenv("GEOAPIFY_API_KEY")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_TIMEOUT_S = float(os.getenv("GEMINI_TIMEOUT_S", "12"))
 AI_SUGGEST_RATE_LIMIT = os.getenv("AI_SUGGEST_RATE_LIMIT", "30/h")
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")

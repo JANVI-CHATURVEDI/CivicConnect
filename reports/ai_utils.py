@@ -9,7 +9,7 @@ from .ai.duplicates import haversine_distance_m, find_possible_duplicates, EARTH
 from .ai.service import analyze_report, analyze_report_full  # noqa: F401
 from .ai.gemini_client import gemini_analyze, VALID_CATEGORIES, VALID_FLAGS, VALID_PRIORITIES  # noqa: F401
 
-GEMINI_MODEL = "gemini-2.0-flash"
+GEMINI_MODEL = "gemini-2.5-flash"
 
 
 def suggest_priority(title="", description="", category=""):

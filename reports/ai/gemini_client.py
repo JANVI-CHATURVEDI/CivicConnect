@@ -31,11 +31,6 @@ def gemini_analyze(title="", description="", image_bytes=None, image_mime_type=N
     api_key = getattr(settings, "GEMINI_API_KEY", "")
     if not api_key or not (title or description or image_bytes):
         return None
-    # Fast offline fail: real Google AI Studio keys start with "AIza". Anything
-    # else (e.g. placeholder) would just burn 3 retries x timeout on every
-    # report — skip the network entirely and let the rule engine handle it.
-    if not (api_key.startswith("AIza") or api_key.startswith("TEST")):
-        return None
     prompt = (
         "Classify this civic issue report for a city government app. "
         "Respond with ONLY a JSON object (no markdown) with exactly these keys: "

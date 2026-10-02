@@ -11,6 +11,7 @@ from .roles import get_profile
 from . import ai_utils
 
 
+@override_settings(GEMINI_API_KEY='')
 class AiUtilsTests(TestCase):
     def test_gemini_analyze_returns_none_without_key(self):
         self.assertIsNone(ai_utils.gemini_analyze("Pothole", "Big pothole"))
@@ -71,6 +72,7 @@ class RoleHierarchyTests(TestCase):
         self.assertEqual(get_profile(user).role, "citizen")
 
 
+@override_settings(GEMINI_API_KEY='')
 class ReportWorkflowTests(TestCase):
     def setUp(self):
         self.citizen = User.objects.create_user("citizen1", "c1@example.com", "CitizenPass123")
@@ -207,6 +209,7 @@ class ReportWorkflowTests(TestCase):
         self.assertEqual(resp.status_code, 302)
 
 
+@override_settings(GEMINI_API_KEY='')
 class PublicPagesTests(TestCase):
     def test_transparency_page_loads_without_login(self):
         resp = self.client.get("/transparency/")
@@ -229,6 +232,7 @@ class PublicPagesTests(TestCase):
         self.assertEqual(resp.status_code, 302)
 
 
+@override_settings(GEMINI_API_KEY='')
 class PermissionMatrixTests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user("owner", "o@e.com", "Pass12345")
@@ -277,6 +281,7 @@ class PermissionMatrixTests(TestCase):
         self.assertEqual(self.client.get(f"/reports/{self.rep.id}/").status_code, 302)
 
 
+@override_settings(GEMINI_API_KEY='')
 class AIFallbackTests(TestCase):
     def test_malformed_gemini_json_falls_back(self):
         from reports.ai import service
@@ -315,6 +320,7 @@ class AIFallbackTests(TestCase):
         self.assertEqual(far, [])
 
 
+@override_settings(GEMINI_API_KEY='')
 class WorkflowTests2(TestCase):
     def setUp(self):
         self.cit = User.objects.create_user("c1", "c1@e.com", "Pass12345")
