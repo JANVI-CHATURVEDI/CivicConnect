@@ -182,7 +182,9 @@
         </section>
 
         <div class="ticker" aria-label="Live issues near you">
-            <span>🔴 LIVE: {% for i in live_issues %}#{{ i.id }} {{ i.title }} ({{ i.get_status_display }}) · {% empty %}no open issues right now — file the first one!{% endfor %}</span>
+            <style>.ticker{display:flex;align-items:center;gap:12px;overflow:hidden;white-space:nowrap;border:1px solid var(--cc-border);border-radius:12px;background:var(--cc-surface);padding:10px 14px;margin:16px 0}.ticker .live-dot{flex-shrink:0;font-weight:800}.ticker .track{display:inline-flex;white-space:nowrap;animation:tickmove 45s linear infinite}.ticker .track>span{padding-right:48px}@keyframes tickmove{to{transform:translateX(-50%)}}@media(prefers-reduced-motion:reduce){.ticker .track{animation:none}}</style>
+            <span class="live-dot">🔴 LIVE</span>
+            <div class="track"><span>{% for i in live_issues %}#{{ i.id }} · {{ i.title }} · {{ i.get_status_display }} &nbsp;&nbsp;✦&nbsp;&nbsp; {% empty %}no open issues right now — file the first one!{% endfor %}</span><span>{% for i in live_issues %}#{{ i.id }} · {{ i.title }} · {{ i.get_status_display }} &nbsp;&nbsp;✦&nbsp;&nbsp; {% endfor %}</span></div>
         </div>
     </main>
 

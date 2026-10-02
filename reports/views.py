@@ -40,7 +40,8 @@ def home(r):
     avg_h = round(agg["avg"].total_seconds() / 3600, 1) if agg["avg"] else None
     cities = Report.objects.exclude(address="").values("state").distinct().count()
     latest = Report.objects.filter(status__in=("resolved", "confirmed")).order_by("-resolved_at", "-created_at")[:6]
-    live_issues = Report.objects.exclude(status__in=("resolved", "confirmed")).order_by("-created_at")[:8]
+    live_qs = Report.objects.exclude(status__in=("resolved", "confirmed")).exclude(needs_review=True).order_by("-created_at")[:25]
+    live_issues = [x for x in live_qs if len((x.title or "").strip()) > 8][:8]
     return render(r, "home.html", {
         "latest": latest, "live_issues": live_issues,
         "stats": {"total": total, "resolved": resolved, "in_progress": in_progress, "avg_h": avg_h, "states": cities},

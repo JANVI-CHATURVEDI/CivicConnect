@@ -46,9 +46,9 @@
 #cc-palette input{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--cc-border);border-radius:10px;background:var(--cc-bg);color:var(--cc-text)}
 #cc-palette a{display:block;padding:10px;border-radius:8px;color:var(--cc-text);text-decoration:none}
 #cc-palette a:hover{background:var(--cc-bg)}
-.ticker{overflow:hidden;white-space:nowrap;border:1px solid var(--cc-border);border-radius:12px;background:var(--cc-surface);padding:10px 0;margin:16px 0}
-.ticker span{display:inline-block;padding-left:100%;animation:tick 30s linear infinite}
-@keyframes tick{to{transform:translateX(-100%)}}
+.ticker{overflow:hidden;white-space:nowrap;border:1px solid var(--cc-border);border-radius:12px;background:var(--cc-surface);padding:10px 14px;margin:16px 0}
+.ticker .track{display:inline-flex;white-space:nowrap;animation:tickmove 45s linear infinite}
+@keyframes tickmove{to{transform:translateX(-50%)}}
 #toasts{position:fixed;top:16px;right:16px;z-index:80;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--cc-surface);border:1px solid var(--cc-border);border-radius:12px;padding:10px 14px;box-shadow:var(--cc-shadow);animation:ccIn .3s ease}
 .typing::after{content:"_";animation:blink 1s infinite}
@@ -56,4 +56,5 @@
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
 .tabbar{display:none}
 @media(max-width:720px){.tabbar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:55;background:var(--cc-surface);border-top:1px solid var(--cc-border);padding:8px;justify-content:space-around}.tabbar a{color:var(--cc-text);text-decoration:none;font-size:.75rem;text-align:center}body{padding-bottom:60px}}
-@media(prefers-reduced-motion:reduce){.ticker span{animation:none}.reveal{opacity:1;transform:none}.wstep-panel.active{animation:none}}
+@keyframes tickmove{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.ticker .track{animation:none}.reveal{opacity:1;transform:none}.wstep-panel.active{animation:none}}
