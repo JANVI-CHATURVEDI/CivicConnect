@@ -24,7 +24,7 @@
         <p class="category-text">{{ report.get_category_display }}</p>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
           <span class="chip {{ report.priority }}">{{ report.get_priority_display }} · {{ report.priority_score }}/100</span>
-          {% if report.needs_review %}<span class="chip">⚠ {{ report.flag_reason|default:"needs review" }}</span>{% endif %}
+          {% if report.needs_review %}<span class="chip">Review: {{ report.flag_reason|default:"needs review" }}</span>{% endif %}
           {% if report.is_overdue %}<span class="chip critical">OVERDUE</span>{% elif report.sla_due %}<span class="chip">SLA {{ report.sla_due|date:"d M H:i" }}</span>{% endif %}
           {% if analysis %}<span class="chip">via {{ analysis.source }}</span>{% endif %}
         </div>
@@ -34,7 +34,7 @@
 
     {% if report.citizen == request.user and report.status == "reported" %}
     <div class="owner-actions">
-        <a href="{% url 'edit_report' report.id %}" class="detect-btn btn-press">✎ Edit Report</a>
+        <a href="{% url 'edit_report' report.id %}" class="detect-btn btn-press">Edit Report</a>
         <a href="{% url 'delete_report' report.id %}" class="detect-btn btn-press" style="color:#dc2626;border-color:#f5c2c2;">Delete Report</a>
     </div>
     {% endif %}

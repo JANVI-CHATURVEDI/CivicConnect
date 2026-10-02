@@ -419,7 +419,7 @@
                 <!-- DESCRIPTION -->
                 <div class="form-group" data-wstep="2">
                     <label class="form-label" for="{{ form.description.id_for_label }}">Detailed Description
-                        <button type="button" class="detect-btn" id="micBtn" aria-label="Dictate with microphone">🎤 Dictate</button>
+                        <button type="button" class="detect-btn" id="micBtn" aria-label="Dictate with microphone"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg> <span>Dictate</span></button>
                     </label>
                     <textarea name="{{ form.description.html_name }}" id="{{ form.description.id_for_label }}"
                         class="form-control"
@@ -789,14 +789,15 @@ document.addEventListener("DOMContentLoaded", function () {
         var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) { toast("Voice not supported in this browser"); return; }
         var r = new SR(); r.lang = "hi-IN"; r.interimResults = false;
-        mic.textContent = "Listening… (hi-IN)";
+        var micLabel = mic.querySelector("span");
+        micLabel.textContent = "Listening… (hi-IN)";
         r.onresult = function (e) {
             var txt = e.results[0][0].transcript;
             var ta = document.querySelector('textarea[name="description"]'); ta.value = (ta.value + " " + txt).trim();
-            ta.dispatchEvent(new Event("input", { bubbles: true })); mic.textContent = "🎤 Dictate";
+            ta.dispatchEvent(new Event("input", { bubbles: true })); micLabel.textContent = "Dictate";
         };
-        r.onerror = function () { mic.textContent = "🎤 Dictate"; };
-        r.onend = function () { mic.textContent = "🎤 Dictate"; };
+        r.onerror = function () { micLabel.textContent = "Dictate"; };
+        r.onend = function () { micLabel.textContent = "Dictate"; };
         r.start();
     });
     var pinInit = false;
