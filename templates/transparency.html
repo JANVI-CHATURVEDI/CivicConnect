@@ -34,6 +34,13 @@
         </div>
     </form>
 
+    <div class="dashboard-stats" style="display:flex;gap:12px;margin:14px 0;flex-wrap:wrap;">
+        <div class="card" style="padding:12px 18px;"><strong class="stat-number" data-target="{{ total }}">0</strong><br><small>Total reports</small></div>
+        <div class="card" style="padding:12px 18px;"><strong class="stat-number" data-target="{{ resolved }}">0</strong><br><small>Resolved</small></div>
+        <div class="card" style="padding:12px 18px;"><strong>Trending:</strong> {% for t in trending %}<span class="chip">{{ t.category }} ({{ t.count }})</span> {% endfor %}</div>
+        <div class="card" style="padding:12px 18px;"><strong>Most improved:</strong> {% for h in improved %}<span class="chip">{{ h.state }} ({{ h.count }})</span> {% endfor %}</div>
+    </div>
+
     <div id="publicMap" class="dashboard-map anim-fade-up" style="height:480px;"></div>
 
 </div>

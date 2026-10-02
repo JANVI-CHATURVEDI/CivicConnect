@@ -16,6 +16,7 @@
 <title>CivicConnect AI</title>
 
 <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+<link rel="stylesheet" href="{% static 'css/motion.css' %}">
 <link
     rel="stylesheet"
     href="{% static 'style.css' %}"
@@ -316,23 +317,71 @@
 </footer>
 
 
+<link rel="manifest" href="{% static 'manifest.webmanifest' %}">
 <script src="{% static 'login.js' %}"></script>
 <script>
     (function () {
+        document.body.classList.add("theme-fade");
         var toggle = document.getElementById("themeToggle");
-        if (!toggle) return;
-        toggle.addEventListener("click", function () {
+        if (toggle) toggle.addEventListener("click", function () {
             var isDark = document.documentElement.getAttribute("data-theme") === "dark";
-            if (isDark) {
-                document.documentElement.removeAttribute("data-theme");
-                localStorage.setItem("cc-theme", "light");
-            } else {
-                document.documentElement.setAttribute("data-theme", "dark");
-                localStorage.setItem("cc-theme", "dark");
-            }
+            if (isDark) { document.documentElement.removeAttribute("data-theme"); localStorage.setItem("cc-theme", "light"); }
+            else { document.documentElement.setAttribute("data-theme", "dark"); localStorage.setItem("cc-theme", "dark"); }
         });
+        // scroll reveal
+        var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }); }, { threshold: 0.12 });
+        document.querySelectorAll(".reveal,.anim-fade-up").forEach(function (el) { el.classList.add("reveal"); io.observe(el); });
+        // count-up
+        document.querySelectorAll(".stat-number[data-target]").forEach(function (el) {
+            var target = parseInt(el.dataset.target || "0", 10); var t0 = null;
+            function step(t) { if (!t0) t0 = t; var p = Math.min(1, (t - t0) / 1200); el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))) + (el.dataset.suffix || ""); if (p < 1) requestAnimationFrame(step); }
+            new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { requestAnimationFrame(step); o.disconnect(); } }, { threshold: 0.4 }).observe(el);
+        });
+        // command palette Ctrl+K
+        document.addEventListener("keydown", function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); var p = document.getElementById("cc-palette"); if (p) { p.classList.add("open"); var i = p.querySelector("input"); if (i) i.focus(); } }
+            if (e.key === "Escape") { document.querySelectorAll("#cc-palette.open,#cc-chat.open").forEach(function (x) { x.classList.remove("open"); }); }
+        });
+        var pc = document.getElementById("cc-palette-close"); if (pc) pc.addEventListener("click", function () { document.getElementById("cc-palette").classList.remove("open"); });
+        // CivicBot
+        var fab = document.getElementById("cc-chat-fab"), chat = document.getElementById("cc-chat");
+        if (fab && chat) fab.addEventListener("click", function () { chat.classList.toggle("open"); });
+        var cf = document.getElementById("cc-chat-form");
+        if (cf) cf.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            var inp = document.getElementById("cc-chat-input"); var q = (inp.value || "").trim(); if (!q) return;
+            var log = document.getElementById("cc-chat-log");
+            log.insertAdjacentHTML("beforeend", "<div class='msg me'></div>"); log.lastChild.textContent = q; inp.value = "";
+            var typing = document.createElement("div"); typing.className = "msg bot typing"; typing.textContent = "CivicBot is thinking"; log.appendChild(typing); log.scrollTop = log.scrollHeight;
+            try { var r = await fetch("/api/assistant/?q=" + encodeURIComponent(q)); var d = await r.json(); typing.classList.remove("typing"); typing.textContent = d.answer || "Sorry, I could not answer that."; }
+            catch (err) { typing.classList.remove("typing"); typing.textContent = "Offline right now — try again soon."; }
+            log.scrollTop = log.scrollHeight;
+        });
+        if ("serviceWorker" in navigator) { navigator.serviceWorker.register("{% static 'sw.js' %}").catch(function () {}); }
     })();
 </script>
+<div id="toasts" aria-live="polite"></div>
+<button id="cc-chat-fab" aria-label="Chat with CivicBot">💬</button>
+<div id="cc-chat" role="dialog" aria-label="CivicBot assistant">
+  <div style="padding:12px;border-bottom:1px solid var(--cc-border);font-weight:800;">CivicBot — ask about reports</div>
+  <div id="cc-chat-log"><div class="msg bot">Hi! Ask "where is my report", "critical reports", or "how do I report".</div></div>
+  <form id="cc-chat-form"><input id="cc-chat-input" placeholder="Type a question…" aria-label="Chat question"><button class="btn btn-primary" style="border-radius:0;">Send</button></form>
+</div>
+<div id="cc-palette" role="dialog" aria-label="Quick search"><div class="box">
+  <input placeholder="Search reports, pages… (Esc to close)" oninput="var q=this.value.toLowerCase();document.querySelectorAll('#cc-palette a').forEach(function(a){a.style.display=a.textContent.toLowerCase().includes(q)?'':'none';})">
+  <a href="{% url 'new' %}">＋ File a new report</a>
+  <a href="{% url 'mine' %}">📋 My reports</a>
+  <a href="{% url 'dashboard' %}">📊 Dashboard</a>
+  <a href="{% url 'analytics' %}">📈 Analytics</a>
+  <a href="{% url 'public_reports' %}">🌍 Transparency map</a>
+  <a href="#" id="cc-palette-close">✕ Close</a>
+</div></div>
+<nav class="tabbar" aria-label="Quick navigation">
+  <a href="{% url 'home' %}">🏠<br>Home</a>
+  <a href="{% url 'new' %}">＋<br>Report</a>
+  <a href="{% url 'mine' %}">📋<br>Mine</a>
+  <a href="{% url 'dashboard' %}">📊<br>Board</a>
+</nav>
 
 </body>
 

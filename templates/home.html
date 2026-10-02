@@ -122,6 +122,10 @@
 
                 </div>
 
+                <div class="ticker" aria-label="Live issues near you">
+                    <span>🔴 LIVE: {% for i in live_issues %}#{{ i.id }} {{ i.title }} ({{ i.get_status_display }}) · {% empty %}no open issues right now — file the first one!{% endfor %}</span>
+                </div>
+
                 <div class="hero-trust">
 
                     <div>

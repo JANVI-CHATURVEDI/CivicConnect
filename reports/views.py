@@ -40,8 +40,9 @@ def home(r):
     avg_h = round(agg["avg"].total_seconds() / 3600, 1) if agg["avg"] else None
     cities = Report.objects.exclude(address="").values("state").distinct().count()
     latest = Report.objects.filter(status__in=("resolved", "confirmed")).order_by("-resolved_at", "-created_at")[:6]
+    live_issues = Report.objects.exclude(status__in=("resolved", "confirmed")).order_by("-created_at")[:8]
     return render(r, "home.html", {
-        "latest": latest,
+        "latest": latest, "live_issues": live_issues,
         "stats": {"total": total, "resolved": resolved, "in_progress": in_progress, "avg_h": avg_h, "states": cities},
     })
 
@@ -342,7 +343,19 @@ def dashboard_map_data(r):
 
 
 def public_reports(r):
-    return render(r, "transparency.html", {"states": STATES, "categories": Report.CATEGORIES})
+    qs = Report.objects.all()
+    if r.GET.get("state"):
+        qs = qs.filter(state=r.GET.get("state"))
+    if r.GET.get("category"):
+        qs = qs.filter(category=r.GET.get("category"))
+    total = qs.count()
+    resolved = qs.filter(status__in=("resolved", "confirmed")).count()
+    by_state = list(qs.exclude(state="").values("state").annotate(count=Count("id")).order_by("-count")[:10])
+    trending = list(qs.values("category").annotate(count=Count("id")).order_by("-count")[:5])
+    improved = list(qs.filter(status__in=("resolved", "confirmed")).exclude(state="").values("state").annotate(count=Count("id")).order_by("-count")[:3])
+    return render(r, "transparency.html", {"states": STATES, "categories": Report.CATEGORIES,
+                                           "total": total, "resolved": resolved, "by_state": by_state,
+                                           "trending": trending, "improved": improved})
 
 
 def public_map_data(r):

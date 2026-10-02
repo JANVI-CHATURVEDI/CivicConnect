@@ -29,8 +29,26 @@
 
         <a href="{% url 'mine' %}" class="my-reports-link">Go to My Reports →</a>
 
+        <canvas id="confetti"></canvas>
+
     </div>
 
 </div>
+
+<script>
+(function () {
+    var c = document.getElementById("confetti"), x = c.getContext("2d");
+    c.width = innerWidth; c.height = innerHeight;
+    var parts = Array.from({ length: 160 }, function () {
+        return { x: Math.random() * c.width, y: -20 - Math.random() * c.height / 2, s: 4 + Math.random() * 6, v: 2 + Math.random() * 3, col: ["#2563eb", "#7c3aed", "#db2777", "#16c7b7"][Math.floor(Math.random() * 4)] };
+    });
+    var frames = 0;
+    (function anim() {
+        x.clearRect(0, 0, c.width, c.height);
+        parts.forEach(function (p) { p.y += p.v; p.x += Math.sin(p.y / 20); x.fillStyle = p.col; x.fillRect(p.x, p.y, p.s, p.s * 0.6); });
+        if (++frames < 220) requestAnimationFrame(anim); else c.remove();
+    })();
+})();
+</script>
 
 {% endblock %}

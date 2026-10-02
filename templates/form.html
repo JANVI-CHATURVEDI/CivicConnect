@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
 
 {% block content %}
 
@@ -219,6 +223,14 @@
 
         <main class="report-card anim-fade-up anim-delay-1">
 
+            <div class="wizard-steps" role="tablist" aria-label="Report steps">
+                <div class="wstep active" data-step="1">1 · Photo</div>
+                <div class="wstep" data-step="2">2 · Details</div>
+                <div class="wstep" data-step="3">3 · Location</div>
+                <div class="wstep" data-step="4">4 · Review</div>
+            </div>
+            <div class="wprogress"><span id="wprog"></span></div>
+
             <form method="post" enctype="multipart/form-data" id="reportForm" novalidate>
 
                 {% csrf_token %}
@@ -231,7 +243,7 @@
                 </div>
 
                 <!-- ISSUE TITLE -->
-                <div class="form-group">
+                <div class="form-group" data-wstep="2">
                     <label class="form-label" for="{{ form.title.id_for_label }}">Issue Title</label>
                     <input type="text" name="{{ form.title.html_name }}" id="{{ form.title.id_for_label }}"
                         class="form-control" placeholder="e.g. Deep pothole near main intersection"
@@ -240,7 +252,7 @@
                 </div>
 
                 <!-- PHOTO -->
-                <div class="form-group">
+                <div class="form-group" data-wstep="1">
                     <label class="form-label">Photo Evidence <span class="hint">JPG, PNG up to 10MB</span></label>
 
                     <div class="file-dropzone" id="dropzone">
@@ -262,7 +274,7 @@
                 </div>
 
                 <!-- CATEGORY -->
-                <div class="form-group">
+                <div class="form-group" data-wstep="2">
                     <label class="form-label">Issue Category</label>
 
                     <div class="category-grid">
@@ -344,7 +356,7 @@
                 </div>
 
                 <!-- PRIORITY -->
-                <div class="form-group">
+                <div class="form-group" data-wstep="2">
                     <label class="form-label">Urgency Level</label>
 
                     <div class="priority-options">
@@ -370,7 +382,7 @@
                 </div>
 
                 <!-- LOCATION -->
-                <div class="form-group">
+                <div class="form-group" data-wstep="3">
                     <label class="form-label">Location Details</label>
 
                     <div class="location-status">
@@ -393,6 +405,8 @@
 
                     {% if form.address.errors %}<div class="field-error-text">{{ form.address.errors.0 }}</div>{% endif %}
 
+                    <div id="pinMap" style="height:260px;border-radius:10px;margin-top:10px;" data-wstep="3"></div>
+
                     <label class="form-label" for="{{ form.state.id_for_label }}" style="margin-top:14px;">State</label>
                     <select name="{{ form.state.html_name }}" id="{{ form.state.id_for_label }}" class="form-control">
                         {% for value, label in form.fields.state.choices %}
@@ -403,15 +417,27 @@
                 </div>
 
                 <!-- DESCRIPTION -->
-                <div class="form-group">
-                    <label class="form-label" for="{{ form.description.id_for_label }}">Detailed Description</label>
+                <div class="form-group" data-wstep="2">
+                    <label class="form-label" for="{{ form.description.id_for_label }}">Detailed Description
+                        <button type="button" class="detect-btn" id="micBtn" aria-label="Dictate with microphone">🎤 Dictate</button>
+                    </label>
                     <textarea name="{{ form.description.html_name }}" id="{{ form.description.id_for_label }}"
                         class="form-control"
                         placeholder="Describe the issue and any useful details...">{{ form.description.value|default:'' }}</textarea>
                     {% if form.description.errors %}<div class="field-error-text">{{ form.description.errors.0 }}</div>{% endif %}
                 </div>
 
-                <button type="submit" class="btn-submit btn-press">{% if editing %}Update Report{% else %}Submit Report{% endif %}</button>
+                <div class="form-group" data-wstep="4" id="reviewStep">
+                    <label class="form-label">Review & submit</label>
+                    <div class="card" style="padding:12px;" id="reviewSummary"><p class="typing">Your summary appears here…</p></div>
+                </div>
+
+                <div class="wnav" data-wstep="nav">
+                    <button type="button" class="btn" id="wprev">← Back</button>
+                    <button type="button" class="btn btn-primary" id="wnext">Next →</button>
+                </div>
+
+                <button type="submit" class="btn-submit btn-press" data-wstep="4">{% if editing %}Update Report{% else %}Submit Report{% endif %}</button>
 
             </form>
 
@@ -706,6 +732,87 @@
         toggleOtherIssueBox();
     });
 
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var step = 1, groups = document.querySelectorAll("#reportForm [data-wstep]");
+    var prog = document.getElementById("wprog"), prev = document.getElementById("wprev"), next = document.getElementById("wnext");
+    function show(n) {
+        step = Math.min(4, Math.max(1, n));
+        groups.forEach(function (g) {
+            var s = g.getAttribute("data-wstep");
+            if (s === "nav") return;
+            g.style.display = (parseInt(s, 10) === step) ? "" : "none";
+        });
+        document.getElementById("pinMap").style.display = step === 3 ? "" : "none";
+        document.querySelectorAll(".wstep").forEach(function (el) {
+            var k = parseInt(el.dataset.step, 10);
+            el.classList.toggle("active", k === step); el.classList.toggle("done", k < step);
+        });
+        if (prog) prog.style.width = (step * 25) + "%";
+        if (prev) prev.disabled = step === 1;
+        if (next) next.textContent = step === 4 ? "Review done ✓" : "Next →";
+        if (step === 4) buildReview();
+        if (step === 3) setTimeout(initPinMap, 60);
+    }
+    function toast(msg) { var box = document.getElementById("toasts"); var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; box.appendChild(t); setTimeout(function () { t.remove(); }, 3000); }
+    function validFor(s) {
+        if (s === 2) { var t = document.querySelector("input[name=title]"); if (!t.value.trim()) { t.focus(); toast("Add a short title first"); return false; } }
+        if (s === 3) { var st = document.querySelector("select[name=state]"); if (!st.value) { st.focus(); toast("Pick your state"); return false; } }
+        return true;
+    }
+    if (prev) prev.addEventListener("click", function () { show(step - 1); });
+    if (next) next.addEventListener("click", function () { if (validFor(step)) show(step + 1); });
+    document.querySelectorAll(".wstep").forEach(function (el) { el.addEventListener("click", function () { show(parseInt(el.dataset.step, 10)); }); });
+    function esc(s) { return (s || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+    function buildReview() {
+        var t = document.querySelector("input[name=title]").value, d = document.querySelector("textarea[name=description]").value;
+        var c = (document.querySelector("input[name=category]:checked") || {}).value || "—";
+        var p = (document.querySelector("input[name=priority]:checked") || {}).value || "—";
+        var a = document.querySelector("input[name=address]").value, dup = document.getElementById("aiDuplicateWarning");
+        document.getElementById("reviewSummary").innerHTML = "<strong>" + esc(t || "(untitled)") + "</strong><br>" + esc(d.slice(0, 220)) + "<br><br>Category: " + esc(c) + " · Urgency: " + esc(p) + "<br>Location: " + esc(a || "—") + (dup && dup.style.display !== "none" ? "<br><br>" + esc(dup.textContent) : "");
+    }
+    show(1);
+    var KEY = "cc-draft-v1", form = document.getElementById("reportForm");
+    try {
+        var saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+        Object.keys(saved).forEach(function (n) { var el = form.querySelector('[name="' + n + '"]'); if (el && el.type !== "file" && el.type !== "radio") el.value = saved[n]; });
+    } catch (e) {}
+    form.addEventListener("input", function () {
+        var d = {}; form.querySelectorAll("[name]").forEach(function (el) { if (el.type === "file") return; if (el.type === "radio" && !el.checked) return; d[el.name] = el.value; });
+        try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) {}
+    });
+    form.addEventListener("submit", function () { try { localStorage.removeItem(KEY); } catch (e) {} });
+    var mic = document.getElementById("micBtn");
+    if (mic) mic.addEventListener("click", function () {
+        var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) { toast("Voice not supported in this browser"); return; }
+        var r = new SR(); r.lang = "hi-IN"; r.interimResults = false;
+        mic.textContent = "Listening… (hi-IN)";
+        r.onresult = function (e) {
+            var txt = e.results[0][0].transcript;
+            var ta = document.querySelector('textarea[name="description"]'); ta.value = (ta.value + " " + txt).trim();
+            ta.dispatchEvent(new Event("input", { bubbles: true })); mic.textContent = "🎤 Dictate";
+        };
+        r.onerror = function () { mic.textContent = "🎤 Dictate"; };
+        r.onend = function () { mic.textContent = "🎤 Dictate"; };
+        r.start();
+    });
+    var pinInit = false;
+    function initPinMap() {
+        if (pinInit || typeof L === "undefined") return; pinInit = true;
+        var latEl = document.getElementById("id_latitude"), lngEl = document.getElementById("id_longitude");
+        var lat = parseFloat(latEl.value) || 26.85, lng = parseFloat(lngEl.value) || 80.95;
+        var m = L.map("pinMap").setView([lat, lng], 13);
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", { maxZoom: 19 }).addTo(m);
+        var mk = L.marker([lat, lng], { draggable: true }).addTo(m);
+        function sync() { var p = mk.getLatLng(); latEl.value = p.lat.toFixed(6); lngEl.value = p.lng.toFixed(6); }
+        mk.on("dragend", sync);
+        m.on("click", function (e) { mk.setLatLng(e.latlng); sync(); });
+        setTimeout(function () { m.invalidateSize(); }, 200);
+    }
+});
 </script>
 
 {% endblock %}

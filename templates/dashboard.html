@@ -40,7 +40,20 @@
     </div>
     {% endif %}
 
-    <!-- Statistics -->
+    <!-- AI Daily Briefing -->
+    <div class="card anim-fade-up reveal" style="padding:16px;margin:14px 0;">
+        <strong>AI Daily Briefing</strong>
+        <span style="color:var(--cc-muted);">· {{ briefing.new_24h }} new in 24h · {{ briefing.critical_open }} critical open · {{ briefing.overdue }} overdue</span>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+            {% for h in briefing.hotspots %}<span class="chip high">{{ h.state }}: {{ h.c }} reports</span>{% empty %}<span class="chip">No hotspots this week</span>{% endfor %}
+        </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin:10px 0;">
+        <button class="btn" id="viewTableBtn">Table view</button>
+        <button class="btn" id="viewKanbanBtn">Kanban view</button>
+        <span style="color:var(--cc-muted);font-size:.85rem;">Tip: press Ctrl+K for quick search · drag cards to change status</span>
+    </div>
     <div class="dashboard-stats">
 
         <div class="dashboard-stat-card card-hover anim-fade-up anim-delay-1">
@@ -208,9 +221,47 @@
 
     </div>
 
+    <!-- Kanban board -->
+    <div class="kanban" id="kanban" style="display:none;">
+        <div class="kcol" data-status="reported"><h4>Reported</h4>{% for x in reports %}{% if x.status == "reported" %}<div class="kcard {{ x.priority }}" draggable="true" data-id="{{ x.id }}"><strong>#{{ x.id }}</strong> {{ x.title|truncatechars:60 }}<br><small>{{ x.get_priority_display }} · {{ x.vote_count }} votes</small></div>{% endif %}{% endfor %}</div>
+        <div class="kcol" data-status="progress"><h4>In Progress</h4>{% for x in reports %}{% if x.status == "progress" %}<div class="kcard {{ x.priority }}" draggable="true" data-id="{{ x.id }}"><strong>#{{ x.id }}</strong> {{ x.title|truncatechars:60 }}<br><small>{{ x.get_priority_display }} · {{ x.vote_count }} votes</small></div>{% endif %}{% endfor %}</div>
+        <div class="kcol" data-status="resolved"><h4>Resolved</h4>{% for x in reports %}{% if x.status == "resolved" or x.status == "confirmed" %}<div class="kcard {{ x.priority }}" draggable="true" data-id="{{ x.id }}"><strong>#{{ x.id }}</strong> {{ x.title|truncatechars:60 }}<br><small>{{ x.get_priority_display }} · {{ x.vote_count }} votes</small></div>{% endif %}{% endfor %}</div>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div style="margin:12px 0;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }} {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">← Prev</a>{% endif %} {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Next →</a>{% endif %}</div>
+    {% endif %}
+
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function () {
+    var t = document.getElementById("viewTableBtn"), k = document.getElementById("viewKanbanBtn");
+    var table = document.querySelector(".dashboard-table-wrap"), board = document.getElementById("kanban");
+    if (t && k) {
+        t.addEventListener("click", function () { table.style.display = ""; board.style.display = "none"; });
+        k.addEventListener("click", function () { table.style.display = "none"; board.style.display = ""; });
+    }
+    function csrf() { var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ""; }
+    document.querySelectorAll(".kcard").forEach(function (card) {
+        card.addEventListener("dragstart", function (e) { card.classList.add("dragging"); e.dataTransfer.setData("text/plain", card.dataset.id); });
+        card.addEventListener("dragend", function () { card.classList.remove("dragging"); });
+    });
+    document.querySelectorAll(".kcol").forEach(function (col) {
+        col.addEventListener("dragover", function (e) { e.preventDefault(); });
+        col.addEventListener("drop", async function (e) {
+            e.preventDefault();
+            var id = e.dataTransfer.getData("text/plain");
+            var fd = new FormData(); fd.append("status", col.dataset.status);
+            try {
+                await fetch("/reports/" + id + "/status/", { method: "POST", headers: { "X-CSRFToken": csrf() }, body: fd });
+                location.reload();
+            } catch (err) { alert("Status update failed"); }
+        });
+    });
+})();
+</script>
 <script>
 (async function () {
     const mapEl = document.getElementById("dashboardMap");
