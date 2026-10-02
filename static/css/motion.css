@@ -46,8 +46,9 @@
 #cc-palette input{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--cc-border);border-radius:10px;background:var(--cc-bg);color:var(--cc-text)}
 #cc-palette a{display:block;padding:10px;border-radius:8px;color:var(--cc-text);text-decoration:none}
 #cc-palette a:hover{background:var(--cc-bg)}
-.ticker{overflow:hidden;white-space:nowrap;border:1px solid var(--cc-border);border-radius:12px;background:var(--cc-surface);padding:10px 14px;margin:16px 0}
-.ticker .track{display:inline-flex;white-space:nowrap;animation:tickmove 45s linear infinite}
+.ticker{overflow:hidden;white-space:nowrap;border:1px solid var(--cc-border);border-radius:12px;background:var(--cc-surface);margin:16px 0}
+.ticker .live-dot{flex-shrink:0;font-weight:800;background:var(--cc-surface);padding:10px 12px 10px 14px;z-index:2;position:relative}
+.ticker .track{display:inline-flex;white-space:nowrap;animation:tickmove 45s linear infinite;will-change:transform}
 @keyframes tickmove{to{transform:translateX(-50%)}}
 #toasts{position:fixed;top:16px;right:16px;z-index:80;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--cc-surface);border:1px solid var(--cc-border);border-radius:12px;padding:10px 14px;box-shadow:var(--cc-shadow);animation:ccIn .3s ease}
