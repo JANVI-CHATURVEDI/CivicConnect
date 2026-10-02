@@ -9,6 +9,7 @@ router.register(r"reports", ReportViewSet, basename="api-reports")
 urlpatterns = [
     path("", views.home, name="home"),
     path("healthz", views.healthz, name="healthz"),
+    path("health", views.healthz, name="health"),
     path("signup/", views.signup, name="signup"),
     path("report/new/", views.new, name="new"),
     path("reports/", views.mine, name="mine"),
