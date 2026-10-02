@@ -1,8 +1,13 @@
-"""Deterministic rich demo seed. Idempotent via demo_ prefix; --seed/--count/--reset."""
+"""Deterministic rich demo seed. Idempotent via demo_ prefix; --seed/--count/--reset.
+
+Bulk-writes users/children (2 queries instead of hundreds) so seeding stays
+fast even against a high-latency hosted DB.
+"""
 import io
 import random
 from datetime import timedelta
 
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
@@ -11,7 +16,7 @@ from PIL import Image, ImageDraw
 
 from reports.ai.service import analyze_report_full
 from reports.constants import SLA_HOURS
-from reports.models import AIAnalysis, Comment, Notification, Profile, Report, StatusEvent, Vote
+from reports.models import AIAnalysis, Comment, Profile, Report, StatusEvent, Vote
 
 DEMO_PASSWORD = "DemoPass123!"
 
@@ -43,14 +48,13 @@ TITLES = [
     ("other", "Buy now lottery", "click here free money http://spam"),
 ]
 
-DEPTS = ["Roads & Infrastructure Dept.", "Water Supply Dept.", "Sanitation Dept.", "Electrical Dept."]
+COMMENTS = ["Same issue near me.", "Please fix soon.", "Thanks for reporting.", "Facing this daily."]
 
 
 def placeholder_image(kind, seed_text, after=False):
     rnd = random.Random(hash(seed_text) % 99999)
     img = Image.new("RGB", (640, 420), (30 + rnd.randint(0, 40), 35 + rnd.randint(0, 40), 45 + rnd.randint(0, 40)))
     d = ImageDraw.Draw(img)
-    # ground + shape per kind
     d.rectangle([0, 300, 640, 420], fill=(60, 60, 65))
     if kind == "road":
         d.ellipse([220, 300, 420, 380], fill=(15, 15, 18))
@@ -85,34 +89,52 @@ class Command(BaseCommand):
         parser.add_argument("--reset", action="store_true")
         parser.add_argument("--seed", type=int, default=42)
         parser.add_argument("--count", type=int, default=250)
+        parser.add_argument("--offline", action="store_true",
+                            help="Skip live Gemini calls (rule engine only). Faster; seed rows are precomputed anyway.")
 
     def handle(self, *args, **options):
         rnd = random.Random(options["seed"])
+        if options.get("offline"):
+            from django.conf import settings as _s
+            _s.GEMINI_API_KEY = ""
         if options["reset"]:
             deleted, _ = User.objects.filter(username__startswith="demo_").delete()
             self.stdout.write(f"Removed {deleted} demo objects.")
-        sup = self._user("demo_superadmin", is_superuser=True, is_staff=True, role="superadmin")
-        states = sorted({c[0] for c in CITIES})
-        for st in states:
-            self._user(f"demo_admin_{st.lower()}", is_staff=True, role="admin", state=st)
-        officers = []
-        for st in states[:6]:
-            for dept in DEPTS[:2]:
-                officers.append(self._user(f"demo_off_{st.lower()}_{len(officers)}", is_staff=True, role="officer", state=st, dept=dept))
-        citizens = [self._user(f"demo_citizen{i}", role="citizen", points=rnd.randint(0, 200)) for i in range(1, 41)]
         n = options["count"]
-        created = 0
-        first_ids = []
+        n_citizens = min(40, max(6, n // 4))
+
+        # ---- bulk users (one shared hash, two queries total) ----
+        pwd = make_password(DEMO_PASSWORD)
+        states = sorted({c[0] for c in CITIES})
+        specs = [("demo_superadmin", True, True, "superadmin", "", "", 0)]
+        specs += [(f"demo_admin_{st.lower()}", True, False, "admin", st, "", 0) for st in states]
+        officer_names = [f"demo_off_{st.lower()}" for st in states]
+        specs += [(u, True, False, "officer", u.rsplit("_", 1)[1].upper(), "Roads & Infrastructure Dept.", 0) for u in officer_names]
+        specs += [(f"demo_citizen{i}", False, False, "citizen", "", "", rnd.randint(0, 200)) for i in range(1, n_citizens + 1)]
+        existing = set(User.objects.filter(username__startswith="demo_").values_list("username", flat=True))
+        fresh = [s for s in specs if s[0] not in existing]
+        if fresh:
+            User.objects.bulk_create([User(username=u, email=f"{u}@demo.local", password=pwd,
+                                            is_staff=st, is_superuser=su) for u, st, su, *_ in fresh])
+            users = {u.username: u for u in User.objects.filter(username__in=[f[0] for f in fresh])}
+            Profile.objects.bulk_create([Profile(user=users[s[0]], role=s[3], state=s[4], department=s[5], points=s[6]) for s in fresh])
+        by_name = {u.username: u for u in User.objects.filter(username__startswith="demo_")}
+        sup = by_name["demo_superadmin"]
+        officers = [by_name[u] for u in officer_names]
+        off_state = {u: by_name[u].profile.state for u in officer_names}
+        citizens = [by_name[f"demo_citizen{i}"] for i in range(1, n_citizens + 1)]
+        self.stdout.write(f"Users ready ({len(by_name)}). Seeding {n} reports...")
+
+        analyses, events, comments, votes = [], [], [], []
+        seen_votes = set()
         for i in range(n):
             st, city, lat0, lon0, locs = rnd.choice(CITIES)
             loc = rnd.choice(locs)
             cat, t, desc = rnd.choice(TITLES)
-            # monsoon spike for water
-            days_ago = rnd.randint(0, 90)
-            created_at = timezone.now() - timedelta(days=days_ago, hours=rnd.randint(0, 23))
-            status = rnd.choices(["reported", "acknowledged", "assigned", "progress", "resolved", "confirmed", "reopened"], weights=[30, 10, 10, 15, 20, 8, 7])[0]
-            title = t.format(loc=loc)
-            description = desc.format(loc=loc)
+            created_at = timezone.now() - timedelta(days=rnd.randint(0, 90), hours=rnd.randint(0, 23))
+            status = rnd.choices(["reported", "acknowledged", "assigned", "progress", "resolved", "confirmed", "reopened"],
+                                 weights=[30, 10, 10, 15, 20, 8, 7])[0]
+            title, description = t.format(loc=loc), desc.format(loc=loc)
             full = analyze_report_full(title=title, description=description, category=cat, latitude=lat0, longitude=lon0)
             rep = Report(
                 citizen=rnd.choice(citizens), title=title[:160], description=description, category=cat,
@@ -122,46 +144,49 @@ class Command(BaseCommand):
                 ai_source="rules", needs_review=full["flag"] != "ok", flag_reason=full["flag"] if full["flag"] != "ok" else "",
                 action_brief=full.get("action_brief", ""), sla_due=created_at + timedelta(hours=SLA_HOURS.get(full["suggested_priority"], 120)),
             )
-            if officers and status in ("assigned", "progress") and rnd.random() < 0.7:
-                rep.assigned_to = rnd.choice([o for o in officers if get_state(o) == st] or officers)
-            rep.save()
+            if status in ("assigned", "progress") and rnd.random() < 0.7:
+                same = [o for o in officers if off_state[o.username] == st] or officers
+                rep.assigned_to = rnd.choice(same)
+            if status == "confirmed" and rnd.random() < 0.8:
+                rep.rating, rep.rating_feedback = rnd.randint(3, 5), "Good work"
             try:
-                img = placeholder_image(cat, f"{options['seed']}-{i}")
-                rep.image.save(f"demo_{i}.jpg", img, save=True)
+                rep.image.save(f"demo_{options['seed']}_{i}.jpg", placeholder_image(cat, f"{options['seed']}-{i}"), save=False)
                 if status in ("resolved", "confirmed"):
-                    after = placeholder_image(cat, f"after-{i}", after=True)
-                    rep.resolution_image.save(f"demo_{i}_after.jpg", after, save=True)
+                    rep.resolution_image.save(f"demo_{options['seed']}_{i}_after.jpg",
+                                              placeholder_image(cat, f"after-{i}", after=True), save=False)
             except Exception:
                 pass
-            Report.objects.filter(pk=rep.pk).update(created_at=created_at, resolved_at=created_at + timedelta(hours=rnd.randint(2, 200)) if status in ("resolved", "confirmed") else None)
-            AIAnalysis.objects.create(report=rep, source="rules", model="rule-engine", latency_ms=full.get("latency_ms", 0), confidence=full.get("confidence", 0.5), payload={k: full.get(k) for k in ("suggested_category", "suggested_priority", "priority_score", "flag")})
-            StatusEvent.objects.create(report=rep, old_status="", new_status="reported", actor=rep.citizen, note="submitted")
+            rep.save()  # single INSERT including image paths
+            Report.objects.filter(pk=rep.pk).update(
+                created_at=created_at,
+                resolved_at=created_at + timedelta(hours=rnd.randint(2, 200)) if status in ("resolved", "confirmed") else None)
+            analyses.append(AIAnalysis(report=rep, source="rules", model="rule-engine", latency_ms=full.get("latency_ms", 0),
+                                       confidence=full.get("confidence", 0.5),
+                                       payload={k: full.get(k) for k in ("suggested_category", "suggested_priority", "priority_score", "flag")}))
+            events.append(StatusEvent(report=rep, old_status="", new_status="reported", actor=rep.citizen, note="submitted"))
             if status != "reported":
-                StatusEvent.objects.create(report=rep, old_status="reported", new_status=status, actor=rnd.choice(officers) if officers else sup, note="workflow")
+                events.append(StatusEvent(report=rep, old_status="reported", new_status=status,
+                                          actor=rnd.choice(officers), note="workflow"))
             if rnd.random() < 0.3:
-                Comment.objects.create(report=rep, user=rnd.choice(citizens), text=rnd.choice(["Same issue near me.", "Please fix soon.", "Thanks for reporting.", "Facing this daily."]))
+                comments.append(Comment(report=rep, user=rnd.choice(citizens), text=rnd.choice(COMMENTS)))
             if rnd.random() < 0.4:
-                for v in rnd.sample(citizens, k=rnd.randint(1, 4)):
-                    Vote.objects.get_or_create(report=rep, user=v)
-            if status in ("confirmed",) and rnd.random() < 0.8:
-                rep.rating = rnd.randint(3, 5); rep.rating_feedback = "Good work"; rep.save(update_fields=["rating", "rating_feedback"])
-            first_ids.append(rep.pk)
-            created += 1
-        # 3 hero reports
-        self._hero(citizens[0], officers, sup, rnd)
-        self.stdout.write(self.style.SUCCESS(f"Seeded {created} reports + heroes. Password: {DEMO_PASSWORD}"))
+                for v in rnd.sample(citizens, k=min(rnd.randint(1, 4), len(citizens))):
+                    if (rep.pk, v.pk) not in seen_votes:
+                        seen_votes.add((rep.pk, v.pk))
+                        votes.append(Vote(report=rep, user=v))
+            if (i + 1) % 5 == 0 or i + 1 == n:
+                self.stdout.write(f"  ...{i + 1}/{n}")
+        AIAnalysis.objects.bulk_create(analyses)
+        StatusEvent.objects.bulk_create(events)
+        Comment.objects.bulk_create(comments)
+        Vote.objects.bulk_create(votes, ignore_conflicts=True)
+        self._hero(citizens[0], officers[0], sup)
+        self.stdout.write(self.style.SUCCESS(f"Seeded {n} reports + 3 heroes. Password: {DEMO_PASSWORD}"))
         self.stdout.write("  Super Admin : demo_superadmin / DemoPass123!")
         self.stdout.write("  State admins: demo_admin_<state> / DemoPass123!")
-        self.stdout.write("  Citizens    : demo_citizen1..40 / DemoPass123!")
+        self.stdout.write(f"  Citizens    : demo_citizen1..{n_citizens} / DemoPass123!")
 
-    def _user(self, username, is_staff=False, is_superuser=False, role="citizen", state="", dept="", points=0):
-        u, c = User.objects.get_or_create(username=username, defaults={"email": f"{username}@demo.local", "is_staff": is_staff, "is_superuser": is_superuser})
-        if c:
-            u.set_password(DEMO_PASSWORD); u.is_staff = is_staff; u.is_superuser = is_superuser; u.save()
-        Profile.objects.update_or_create(user=u, defaults={"role": role, "state": state, "department": dept, "points": points})
-        return u
-
-    def _hero(self, citizen, officers, sup, rnd):
+    def _hero(self, citizen, officer, sup):
         heroes = [
             ("manhole", "CRITICAL: Open manhole near City Montessori School, Gomti Nagar", "An uncovered manhole on the footpath where schoolchildren walk every day. Urgent cover needed.", "UP", 26.85, 80.95),
             ("water", "Burst pipeline flooding MG Road Kanpur", "A major pipeline burst is wasting water and flooding the road.", "UP", 26.45, 80.33),
@@ -181,10 +206,3 @@ class Command(BaseCommand):
             StatusEvent.objects.create(report=r, old_status="", new_status="reported", actor=citizen)
             StatusEvent.objects.create(report=r, old_status="reported", new_status="assigned", actor=sup, note="escalated, assigned")
             StatusEvent.objects.create(report=r, old_status="assigned", new_status="resolved", actor=sup, note="fixed + verified")
-
-
-def get_state(u):
-    try:
-        return u.profile.state
-    except Exception:
-        return ""
