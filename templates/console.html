@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard-page">
+  <div class="dashboard-header anim-fade-up">
+    <p class="eyebrow">NATIONAL CONSOLE</p>
+    <h1>Super Admin Console</h1>
+    <p class="dashboard-scope">Per-state performance, AI system health, work queue and audit trail.</p>
+  </div>
+
+  <div class="dashboard-stats">
+    <div class="dashboard-stat-card"><span class="dashboard-stat-value">{{ queue.reported }}</span><span class="dashboard-stat-label">Awaiting triage</span></div>
+    <div class="dashboard-stat-card"><span class="dashboard-stat-value">{{ queue.active }}</span><span class="dashboard-stat-label">In active work</span></div>
+    <div class="dashboard-stat-card"><span class="dashboard-stat-value">{{ queue.reopened }}</span><span class="dashboard-stat-label">Reopened</span></div>
+    <div class="dashboard-stat-card"><span class="dashboard-stat-value">{{ queue.needs_review }}</span><span class="dashboard-stat-label">Needs AI review</span></div>
+    <div class="dashboard-stat-card"><span class="dashboard-stat-value">{{ ai.gemini|default:0 }}/{{ ai.total|default:0 }}</span><span class="dashboard-stat-label">Via Gemini / total AI</span></div>
+    <div class="dashboard-stat-card"><span class="dashboard-stat-value">{{ ai.avg_ms|default:0 }}ms</span><span class="dashboard-stat-label">Avg AI latency</span></div>
+  </div>
+
+  <h2 style="margin-top:24px;">State leaderboard</h2>
+  <div class="dashboard-table-wrap"><table class="dashboard-table">
+    <tr><th>State</th><th>Total</th><th>Resolved</th><th>Avg resolve (h)</th><th>SLA compliance</th><th>Avg rating</th><th>Open</th></tr>
+    {% for x in rows %}
+    <tr><td><strong>{{ x.state }}</strong></td><td>{{ x.total }}</td><td>{{ x.resolved }}</td>
+      <td>{{ x.avg_h|default:"—" }}</td><td>{{ x.sla_ok }}%</td><td>{{ x.avg_rating|default:"—" }}</td><td>{{ x.open }}</td></tr>
+    {% empty %}<tr><td colspan="7">No state data yet.</td></tr>{% endfor %}
+  </table></div>
+
+  <h2 style="margin-top:24px;">Recent audit trail</h2>
+  <ul class="tl">
+    {% for e in audit %}
+    <li><strong>#{{ e.report_id }} → {{ e.get_new_status_display|default:e.new_status }}</strong>
+      <small>{{ e.created_at|date:"d M H:i" }}{% if e.actor %} · {{ e.actor.username }}{% endif %}{% if e.note %} — {{ e.note }}{% endif %}</small></li>
+    {% empty %}<li>No transitions yet.</li>{% endfor %}
+  </ul>
+</div>
+{% endblock %}

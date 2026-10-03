@@ -66,23 +66,23 @@
 
     <nav>
 
-        <a href="{% url 'home' %}">
+        <a href="{% url 'home' %}" data-i18n="nav.home">
             Home
         </a>
 
-        <a href="{% url 'home' %}#how-it-works">
+        <a href="{% url 'home' %}#how-it-works" data-i18n="nav.how">
             How It Works
         </a>
 
-        <a href="{% url 'home' %}#features">
+        <a href="{% url 'home' %}#features" data-i18n="nav.features">
             Features
         </a>
 
-        <a href="{% url 'home' %}#issues">
+        <a href="{% url 'home' %}#issues" data-i18n="nav.issues">
             Issues
         </a>
 
-        <a href="{% url 'public_reports' %}">
+        <a href="{% url 'public_reports' %}" data-i18n="nav.transparency">
             Transparency
         </a>
 
@@ -96,11 +96,14 @@
             <svg class="icon-svg icon-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
 
+        <button type="button" class="login-btn" id="langToggle" aria-label="Switch language">EN | हिं</button>
+
         {% if user.is_authenticated %}
 
             <a
                 href="{% url 'mine' %}"
                 class="login-btn"
+                data-i18n="nav.mine"
             >
                 My Reports
             </a>
@@ -109,6 +112,7 @@
             <a
                 href="{% url 'new' %}"
                 class="report-btn"
+                data-i18n="nav.report"
             >
                 Report Issue
             </a>
@@ -130,6 +134,9 @@
                 {% if user_profile.role == "superadmin" %}
                 <a href="{% url 'manage_admins' %}" class="login-btn">
                     Manage Admins
+                </a>
+                <a href="{% url 'console' %}" class="login-btn">
+                    Console
                 </a>
                 {% endif %}
 
@@ -364,7 +371,34 @@
             log.scrollTop = log.scrollHeight;
         });
         if ("serviceWorker" in navigator) { navigator.serviceWorker.register("{% static 'sw.js' %}").catch(function () {}); }
-        // nav border appears only after scrolling past ~20px
+        // EN/HI stub switcher for key nav strings (persisted)
+        (function () {
+            var dict = {
+                "nav.home": { hi: "मुख्य पृष्ठ" }, "nav.how": { hi: "यह कैसे काम करता है" },
+                "nav.features": { hi: "विशेषताएँ" }, "nav.issues": { hi: "समस्याएँ" },
+                "nav.transparency": { hi: "पारदर्शिता" }, "nav.mine": { hi: "मेरी रिपोर्ट" },
+                "nav.report": { hi: "रिपोर्ट करें" }
+            };
+            function apply(lang) {
+                document.querySelectorAll("[data-i18n]").forEach(function (el) {
+                    if (!el.dataset.en) el.dataset.en = el.textContent.trim();
+                    var d = dict[el.dataset.i18n];
+                    el.textContent = (lang === "hi" && d) ? d.hi : el.dataset.en;
+                });
+                try { localStorage.setItem("cc-lang", lang); } catch (e) {}
+                var t = document.getElementById("langToggle");
+                if (t) t.textContent = lang === "hi" ? "हिं | EN" : "EN | हिं";
+            }
+            var cur = null;
+            try { cur = localStorage.getItem("cc-lang"); } catch (e) {}
+            apply(cur === "hi" ? "hi" : "en");
+            var t = document.getElementById("langToggle");
+            if (t) t.addEventListener("click", function () {
+                var now = null;
+                try { now = localStorage.getItem("cc-lang"); } catch (e) {}
+                apply(now === "hi" ? "en" : "hi");
+            });
+        })();
         (function () {
             var nav = document.querySelector(".navbar");
             if (!nav) return;

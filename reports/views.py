@@ -206,7 +206,10 @@ def detail(r, pk):
         messages.error(r, "You don't have access to that report.")
         return redirect("mine")
     analysis = x.analyses.order_by("-created_at").first()
-    return render(r, "detail.html", {"report": x, "analysis": analysis})
+    comments = x.comments.select_related("user").order_by("created_at")
+    if not perm.is_staff_role(r.user):
+        comments = comments.filter(internal_only=False)
+    return render(r, "detail.html", {"report": x, "analysis": analysis, "comments": comments})
 
 
 @login_required
@@ -666,5 +669,102 @@ def ai_status_api(r, pk):
     return JsonResponse({"success": True, "pending": False, "source": a.source, "payload": a.payload})
 
 
+@login_required
+@require_GET
+def console(r):
+    profile = get_profile(r.user)
+    if profile.role != "superadmin":
+        return redirect("dashboard" if perm.is_staff_role(r.user) else "mine")
+    from django.db.models import Q
+    states = Report.objects.exclude(state="").values("state").annotate(
+        total=Count("id"),
+        resolved=Count("id", filter=Q(status__in=("resolved", "confirmed"))),
+        avg_rating=Avg("rating"),
+        breached=Count("id", filter=Q(sla_due__lt=timezone.now()) & ~Q(status__in=("resolved", "confirmed"))),
+    ).order_by("-total")
+    rows = []
+    for s in states:
+        qs = Report.objects.filter(state=s["state"])
+        res = qs.filter(status__in=("resolved", "confirmed"), resolved_at__isnull=False).annotate(
+            duration=ExpressionWrapper(F("resolved_at") - F("created_at"), output_field=DurationField()))
+        avg = res.aggregate(a=Avg("duration"))["a"]
+        open_n = qs.exclude(status__in=("resolved", "confirmed")).count()
+        rows.append({
+            "state": s["state"], "total": s["total"], "resolved": s["resolved"],
+            "avg_h": round(avg.total_seconds() / 3600, 1) if avg else None,
+            "sla_ok": round(100 * (s["total"] - s["breached"]) / s["total"], 1) if s["total"] else 100,
+            "avg_rating": round(s["avg_rating"], 1) if s["avg_rating"] else None,
+            "open": open_n,
+        })
+    rows.sort(key=lambda x: (x["sla_ok"], x["resolved"]), reverse=True)
+    ai = AIAnalysis.objects.aggregate(
+        total=Count("id"),
+        gemini=Count("id", filter=Q(source="gemini")),
+        avg_ms=Avg("latency_ms"),
+        low_conf=Count("id", filter=Q(confidence__lt=0.5)),
+    )
+    queue = {
+        "reported": Report.objects.filter(status="reported").count(),
+        "active": Report.objects.filter(status__in=("acknowledged", "assigned", "progress")).count(),
+        "reopened": Report.objects.filter(status="reopened").count(),
+        "needs_review": Report.objects.filter(needs_review=True).count(),
+    }
+    audit = StatusEvent.objects.select_related("report", "actor").order_by("-created_at")[:30]
+    return render(r, "console.html", {"profile": profile, "rows": rows, "ai": ai, "queue": queue, "audit": audit})
+
+
 def healthz(r):
     return JsonResponse({"ok": True})
+
+
+@login_required
+@require_POST
+def bulk_update(r):
+    profile = get_profile(r.user)
+    if not perm.is_staff_role(r.user):
+        return redirect("mine")
+    ids = [int(x) for x in r.POST.getlist("ids") if str(x).isdigit()]
+    action = r.POST.get("action", "")
+    updated = 0
+    for rep in Report.objects.filter(pk__in=ids):
+        if action.startswith("status:"):
+            new_status = action.split(":", 1)[1]
+            if new_status in [c for c, _ in Report.STATUS] and perm.can_change_status(r.user, rep) and new_status != rep.status:
+                old = rep.status
+                rep.status = new_status
+                rep.resolved_at = timezone.now() if new_status in ("resolved", "confirmed") else None
+                rep.save()
+                StatusEvent.objects.create(report=rep, old_status=old, new_status=new_status, actor=r.user, note="bulk")
+                notify_status_change(rep)
+                updated += 1
+        elif action.startswith("priority:") and perm.can_assign(r.user, rep):
+            new_p = action.split(":", 1)[1]
+            if new_p in [c for c, _ in Report.PRIORITY]:
+                rep.priority = new_p
+                rep.sla_due = _sla_due(new_p)
+                rep.save()
+                updated += 1
+    messages.success(r, f"Bulk action applied to {updated} report(s).")
+    return redirect("dashboard")
+
+
+@login_required
+@require_GET
+def export_csv(r):
+    profile = get_profile(r.user)
+    if not perm.is_staff_role(r.user):
+        return redirect("mine")
+    import csv
+    from django.http import HttpResponse
+    qs = _apply_common_filters(_scoped_reports(profile), r, profile).select_related("citizen", "assigned_to").order_by("-created_at")[:5000]
+    resp = HttpResponse(content_type="text/csv")
+    resp["Content-Disposition"] = "attachment; filename=civicconnect_reports.csv"
+    w = csv.writer(resp)
+    w.writerow(["id", "title", "category", "priority", "priority_score", "status", "state", "department",
+                "assigned_to", "citizen", "created_at", "resolved_at", "sla_due", "address"])
+    for x in qs:
+        w.writerow([x.id, x.title, x.category, x.priority, x.priority_score, x.status, x.state, x.department,
+                    x.assigned_to.username if x.assigned_to else "", x.citizen.username,
+                    x.created_at.isoformat(), x.resolved_at.isoformat() if x.resolved_at else "",
+                    x.sla_due.isoformat() if x.sla_due else "", x.address])
+    return resp

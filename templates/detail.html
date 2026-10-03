@@ -51,12 +51,12 @@
       <h3>Photo {% if report.resolution_image %}— before / after{% endif %}</h3>
       {% if report.resolution_image %}
       <div class="ba" id="baSlider">
-        <img src="{{ report.image.url }}" alt="Before">
-        <div class="after"><img src="{{ report.resolution_image.url }}" alt="After"></div>
+        <img src="{{ report.image.url }}" alt="Before" loading="lazy" decoding="async">
+        <div class="after"><img src="{{ report.resolution_image.url }}" alt="After" loading="lazy" decoding="async"></div>
         <input type="range" min="0" max="100" value="50" aria-label="Before after slider">
       </div>
       {% else %}
-      <div class="report-image-container"><img src="{{ report.image.url }}" alt="Report image" class="report-detail-image" loading="lazy"></div>
+      <div class="report-image-container"><img src="{{ report.image.url }}" alt="Report image" class="report-detail-image" loading="lazy" decoding="async"></div>
       {% endif %}
       {% if analysis and analysis.payload.caption %}<p><em>AI sees: {{ analysis.payload.caption }}</em></p>{% endif %}
       {% if analysis and analysis.payload.hazards %}<p>Hazards: {% for h in analysis.payload.hazards %}<span class="chip high">{{ h }}</span> {% endfor %}</p>{% endif %}
@@ -132,7 +132,7 @@
         <button type="submit" class="comment-btn">Post Comment</button>
       </form>
       <div class="comments-list" id="commentList">
-        {% for comment in report.comments.all %}
+        {% for comment in comments %}
         <div class="comment">{% if comment.internal_only %}<span class="chip">staff-only</span> {% endif %}
           <div class="comment-header"><strong>{{ comment.user.username }}</strong><span>{{ comment.created_at|date:"d M Y, H:i" }}</span></div>
           <p>{{ comment.text }}</p>

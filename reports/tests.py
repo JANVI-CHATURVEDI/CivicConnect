@@ -370,3 +370,49 @@ class WorkflowTests2(TestCase):
         self.client.login(username="c1", password="Pass12345")
         resp = self.client.get("/api/assistant/", {"q": "where is my report"})
         self.assertIn("Leak", resp.json()["answer"])
+
+
+@override_settings(GEMINI_API_KEY='')
+class StaffToolsTests(TestCase):
+    def setUp(self):
+        self.cit = User.objects.create_user("sc1", "s@e.com", "Pass12345")
+        self.adm = User.objects.create_user("sad", "sa@e.com", "Pass12345", is_staff=True)
+        Profile.objects.update_or_create(user=self.adm, defaults={"role": "admin", "state": "UP"})
+        self.boss = User.objects.create_superuser("sboss", "sb@e.com", "Pass12345")
+        self.r1 = Report.objects.create(citizen=self.cit, title="One", description="Real issue description", category="road", state="UP")
+        self.r2 = Report.objects.create(citizen=self.cit, title="Two", description="Another real description", category="water", state="UP")
+
+    def test_internal_notes_hidden_from_citizen(self):
+        Comment.objects.create(report=self.r1, user=self.adm, text="staff only note", internal_only=True)
+        self.client.login(username="sc1", password="Pass12345")
+        resp = self.client.get(f"/reports/{self.r1.id}/")
+        self.assertNotContains(resp, "staff only note")
+        self.client.login(username="sad", password="Pass12345")
+        self.assertContains(self.client.get(f"/reports/{self.r1.id}/"), "staff only note")
+
+    def test_bulk_status_update(self):
+        self.client.login(username="sad", password="Pass12345")
+        self.client.post("/dashboard/bulk/", {"ids": [self.r1.id, self.r2.id], "action": "status:progress"})
+        self.r1.refresh_from_db(); self.r2.refresh_from_db()
+        self.assertEqual((self.r1.status, self.r2.status), ("progress", "progress"))
+
+    def test_bulk_requires_staff(self):
+        self.client.login(username="sc1", password="Pass12345")
+        self.client.post("/dashboard/bulk/", {"ids": [self.r1.id], "action": "status:progress"})
+        self.r1.refresh_from_db()
+        self.assertEqual(self.r1.status, "reported")
+
+    def test_csv_export_scoped(self):
+        self.client.login(username="sad", password="Pass12345")
+        resp = self.client.get("/dashboard/export/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("text/csv", resp["Content-Type"])
+        self.assertIn("One", resp.content.decode())
+
+    def test_console_superadmin_only(self):
+        self.client.login(username="sad", password="Pass12345")
+        self.assertEqual(self.client.get("/console/").status_code, 302)
+        self.client.login(username="sboss", password="Pass12345")
+        resp = self.client.get("/console/")
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, "UP")

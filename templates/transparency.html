@@ -41,11 +41,15 @@
         <div class="card" style="padding:12px 18px;"><strong>Most improved:</strong> {% for h in improved %}<span class="chip">{{ h.state }} ({{ h.count }})</span> {% endfor %}</div>
     </div>
 
+    <div style="display:flex;gap:8px;margin:10px 0;">
+        <button class="btn btn-secondary" id="heatBtnT" type="button">Heat overlay</button>
+    </div>
     <div id="publicMap" class="dashboard-map anim-fade-up" style="height:480px;"></div>
 
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script>
 (async function () {
     const map = L.map("publicMap").setView([22.9734, 78.6569], 5);
@@ -56,11 +60,19 @@
     }).addTo(map);
 
     const statusColors = { reported: "#2563eb", progress: "#7c3aed", resolved: "#16c7b7" };
+    let heatT = null;
 
     try {
         const params = new URLSearchParams(window.location.search);
         const response = await fetch(`/api/public-map-data/?${params.toString()}`);
         const data = await response.json();
+
+        heatT = L.heatLayer(data.reports.map(r => [r.lat, r.lng, 0.7]), { radius: 28, blur: 22, maxZoom: 12 });
+        const hb = document.getElementById("heatBtnT");
+        if (hb) hb.addEventListener("click", function () {
+            if (map.hasLayer(heatT)) { map.removeLayer(heatT); hb.textContent = "Heat overlay"; }
+            else { heatT.addTo(map); hb.textContent = "Hide heat"; }
+        });
 
         data.reports.forEach(function (rep) {
             const marker = L.circleMarker([rep.lat, rep.lng], {
