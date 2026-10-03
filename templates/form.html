@@ -12,13 +12,13 @@
 ========================================================= */
 
     .report-page {
-        --bg-main: #f8fafc;
+        --bg-main: #faf7f0;
         --card-bg: #ffffff;
-        --text-primary: #0f172a;
-        --text-muted: #64748b;
-        --border-color: #e2e8f0;
-        --brand-primary: #2563eb;
-        --brand-hover: #1d4ed8;
+        --text-primary: #0a1f3a;
+        --text-muted: #5b6b82;
+        --border-color: #e3dac2;
+        --brand-primary: #0f2e54;
+        --brand-hover: #0a1f3a;
         --success-color: #059669;
         --danger-color: #dc2626;
         --warning-color: #d97706;
@@ -66,22 +66,18 @@
     .form-control:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .10); }
     textarea.form-control { min-height: 120px; resize: vertical; }
 
-    /* ---- AI PANEL ---- */
+    /* ---- AI PANEL (formal) ---- */
     .ai-panel {
         display: none;
         position: relative;
         margin-bottom: 26px;
         padding: 20px 22px;
-        border-radius: 14px;
-        border: 1px solid transparent;
-        background:
-            linear-gradient(#fdfeff, #fdfeff) padding-box,
-            linear-gradient(120deg, #2563eb, #7c3aed, #16c7b7, #2563eb) border-box;
-        background-size: 100% 100%, 300% 300%;
-        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
-        animation: gradientShift 8s ease infinite;
+        border-radius: 12px;
+        border: 1px solid #c9a227;
+        border-left: 5px solid #0f2e54;
+        background: #fffdf6;
     }
-    .ai-panel.show { display: block; animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both, gradientShift 8s ease infinite; }
+    .ai-panel.show { display: block; }
     .ai-panel-title {
         display: flex;
         align-items: center;
@@ -89,14 +85,13 @@
         font-size: 12px;
         font-weight: 800;
         letter-spacing: 0.5px;
-        color: #2563eb;
+        color: #0f2e54;
         text-transform: uppercase;
         margin-bottom: 12px;
     }
     .ai-panel-title .dot {
         width: 7px; height: 7px; border-radius: 50%;
-        background: #16c7b7;
-        box-shadow: 0 0 8px rgba(22,199,183,.8);
+        background: #c9a227;
     }
     .ai-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
     .ai-chip {
@@ -136,7 +131,7 @@
         cursor: pointer;
         transition: .2s ease;
     }
-    .file-dropzone:hover, .file-dropzone.dragover { border-color: var(--brand-primary); background: #eff6ff; }
+    .file-dropzone:hover, .file-dropzone.dragover { border-color: var(--brand-primary); background: #f3ead3; }
     .dropzone-icon { width: 32px; height: 32px; margin-bottom: 10px; color: #64748b; }
     .file-dropzone p { margin: 0 0 5px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
     .file-dropzone small { color: var(--text-muted); font-size: 12px; }
@@ -155,7 +150,7 @@
     }
     .cat-card:hover { border-color: #cbd5e1; background: #f8fafc; }
     .cat-card input { position: absolute; opacity: 0; pointer-events: none; }
-    .cat-card.active { border-color: var(--brand-primary); background: #eff6ff; box-shadow: 0 0 0 1px var(--brand-primary); }
+    .cat-card.active { border-color: var(--brand-primary); background: #f3ead3; box-shadow: 0 0 0 1px var(--brand-primary); }
     .cat-card svg { width: 22px; height: 22px; color: #64748b; }
     .cat-card.active svg { color: var(--brand-primary); }
     .cat-card span { font-size: 12px; font-weight: 500; text-align: center; }
@@ -222,14 +217,6 @@
         </header>
 
         <main class="report-card anim-fade-up anim-delay-1">
-
-            <div class="wizard-steps" role="tablist" aria-label="Report steps">
-                <div class="wstep active" data-step="1">1 · Photo</div>
-                <div class="wstep" data-step="2">2 · Details</div>
-                <div class="wstep" data-step="3">3 · Location</div>
-                <div class="wstep" data-step="4">4 · Review</div>
-            </div>
-            <div class="wprogress"><span id="wprog"></span></div>
 
             <form method="post" enctype="multipart/form-data" id="reportForm" novalidate>
 
@@ -427,17 +414,7 @@
                     {% if form.description.errors %}<div class="field-error-text">{{ form.description.errors.0 }}</div>{% endif %}
                 </div>
 
-                <div class="form-group" data-wstep="4" id="reviewStep">
-                    <label class="form-label">Review & submit</label>
-                    <div class="card" style="padding:12px;" id="reviewSummary"><p class="typing">Your summary appears here…</p></div>
-                </div>
-
-                <div class="wnav" data-wstep="nav">
-                    <button type="button" class="btn" id="wprev">← Back</button>
-                    <button type="button" class="btn btn-primary" id="wnext">Next →</button>
-                </div>
-
-                <button type="submit" class="btn-submit btn-press" data-wstep="4">{% if editing %}Update Report{% else %}Submit Report{% endif %}</button>
+                <button type="submit" class="btn-submit btn-press">{% if editing %}Update Report{% else %}Submit Report{% endif %}</button>
 
             </form>
 
@@ -736,44 +713,8 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    var step = 1, groups = document.querySelectorAll("#reportForm [data-wstep]");
-    var prog = document.getElementById("wprog"), prev = document.getElementById("wprev"), next = document.getElementById("wnext");
-    function show(n) {
-        step = Math.min(4, Math.max(1, n));
-        groups.forEach(function (g) {
-            var s = g.getAttribute("data-wstep");
-            if (s === "nav") return;
-            g.style.display = (parseInt(s, 10) === step) ? "" : "none";
-        });
-        document.getElementById("pinMap").style.display = step === 3 ? "" : "none";
-        document.querySelectorAll(".wstep").forEach(function (el) {
-            var k = parseInt(el.dataset.step, 10);
-            el.classList.toggle("active", k === step); el.classList.toggle("done", k < step);
-        });
-        if (prog) prog.style.width = (step * 25) + "%";
-        if (prev) prev.disabled = step === 1;
-        if (next) next.textContent = step === 4 ? "Review done ✓" : "Next →";
-        if (step === 4) buildReview();
-        if (step === 3) setTimeout(initPinMap, 60);
-    }
-    function toast(msg) { var box = document.getElementById("toasts"); var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; box.appendChild(t); setTimeout(function () { t.remove(); }, 3000); }
-    function validFor(s) {
-        if (s === 2) { var t = document.querySelector("input[name=title]"); if (!t.value.trim()) { t.focus(); toast("Add a short title first"); return false; } }
-        if (s === 3) { var st = document.querySelector("select[name=state]"); if (!st.value) { st.focus(); toast("Pick your state"); return false; } }
-        return true;
-    }
-    if (prev) prev.addEventListener("click", function () { show(step - 1); });
-    if (next) next.addEventListener("click", function () { if (validFor(step)) show(step + 1); });
-    document.querySelectorAll(".wstep").forEach(function (el) { el.addEventListener("click", function () { show(parseInt(el.dataset.step, 10)); }); });
-    function esc(s) { return (s || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-    function buildReview() {
-        var t = document.querySelector("input[name=title]").value, d = document.querySelector("textarea[name=description]").value;
-        var c = (document.querySelector("input[name=category]:checked") || {}).value || "—";
-        var p = (document.querySelector("input[name=priority]:checked") || {}).value || "—";
-        var a = document.querySelector("input[name=address]").value, dup = document.getElementById("aiDuplicateWarning");
-        document.getElementById("reviewSummary").innerHTML = "<strong>" + esc(t || "(untitled)") + "</strong><br>" + esc(d.slice(0, 220)) + "<br><br>Category: " + esc(c) + " · Urgency: " + esc(p) + "<br>Location: " + esc(a || "—") + (dup && dup.style.display !== "none" ? "<br><br>" + esc(dup.textContent) : "");
-    }
-    show(1);
+    function toast(msg) { var box = document.getElementById("toasts"); if (!box) return; var t = document.createElement("div"); t.className = "toast"; t.textContent = msg; box.appendChild(t); setTimeout(function () { t.remove(); }, 3000); }
+    setTimeout(initPinMap, 300);
     var KEY = "cc-draft-v1", form = document.getElementById("reportForm");
     try {
         var saved = JSON.parse(localStorage.getItem(KEY) || "{}");
