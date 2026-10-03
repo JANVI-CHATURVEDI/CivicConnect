@@ -1,4 +1,5 @@
 """Service layer: full analysis dict used by views + API."""
+
 import hashlib
 import time
 
@@ -13,9 +14,18 @@ def content_hash(title="", description="", category="", lat=None, lon=None):
     return h.hexdigest()
 
 
-def analyze_report_full(title="", description="", category="", latitude=None, longitude=None,
-                        exclude_pk=None, image_bytes=None, image_mime_type=None,
-                        upvotes=0, age_days=0):
+def analyze_report_full(
+    title="",
+    description="",
+    category="",
+    latitude=None,
+    longitude=None,
+    exclude_pk=None,
+    image_bytes=None,
+    image_mime_type=None,
+    upvotes=0,
+    age_days=0,
+):
     t0 = time.monotonic()
     g = gemini_analyze(title, description, image_bytes, image_mime_type)
     if g:
@@ -36,7 +46,11 @@ def analyze_report_full(title="", description="", category="", latitude=None, lo
         detected = rule_engine.suggest_category(f"{title} {description}")
         urgency, hits, sensitive = rule_engine.text_urgency(title, description)
         # rule severity heuristic
-        severity = 75 if hits and any(k in rule_engine.HIGH_PRIORITY_KEYWORDS for k in hits) else (55 if hits else 30)
+        severity = (
+            75
+            if hits and any(k in rule_engine.HIGH_PRIORITY_KEYWORDS for k in hits)
+            else (55 if hits else 30)
+        )
         department = rule_engine.suggest_department(category or detected or "other")
         flag = rule_engine.suggest_flag(title, description)
         confidence = 0.55
@@ -50,8 +64,14 @@ def analyze_report_full(title="", description="", category="", latitude=None, lo
     dups = find_possible_duplicates(eff_category, latitude, longitude, title, description, exclude_pk)
     density = len(dups)
     score, label, reasons = rule_engine.priority_score(
-        severity=severity, urgency=urgency, category=eff_category,
-        sensitive=sensitive, upvotes=upvotes, age_days=age_days, density=density)
+        severity=severity,
+        urgency=urgency,
+        category=eff_category,
+        sensitive=sensitive,
+        upvotes=upvotes,
+        age_days=age_days,
+        density=density,
+    )
     if source == "gemini" and priority:
         # blend: keep Gemini label unless score strongly disagrees (+/- 2 bands)
         order = ["low", "medium", "high", "critical"]
@@ -88,10 +108,20 @@ def analyze_report_full(title="", description="", category="", latitude=None, lo
     }
 
 
-def analyze_report(title="", description="", category="", latitude=None, longitude=None,
-                   exclude_pk=None, image_bytes=None, image_mime_type=None):
+def analyze_report(
+    title="",
+    description="",
+    category="",
+    latitude=None,
+    longitude=None,
+    exclude_pk=None,
+    image_bytes=None,
+    image_mime_type=None,
+):
     """Backwards-compatible thin dict (used by old views/tests)."""
-    full = analyze_report_full(title, description, category, latitude, longitude, exclude_pk, image_bytes, image_mime_type)
+    full = analyze_report_full(
+        title, description, category, latitude, longitude, exclude_pk, image_bytes, image_mime_type
+    )
     return {
         "suggested_category": full["suggested_category"],
         "suggested_priority": full["suggested_priority"],
@@ -99,15 +129,29 @@ def analyze_report(title="", description="", category="", latitude=None, longitu
         "department": full["department"],
         "ai_source": full["ai_source"],
         "flag": full["flag"],
-        "duplicates": [{k: d[k] for k in ("id", "title", "status", "distance_m")} for d in full["duplicates"]],
+        "duplicates": [
+            {k: d[k] for k in ("id", "title", "status", "distance_m")} for d in full["duplicates"]
+        ],
     }
 
 
 def draft_action_brief(category, priority, summary):
-    crew = {"road": "2 road crew + roller", "water": "plumber team + valves", "garbage": "sanitation truck + 3 staff",
-            "light": "electrician + ladder van", "tree": "arborist + crane", "manhole": "PWC team + cover stock",
-            "traffic": "traffic police + signal tech", "other": "field inspector"}.get(category, "field inspector")
-    effort = {"critical": "4-8 hrs, immediate", "high": "1-2 days", "medium": "3-5 days", "low": "1-2 weeks"}.get(priority, "3-5 days")
+    crew = {
+        "road": "2 road crew + roller",
+        "water": "plumber team + valves",
+        "garbage": "sanitation truck + 3 staff",
+        "light": "electrician + ladder van",
+        "tree": "arborist + crane",
+        "manhole": "PWC team + cover stock",
+        "traffic": "traffic police + signal tech",
+        "other": "field inspector",
+    }.get(category, "field inspector")
+    effort = {
+        "critical": "4-8 hrs, immediate",
+        "high": "1-2 days",
+        "medium": "3-5 days",
+        "low": "1-2 weeks",
+    }.get(priority, "3-5 days")
     return f"{summary or 'Inspect site'}. Dispatch {crew}. Est. effort: {effort}."
 
 

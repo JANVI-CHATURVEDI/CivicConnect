@@ -20,8 +20,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         cutoff = timezone.now() - timedelta(hours=STALE_HOURS)
-        stale = Report.objects.filter(priority__in=("high", "critical"), status__in=("reported", "acknowledged"), created_at__lt=cutoff)
-        breached = Report.objects.filter(sla_due__lt=timezone.now()).exclude(status__in=("resolved", "confirmed"))
+        stale = Report.objects.filter(
+            priority__in=("high", "critical"), status__in=("reported", "acknowledged"), created_at__lt=cutoff
+        )
+        breached = Report.objects.filter(sla_due__lt=timezone.now()).exclude(
+            status__in=("resolved", "confirmed")
+        )
         targets = (stale | breached).distinct()
 
         if not targets.exists():
@@ -29,7 +33,9 @@ class Command(BaseCommand):
             return
 
         superadmin_emails = list(
-            Profile.objects.filter(role="superadmin").exclude(user__email="").values_list("user__email", flat=True)
+            Profile.objects.filter(role="superadmin")
+            .exclude(user__email="")
+            .values_list("user__email", flat=True)
         )
 
         by_state = {}

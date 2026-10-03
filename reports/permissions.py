@@ -1,4 +1,5 @@
 """Central permission helpers — single place enforcing role x action rules."""
+
 from .roles import get_profile
 
 
@@ -16,8 +17,10 @@ def can_view_report(user, report):
         if report.assigned_to_id == user.id:
             return True
         # officers can see reports in their state+department for triage
-        return bool(report.state) and report.state == profile.state and (
-            not profile.department or report.department == profile.department
+        return (
+            bool(report.state)
+            and report.state == profile.state
+            and (not profile.department or report.department == profile.department)
         )
     return False
 

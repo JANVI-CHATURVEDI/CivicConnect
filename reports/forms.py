@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Report
+
 from .constants import STATES
+from .models import Report
 
 
 class ReportForm(forms.ModelForm):
@@ -17,7 +18,7 @@ class ReportForm(forms.ModelForm):
         widget=forms.Textarea(attrs={"rows": 4}),
     )
 
-    state = forms.ChoiceField(choices=[("", "— Select State —")] + list(STATES))
+    state = forms.ChoiceField(choices=[("", "— Select State —"), *list(STATES)])
 
     class Meta:
         model = Report
@@ -75,8 +76,10 @@ class SignupForm(UserCreationForm):
 
 class CreateAdminForm(UserCreationForm):
     email = forms.EmailField(required=True)
-    role = forms.ChoiceField(choices=[("officer", "Field Officer"), ("admin", "State Admin"), ("superadmin", "Super Admin")])
-    state = forms.ChoiceField(choices=[("", "— Select State —")] + list(STATES), required=False)
+    role = forms.ChoiceField(
+        choices=[("officer", "Field Officer"), ("admin", "State Admin"), ("superadmin", "Super Admin")]
+    )
+    state = forms.ChoiceField(choices=[("", "— Select State —"), *list(STATES)], required=False)
     department = forms.CharField(required=False)
 
     class Meta:

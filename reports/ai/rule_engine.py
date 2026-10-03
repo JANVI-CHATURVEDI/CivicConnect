@@ -1,33 +1,85 @@
 """Rule engine: categories, urgency, language, spam, departments, scoring."""
 
-import math
 import re
 
 CATEGORY_KEYWORDS = {
     "road": ["pothole", "road", "crack", "asphalt", "highway", "footpath", "pavement", "sinkhole", "gaddha"],
     "water": ["leak", "pipe", "water", "burst", "sewage", "drain", "tap", "pipeline", "paani", "nal"],
     "garbage": ["garbage", "trash", "waste", "bin", "dump", "litter", "rubbish", "kachra", "kooda"],
-    "light": ["streetlight", "street light", "lamp", "bulb", "dark street", "electric pole", "batti", "light"],
+    "light": [
+        "streetlight",
+        "street light",
+        "lamp",
+        "bulb",
+        "dark street",
+        "electric pole",
+        "batti",
+        "light",
+    ],
     "tree": ["tree", "branch", "fallen tree", "uprooted", "ped"],
     "manhole": ["manhole", "open drain", "open hole", "sewer cover", "gutter"],
     "traffic": ["signal", "traffic light", "traffic signal", "junction light"],
 }
 
 HIGH_PRIORITY_KEYWORDS = [
-    "urgent", "danger", "dangerous", "emergency", "accident", "injury", "injured",
-    "fire", "aag", "collapsed", "collapse", "flood", "flooding", "electrocution",
-    "live wire", "exposed wire", "blocking road", "child", "school", "hospital",
-    "death", "died", "life threat", "leaking gas", "gas leak", "khatra",
+    "urgent",
+    "danger",
+    "dangerous",
+    "emergency",
+    "accident",
+    "injury",
+    "injured",
+    "fire",
+    "aag",
+    "collapsed",
+    "collapse",
+    "flood",
+    "flooding",
+    "electrocution",
+    "live wire",
+    "exposed wire",
+    "blocking road",
+    "child",
+    "school",
+    "hospital",
+    "death",
+    "died",
+    "life threat",
+    "leaking gas",
+    "gas leak",
+    "khatra",
 ]
 
 MEDIUM_PRIORITY_KEYWORDS = [
-    "large", "big", "bada", "heavy traffic", "overflowing", "broken", "toota",
-    "cracked", "several days", "weeks", "repeated", "worsening", "smell", "badboo", "stagnant",
+    "large",
+    "big",
+    "bada",
+    "heavy traffic",
+    "overflowing",
+    "broken",
+    "toota",
+    "cracked",
+    "several days",
+    "weeks",
+    "repeated",
+    "worsening",
+    "smell",
+    "badboo",
+    "stagnant",
 ]
 
 SENSITIVE_KEYWORDS = ["school", "hospital", "playground", "market", "station", "mandir", "masjid"]
 
-CATEGORY_RISK = {"manhole": 25, "traffic": 20, "water": 12, "road": 10, "light": 8, "garbage": 5, "tree": 7, "other": 3}
+CATEGORY_RISK = {
+    "manhole": 25,
+    "traffic": 20,
+    "water": 12,
+    "road": 10,
+    "light": 8,
+    "garbage": 5,
+    "tree": 7,
+    "other": 3,
+}
 
 DEPARTMENT_MAP = {
     "road": "Roads & Infrastructure Dept.",
@@ -102,7 +154,9 @@ def text_similarity(a, b):
     return len(sa & sb) / max(1, len(sa | sb))
 
 
-def priority_score(severity=50, urgency=0, category="other", sensitive=False, upvotes=0, age_days=0, density=0):
+def priority_score(
+    severity=50, urgency=0, category="other", sensitive=False, upvotes=0, age_days=0, density=0
+):
     parts = {}
     parts["ai_severity"] = round(max(0, min(100, severity)) * 0.35, 1)
     parts["text_urgency"] = round(max(0, min(100, urgency)) * 0.25, 1)

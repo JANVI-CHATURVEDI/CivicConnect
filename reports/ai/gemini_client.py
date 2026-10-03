@@ -1,4 +1,5 @@
 """Gemini client: header auth, model from env, retries, timeout, structured JSON."""
+
 import base64
 import json
 import logging
@@ -49,7 +50,14 @@ def gemini_analyze(title="", description="", image_bytes=None, image_mime_type=N
         prompt += "\nA photo of the issue is attached — use it to inform severity, hazards and photo_match."
     parts = [{"text": prompt}]
     if image_bytes and image_mime_type:
-        parts.append({"inline_data": {"mime_type": image_mime_type, "data": base64.b64encode(image_bytes).decode("ascii")}})
+        parts.append(
+            {
+                "inline_data": {
+                    "mime_type": image_mime_type,
+                    "data": base64.b64encode(image_bytes).decode("ascii"),
+                }
+            }
+        )
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{_model()}:generateContent"
     body = {
         "contents": [{"parts": parts}],
@@ -65,8 +73,7 @@ def gemini_analyze(title="", description="", image_bytes=None, image_mime_type=N
             text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
             if text.startswith("```"):
                 text = text.strip("`")
-                if text.startswith("json"):
-                    text = text[4:]
+                text = text.removeprefix("json")
                 text = text.strip()
             result = json.loads(text)
             if result.get("category") in VALID_CATEGORIES and result.get("priority") in VALID_PRIORITIES:
@@ -85,6 +92,6 @@ def gemini_analyze(title="", description="", image_bytes=None, image_mime_type=N
         except Exception as e:  # network, 4xx/5xx, malformed JSON
             last_err = e
             log.warning("gemini attempt %d failed: %s", attempt + 1, e)
-            time.sleep(0.5 * (2 ** attempt))
+            time.sleep(0.5 * (2**attempt))
     log.error("gemini failed after retries: %s", last_err)
     return None

@@ -1,7 +1,8 @@
-from pathlib import Path
-from dotenv import load_dotenv
 import os
+from pathlib import Path
+
 import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
@@ -13,12 +14,14 @@ GEMINI_TIMEOUT_S = float(os.getenv("GEMINI_TIMEOUT_S", "12"))
 AI_SUGGEST_RATE_LIMIT = os.getenv("AI_SUGGEST_RATE_LIMIT", "30/h")
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 
-_DEFAULT_SECRET = "change-this-secret-key"
+_DEFAULT_SECRET = "change-this-secret-key"  # noqa: S105 — sentinel value; DEBUG=False refuses to boot with it
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", _DEFAULT_SECRET)
 DEBUG = os.getenv("DJANGO_DEBUG", "True") == "True"
 if not DEBUG and SECRET_KEY in (_DEFAULT_SECRET, "change-this-to-a-random-string", ""):
     raise RuntimeError("Refusing to run with DEBUG=False and default DJANGO_SECRET_KEY. Set a strong value.")
-ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h] or (["*"] if DEBUG else ["localhost", "127.0.0.1"])
+ALLOWED_HOSTS = [h for h in os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",") if h] or (
+    ["*"] if DEBUG else ["localhost", "127.0.0.1"]
+)
 CSRF_TRUSTED_ORIGINS = [h for h in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if h]
 SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT", "False") == "True"
 SESSION_COOKIE_SECURE = not DEBUG or os.getenv("SESSION_COOKIE_SECURE", "False") == "True"
@@ -42,18 +45,23 @@ INSTALLED_APPS = [
 ]
 try:
     import whitenoise  # noqa: F401
+
     _HAS_WHITE = True
 except ImportError:
     _HAS_WHITE = False
-MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
-] + (["whitenoise.middleware.WhiteNoiseMiddleware"] if _HAS_WHITE else []) + [
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-]
+MIDDLEWARE = (
+    [
+        "django.middleware.security.SecurityMiddleware",
+    ]
+    + (["whitenoise.middleware.WhiteNoiseMiddleware"] if _HAS_WHITE else [])
+    + [
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+    ]
+)
 ROOT_URLCONF = "civicconnect.urls"
 WSGI_APPLICATION = "civicconnect.wsgi.application"
 TEMPLATES = [
@@ -102,8 +110,7 @@ else:
     }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-     "OPTIONS": {"min_length": 6}},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 6}},
 ]
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Asia/Kolkata"
@@ -113,7 +120,13 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STORAGES = {
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage" if _HAS_WHITE else "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    # Manifest storage needs collectstatic before every test run; the plain
+    # compressed backend still serves gzip via WhiteNoise with no manifest.
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage"
+        if _HAS_WHITE
+        else "django.contrib.staticfiles.storage.StaticFilesStorage"
+    },
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
 }
 MEDIA_URL = "/media/"
@@ -149,11 +162,10 @@ REST_FRAMEWORK = {
 if SENTRY_DSN:
     try:
         import sentry_sdk
+
         sentry_sdk.init(dsn=SENTRY_DSN, traces_sample_rate=0.1)
     except ImportError:
         pass
 
-EMAIL_BACKEND = os.getenv(
-    "EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend"
-)
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = "CivicConnect AI <noreply@civicconnect.local>"

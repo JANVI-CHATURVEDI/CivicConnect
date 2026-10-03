@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Report, Comment, Vote, Profile, StatusEvent, AIAnalysis, Notification
+
+from .models import AIAnalysis, Comment, Notification, Profile, Report, StatusEvent, Vote
 
 
 @admin.register(Report)

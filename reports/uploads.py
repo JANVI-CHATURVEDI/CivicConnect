@@ -1,8 +1,10 @@
 """Upload validation: size, Pillow verify, EXIF GPS hint, strip, thumbnail."""
+
 import io
-from PIL import Image
-from PIL.ExifTags import TAGS, GPSTAGS
+
 from django.core.files.base import ContentFile
+from PIL import Image
+from PIL.ExifTags import TAGS
 
 MAX_UPLOAD_MB = 5
 MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024
@@ -66,9 +68,11 @@ def _extract_gps(img):
                 break
         if not gps_info:
             return None
+
         def _d(v):
             d = float(v[0]) + float(v[1]) / 60 + float(v[2]) / 3600
             return d
+
         lat = _d(gps_info[2]) * (-1 if gps_info.get(1) == "S" else 1)
         lon = _d(gps_info[4]) * (-1 if gps_info.get(3) == "W" else 1)
         return (lat, lon)

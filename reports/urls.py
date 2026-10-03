@@ -1,5 +1,6 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+
 from . import views
 from .api import ReportViewSet, StatsView
 
@@ -26,7 +27,6 @@ urlpatterns = [
     path("api/public-map-data/", views.public_map_data, name="public_map_data"),
     path("manage-admins/", views.manage_admins, name="manage_admins"),
     path("manage-admins/<int:user_id>/demote/", views.demote_admin, name="demote_admin"),
-
     path("api/get-address/", views.get_address, name="get_address"),
     path("api/ai-suggest/", views.ai_suggest, name="ai_suggest"),
     path("api/assistant/", views.assistant_api, name="assistant_api"),
@@ -36,7 +36,6 @@ urlpatterns = [
     path("api/stats/", StatsView.as_view(), name="api_stats"),
     path("api/", include(router.urls)),
     path("success/<int:pk>/", views.success, name="success"),
-
     path("reports/<int:pk>/comment/", views.add_comment, name="add_comment"),
     path("reports/<int:pk>/vote/", views.vote_report, name="vote_report"),
     path("reports/<int:pk>/status/", views.update_status, name="update_status"),

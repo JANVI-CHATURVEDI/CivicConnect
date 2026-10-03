@@ -1,5 +1,7 @@
 """Mini REST API (DRF) with throttling."""
-from rest_framework import serializers, viewsets, permissions, views as drf_views
+
+from rest_framework import permissions, serializers, viewsets
+from rest_framework import views as drf_views
 from rest_framework.response import Response
 
 from .models import Report
@@ -9,8 +11,20 @@ from .roles import get_profile
 class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
-        fields = ["id", "title", "description", "category", "priority", "priority_score",
-                  "status", "department", "state", "latitude", "longitude", "created_at"]
+        fields = [
+            "id",
+            "title",
+            "description",
+            "category",
+            "priority",
+            "priority_score",
+            "status",
+            "department",
+            "state",
+            "latitude",
+            "longitude",
+            "created_at",
+        ]
         read_only_fields = ["priority", "priority_score", "status", "department"]
 
 
@@ -33,10 +47,13 @@ class ReportViewSet(viewsets.ModelViewSet):
         return Report.objects.filter(citizen=u).order_by("-created_at")[:500]
 
     def perform_create(self, serializer):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
         from .ai.service import analyze_report_full
         from .constants import SLA_HOURS
-        from django.utils import timezone
-        from datetime import timedelta
+
         rep = serializer.save(citizen=self.request.user)
         try:
             full = analyze_report_full(rep.title, rep.description, rep.category, rep.latitude, rep.longitude)

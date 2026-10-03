@@ -6,12 +6,12 @@ from django.core import mail
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
-from .models import Profile, Report, Comment, Vote, StatusEvent
-from .roles import get_profile
 from . import ai_utils
+from .models import Comment, Profile, Report, StatusEvent, Vote
+from .roles import get_profile
 
 
-@override_settings(GEMINI_API_KEY='')
+@override_settings(GEMINI_API_KEY="")
 class AiUtilsTests(TestCase):
     def test_gemini_analyze_returns_none_without_key(self):
         self.assertIsNone(ai_utils.gemini_analyze("Pothole", "Big pothole"))
@@ -37,9 +37,17 @@ class AiUtilsTests(TestCase):
         mock_response = MagicMock()
         mock_response.raise_for_status = lambda: None
         mock_response.json.return_value = {
-            "candidates": [{"content": {"parts": [{
-                "text": '{"category":"road","priority":"high","severity":78,"department":"Roads Dept.","flag":"ok","caption":"Pothole","hazards":[],"photo_match":"match","confidence":0.8}'
-            }]}}]
+            "candidates": [
+                {
+                    "content": {
+                        "parts": [
+                            {
+                                "text": '{"category":"road","priority":"high","severity":78,"department":"Roads Dept.","flag":"ok","caption":"Pothole","hazards":[],"photo_match":"match","confidence":0.8}'  # noqa: E501
+                            }
+                        ]
+                    }
+                }
+            ]
         }
         mock_post.return_value = mock_response
 
@@ -72,7 +80,7 @@ class RoleHierarchyTests(TestCase):
         self.assertEqual(get_profile(user).role, "citizen")
 
 
-@override_settings(GEMINI_API_KEY='')
+@override_settings(GEMINI_API_KEY="")
 class ReportWorkflowTests(TestCase):
     def setUp(self):
         self.citizen = User.objects.create_user("citizen1", "c1@example.com", "CitizenPass123")
@@ -156,11 +164,20 @@ class ReportWorkflowTests(TestCase):
     def test_citizen_can_edit_own_unactioned_report(self):
         self._submit_report()
         report = Report.objects.get(title="Pothole on MG Road")
-        resp = self.client.post(f"/reports/{report.id}/edit/", {
-            "title": "Updated pothole title", "description": "Updated description of the same issue",
-            "category": "road", "priority": "high", "other_issue": "",
-            "latitude": "26.4515", "longitude": "80.3080", "address": "MG Road", "state": "UP",
-        })
+        resp = self.client.post(
+            f"/reports/{report.id}/edit/",
+            {
+                "title": "Updated pothole title",
+                "description": "Updated description of the same issue",
+                "category": "road",
+                "priority": "high",
+                "other_issue": "",
+                "latitude": "26.4515",
+                "longitude": "80.3080",
+                "address": "MG Road",
+                "state": "UP",
+            },
+        )
         self.assertEqual(resp.status_code, 302)
         report.refresh_from_db()
         self.assertEqual(report.title, "Updated pothole title")
@@ -183,19 +200,25 @@ class ReportWorkflowTests(TestCase):
     def test_other_citizen_cannot_edit_or_delete(self):
         self._submit_report()
         report = Report.objects.get(title="Pothole on MG Road")
-        other = User.objects.create_user("other1", "o1@example.com", "OtherPass123")
+        _other = User.objects.create_user("_other1", "o1@example.com", "OtherPass123")
         self.client.logout()
-        self.client.login(username="other1", password="OtherPass123")
+        self.client.login(username="_other1", password="OtherPass123")
         self.client.post(f"/reports/{report.id}/delete/")
         self.assertTrue(Report.objects.filter(pk=report.id).exists())
 
     def test_manage_admins_create_and_demote(self):
         self.client.login(username="boss", password="SuperPass123")
-        resp = self.client.post("/manage-admins/", {
-            "username": "newadmin", "email": "na@example.com",
-            "password1": "NewPass123", "password2": "NewPass123",
-            "role": "admin", "state": "KL",
-        })
+        resp = self.client.post(
+            "/manage-admins/",
+            {
+                "username": "newadmin",
+                "email": "na@example.com",
+                "password1": "NewPass123",
+                "password2": "NewPass123",
+                "role": "admin",
+                "state": "KL",
+            },
+        )
         self.assertEqual(resp.status_code, 302)
         new_admin = User.objects.get(username="newadmin")
         self.assertEqual(get_profile(new_admin).role, "admin")
@@ -209,7 +232,7 @@ class ReportWorkflowTests(TestCase):
         self.assertEqual(resp.status_code, 302)
 
 
-@override_settings(GEMINI_API_KEY='')
+@override_settings(GEMINI_API_KEY="")
 class PublicPagesTests(TestCase):
     def test_transparency_page_loads_without_login(self):
         resp = self.client.get("/transparency/")
@@ -218,8 +241,13 @@ class PublicPagesTests(TestCase):
     def test_public_map_data_loads_without_login(self):
         user = User.objects.create_user("citizen2", "c2@example.com", "CitizenPass123")
         Report.objects.create(
-            citizen=user, title="Public one", description="desc", category="road",
-            latitude=26.4, longitude=80.3, state="UP",
+            citizen=user,
+            title="Public one",
+            description="desc",
+            category="road",
+            latitude=26.4,
+            longitude=80.3,
+            state="UP",
         )
         resp = self.client.get("/api/public-map-data/")
         self.assertEqual(resp.status_code, 200)
@@ -232,14 +260,20 @@ class PublicPagesTests(TestCase):
         self.assertEqual(resp.status_code, 302)
 
 
-@override_settings(GEMINI_API_KEY='')
+@override_settings(GEMINI_API_KEY="")
 class PermissionMatrixTests(TestCase):
     def setUp(self):
         self.owner = User.objects.create_user("owner", "o@e.com", "Pass12345")
         self.other = User.objects.create_user("other", "ot@e.com", "Pass12345")
         self.admin = User.objects.create_user("adm", "a@e.com", "Pass12345", is_staff=True)
         Profile.objects.update_or_create(user=self.admin, defaults={"role": "admin", "state": "UP"})
-        self.rep = Report.objects.create(citizen=self.owner, title="T", description="Some real description here", category="road", state="UP")
+        self.rep = Report.objects.create(
+            citizen=self.owner,
+            title="T",
+            description="Some real description here",
+            category="road",
+            state="UP",
+        )
 
     def test_other_citizen_cannot_view(self):
         self.client.login(username="other", password="Pass12345")
@@ -276,57 +310,84 @@ class PermissionMatrixTests(TestCase):
 
     def test_officer_scoped(self):
         off = User.objects.create_user("off", "off@e.com", "Pass12345", is_staff=True)
-        Profile.objects.update_or_create(user=off, defaults={"role": "officer", "state": "MH", "department": "Roads & Infrastructure Dept."})
+        Profile.objects.update_or_create(
+            user=off,
+            defaults={"role": "officer", "state": "MH", "department": "Roads & Infrastructure Dept."},
+        )
         self.client.login(username="off", password="Pass12345")
         self.assertEqual(self.client.get(f"/reports/{self.rep.id}/").status_code, 302)
 
 
-@override_settings(GEMINI_API_KEY='')
+@override_settings(GEMINI_API_KEY="")
 class AIFallbackTests(TestCase):
     def test_malformed_gemini_json_falls_back(self):
         from reports.ai import service
+
         with patch("reports.ai.service.gemini_analyze", return_value={"category": "road"}):
             # missing priority -> invalid, but service handles dict directly? gemini returns None path instead
             pass
-        full = service.analyze_report_full(title="Pothole", description="big pothole near school", category="road")
+        full = service.analyze_report_full(
+            title="Pothole", description="big pothole near school", category="road"
+        )
         self.assertIn(full["ai_source"], ("rules", "gemini"))
         self.assertIn(full["suggested_priority"], ("low", "medium", "high", "critical"))
 
     def test_priority_score_transparent(self):
         from reports.ai.rule_engine import priority_score
-        score, label, reasons = priority_score(severity=90, urgency=90, category="manhole", sensitive=True, upvotes=5, age_days=5, density=3)
+
+        score, label, reasons = priority_score(
+            severity=90, urgency=90, category="manhole", sensitive=True, upvotes=5, age_days=5, density=3
+        )
         self.assertGreaterEqual(score, 80)
         self.assertEqual(label, "critical")
         self.assertTrue(reasons)
 
     def test_language_detection(self):
         from reports.ai.rule_engine import detect_language
+
         self.assertEqual(detect_language("sadak par bada gaddha hai"), "hinglish")
         self.assertEqual(detect_language("पानी लीक हो रहा है"), "hi")
         self.assertEqual(detect_language("Pothole on main road"), "en")
 
     def test_spam_flagged(self):
         from reports.ai.service import analyze_report_full
+
         full = analyze_report_full(title="Buy now", description="click here free money http://x")
         self.assertEqual(full["flag"], "spam")
 
     def test_duplicate_bbox_prefilter(self):
         from reports.ai.duplicates import find_possible_duplicates
+
         u = User.objects.create_user("du", "du@e.com", "Pass12345")
-        r1 = Report.objects.create(citizen=u, title="Pothole here", description="big deep pothole", category="road", latitude=26.85, longitude=80.95, state="UP")
+        r1 = Report.objects.create(
+            citizen=u,
+            title="Pothole here",
+            description="big deep pothole",
+            category="road",
+            latitude=26.85,
+            longitude=80.95,
+            state="UP",
+        )
         near = find_possible_duplicates("road", 26.8501, 80.9501, title="pothole", description="deep hole")
         far = find_possible_duplicates("road", 19.07, 72.87, title="pothole", description="deep hole")
         self.assertTrue(any(m[0].id == r1.id for m in near))
         self.assertEqual(far, [])
 
 
-@override_settings(GEMINI_API_KEY='')
+@override_settings(GEMINI_API_KEY="")
 class WorkflowTests2(TestCase):
     def setUp(self):
         self.cit = User.objects.create_user("c1", "c1@e.com", "Pass12345")
         self.adm = User.objects.create_user("ad", "ad@e.com", "Pass12345", is_staff=True)
         Profile.objects.update_or_create(user=self.adm, defaults={"role": "admin", "state": "UP"})
-        self.rep = Report.objects.create(citizen=self.cit, title="Leak", description="water leaking for days", category="water", state="UP", status="resolved")
+        self.rep = Report.objects.create(
+            citizen=self.cit,
+            title="Leak",
+            description="water leaking for days",
+            category="water",
+            state="UP",
+            status="resolved",
+        )
 
     def test_status_event_logged(self):
         self.client.login(username="ad", password="Pass12345")
@@ -343,17 +404,21 @@ class WorkflowTests2(TestCase):
         self.assertEqual(self.rep.status, "reopened")
 
     def test_sla_overdue_flag(self):
-        from django.utils import timezone
         from datetime import timedelta
+
+        from django.utils import timezone
+
         self.rep.status = "reported"
         self.rep.sla_due = timezone.now() - timedelta(hours=1)
         self.rep.save()
         self.assertTrue(self.rep.is_overdue)
 
     def test_upload_rejects_non_image(self):
-        from reports.uploads import validate_and_clean_image
         from django.core.files.base import ContentFile
-        f, gps, err = validate_and_clean_image(ContentFile(b"not an image", name="x.txt"))
+
+        from reports.uploads import validate_and_clean_image
+
+        _, _, err = validate_and_clean_image(ContentFile(b"not an image", name="x.txt"))
         self.assertIsNotNone(err)
 
     def test_api_list_and_stats(self):
@@ -372,15 +437,23 @@ class WorkflowTests2(TestCase):
         self.assertIn("Leak", resp.json()["answer"])
 
 
-@override_settings(GEMINI_API_KEY='')
+@override_settings(GEMINI_API_KEY="")
 class StaffToolsTests(TestCase):
     def setUp(self):
         self.cit = User.objects.create_user("sc1", "s@e.com", "Pass12345")
         self.adm = User.objects.create_user("sad", "sa@e.com", "Pass12345", is_staff=True)
         Profile.objects.update_or_create(user=self.adm, defaults={"role": "admin", "state": "UP"})
         self.boss = User.objects.create_superuser("sboss", "sb@e.com", "Pass12345")
-        self.r1 = Report.objects.create(citizen=self.cit, title="One", description="Real issue description", category="road", state="UP")
-        self.r2 = Report.objects.create(citizen=self.cit, title="Two", description="Another real description", category="water", state="UP")
+        self.r1 = Report.objects.create(
+            citizen=self.cit, title="One", description="Real issue description", category="road", state="UP"
+        )
+        self.r2 = Report.objects.create(
+            citizen=self.cit,
+            title="Two",
+            description="Another real description",
+            category="water",
+            state="UP",
+        )
 
     def test_internal_notes_hidden_from_citizen(self):
         Comment.objects.create(report=self.r1, user=self.adm, text="staff only note", internal_only=True)
@@ -393,7 +466,8 @@ class StaffToolsTests(TestCase):
     def test_bulk_status_update(self):
         self.client.login(username="sad", password="Pass12345")
         self.client.post("/dashboard/bulk/", {"ids": [self.r1.id, self.r2.id], "action": "status:progress"})
-        self.r1.refresh_from_db(); self.r2.refresh_from_db()
+        self.r1.refresh_from_db()
+        self.r2.refresh_from_db()
         self.assertEqual((self.r1.status, self.r2.status), ("progress", "progress"))
 
     def test_bulk_requires_staff(self):

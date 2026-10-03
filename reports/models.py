@@ -1,6 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import User
-from .constants import STATES, ROLES
+from django.db import models
+
+from .constants import ROLES, STATES
 
 
 class Report(models.Model):
@@ -50,12 +51,16 @@ class Report(models.Model):
     sla_due = models.DateTimeField(null=True, blank=True)
 
     department = models.CharField(max_length=80, blank=True)
-    assigned_to = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_reports")
+    assigned_to = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="assigned_reports"
+    )
     ai_priority_suggested = models.CharField(max_length=10, blank=True)
     ai_source = models.CharField(max_length=10, blank=True)
     needs_review = models.BooleanField(default=False)
     flag_reason = models.CharField(max_length=120, blank=True)
-    duplicate_of = models.ForeignKey("self", on_delete=models.SET_NULL, null=True, blank=True, related_name="duplicates")
+    duplicate_of = models.ForeignKey(
+        "self", on_delete=models.SET_NULL, null=True, blank=True, related_name="duplicates"
+    )
     action_brief = models.TextField(blank=True)
     rating = models.PositiveSmallIntegerField(null=True, blank=True)
     rating_feedback = models.TextField(blank=True)
@@ -79,7 +84,10 @@ class Report(models.Model):
     @property
     def is_overdue(self):
         from django.utils import timezone
-        return bool(self.sla_due and self.status not in ("resolved", "confirmed") and timezone.now() > self.sla_due)
+
+        return bool(
+            self.sla_due and self.status not in ("resolved", "confirmed") and timezone.now() > self.sla_due
+        )
 
 
 class Profile(models.Model):
@@ -133,7 +141,9 @@ class StatusEvent(models.Model):
 
 
 class AIAnalysis(models.Model):
-    report = models.ForeignKey(Report, on_delete=models.CASCADE, related_name="analyses", null=True, blank=True)
+    report = models.ForeignKey(
+        Report, on_delete=models.CASCADE, related_name="analyses", null=True, blank=True
+    )
     content_hash = models.CharField(max_length=64, blank=True, db_index=True)
     source = models.CharField(max_length=10, default="rules")
     model = models.CharField(max_length=80, blank=True)

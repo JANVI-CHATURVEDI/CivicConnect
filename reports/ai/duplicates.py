@@ -1,4 +1,5 @@
 """Duplicate detection: DB bbox prefilter + Haversine + text similarity."""
+
 import math
 from datetime import timedelta
 
@@ -20,8 +21,11 @@ def haversine_distance_m(lat1, lon1, lat2, lon2):
     return EARTH_RADIUS_M * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
-def find_possible_duplicates(category, latitude, longitude, title="", description="", exclude_pk=None, limit=5):
+def find_possible_duplicates(
+    category, latitude, longitude, title="", description="", exclude_pk=None, limit=5
+):
     from reports.models import Report
+
     if latitude is None or longitude is None:
         return []
     try:
@@ -33,7 +37,8 @@ def find_possible_duplicates(category, latitude, longitude, title="", descriptio
     d_lat = DUPLICATE_RADIUS_M / 111320.0
     d_lon = DUPLICATE_RADIUS_M / max(30000.0, 111320.0 * max(0.2, math.cos(math.radians(lat))))
     candidates = Report.objects.filter(
-        category=category, created_at__gte=since,
+        category=category,
+        created_at__gte=since,
         latitude__range=(lat - d_lat, lat + d_lat),
         longitude__range=(lon - d_lon, lon + d_lon),
     ).only("id", "title", "description", "status", "latitude", "longitude")
