@@ -2214,3 +2214,61 @@ textarea:focus-visible {
         transform: none;
     }
 }
+/* ============================================================
+   CivicConnect UNIFIED COMPONENT SYSTEM (appended per redesign brief)
+   One button anatomy, paper cards, tinted pill badges, tabular nums.
+   ============================================================ */
+.btn-primary, button.btn-primary, a.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--ink-900, #0B1220); color: var(--paper, #FCFBF8);
+  border: none; border-radius: 12px; padding: 12px 22px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(11,18,32,.04));
+  transition: transform .12s cubic-bezier(.4,0,.2,1), box-shadow .12s cubic-bezier(.4,0,.2,1), background .12s cubic-bezier(.4,0,.2,1);
+}
+.btn-primary:hover { transform: translateY(-2px); background: var(--ink-700, #1C2740); box-shadow: var(--shadow-md, 0 4px 16px rgba(11,18,32,.06)); }
+.btn-primary:active { transform: scale(.98); box-shadow: var(--shadow-sm, 0 1px 2px rgba(11,18,32,.04)); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-secondary, button.btn-secondary, a.btn-secondary {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: transparent; color: var(--ink-700, #1C2740);
+  border: 1px solid var(--ink-100, #E7EAF2); border-radius: 12px; padding: 12px 22px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: border-color .15s cubic-bezier(.4,0,.2,1), background .15s cubic-bezier(.4,0,.2,1);
+}
+.btn-secondary:hover { border-color: var(--ink-500, #47577D); background: var(--ink-50, #F5F6FA); }
+.btn-ghost, button.btn-ghost, a.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: none; border: none; color: var(--ink-500, #47577D);
+  font-size: 14px; font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 12px;
+}
+.btn-ghost:hover { background: var(--ink-50, #F5F6FA); color: var(--ink-700, #1C2740); }
+.btn-danger, button.btn-danger, a.btn-danger {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--danger, #A3342F); color: var(--paper, #FCFBF8);
+  border: none; border-radius: 12px; padding: 12px 22px;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(11,18,32,.04));
+  transition: transform .12s cubic-bezier(.4,0,.2,1), box-shadow .12s cubic-bezier(.4,0,.2,1);
+}
+.btn-danger:hover { transform: translateY(-2px); box-shadow: var(--shadow-md, 0 4px 16px rgba(11,18,32,.06)); }
+.btn-danger:active { transform: scale(.98); }
+a.btn-primary, a.btn-secondary, a.btn-ghost, a.btn-danger { text-decoration: none; }
+button:focus-visible, a.btn-primary:focus-visible, a.btn-secondary:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--gold-500, #C9A227); outline-offset: 2px;
+}
+.badge-tint {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 999px; padding: 4px 10px;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em;
+}
+.stat-number, .dashboard-stat-value { font-variant-numeric: tabular-nums; }
+.card-paper {
+  background: var(--paper, #FCFBF8);
+  border: 1px solid var(--ink-100, #E7EAF2);
+  border-radius: 12px; box-shadow: var(--shadow-sm, 0 1px 2px rgba(11,18,32,.04));
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-primary, .btn-secondary, .btn-ghost, .btn-danger { transition: none !important; }
+}

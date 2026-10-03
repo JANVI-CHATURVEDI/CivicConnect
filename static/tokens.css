@@ -1,0 +1,67 @@
+/* ============================================================
+   CivicConnect TOKENS — the single source of truth for the design
+   system. Load this stylesheet FIRST (before every other CSS file).
+   "Formal, but expensive": ink navy + brass gold, paper (never pure
+   white), tabular numerals, strict spacing/radius/shadow scales.
+   ============================================================ */
+:root {
+  /* ink scale */
+  --ink-900: #0b1220;
+  --ink-800: #11192c;
+  --ink-700: #1c2740;
+  --ink-600: #2e3b5c;
+  --ink-500: #47577d;
+  --ink-300: #8793ad;
+  --ink-100: #e7eaf2;
+  --ink-50: #f5f6fa;
+
+  /* warm paper (card surfaces — never pure white) */
+  --paper: #fcfbf8;
+
+  /* brass gold accent — rare, deliberate */
+  --gold-600: #ad8a3c;
+  --gold-500: #c9a227;
+  --gold-200: #efe2bc;
+
+  /* desaturated semantics */
+  --success: #2f6f4e;
+  --warning: #a66a1e;
+  --danger: #a3342f;
+  --info: #35507a;
+
+  /* type */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-state: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* spacing scale ONLY */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+  --sp-6: 24px; --sp-8: 32px; --sp-12: 48px; --sp-16: 64px; --sp-24: 96px;
+
+  /* radius scale */
+  --r-sm: 6px;   /* inputs, small chips */
+  --r-md: 12px;  /* buttons, cards */
+  --r-lg: 20px;  /* large feature cards, modals */
+  --r-pill: 999px;
+
+  /* elevation — separation, not decoration */
+  --shadow-sm: 0 1px 2px rgba(11, 18, 32, 0.04);
+  --shadow-md: 0 4px 16px rgba(11, 18, 32, 0.06);
+  --shadow-lg: 0 12px 32px rgba(11, 18, 32, 0.1);
+  --shadow-gold-glow: 0 8px 24px rgba(201, 162, 39, 0.25);
+}
+
+/* deliberate dark "night mode" — same institution, after hours */
+[data-theme="dark"] {
+  --ink-50: #0a0e18;
+  --paper: #121a2b;
+  --ink-100: #26314a;
+  --ink-500: #9aa6c3;
+  --ink-700: #e9ecf5;
+  --ink-900: #e9ecf5;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-gold-glow: 0 8px 28px rgba(201, 162, 39, 0.35);
+}

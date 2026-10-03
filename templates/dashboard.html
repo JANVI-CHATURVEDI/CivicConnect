@@ -301,5 +301,23 @@
     }
 })();
 </script>
+<script>
+/* dashboard stat count-up on first load only */
+(function () {
+    function animate(el) {
+        var target = parseInt((el.textContent || "").replace(/[^0-9]/g, ""), 10);
+        if (isNaN(target)) return;
+        var t0 = null;
+        function step(t) {
+            if (!t0) t0 = t;
+            var p = Math.min(1, (t - t0) / 900);
+            el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+            if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+    document.querySelectorAll(".dashboard-stat-value").forEach(animate);
+})();
+</script>
 
 {% endblock %}

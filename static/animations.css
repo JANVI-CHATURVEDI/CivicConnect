@@ -1,5 +1,8 @@
+/* CivicConnect MOTION — confident, never excited.
+   expo-out for entrances, material-standard for state changes.
+   Durations: micro 120-200ms, panels 300-450ms, hero 500-700ms. */
 @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(18px); }
+    from { opacity: 0; transform: translateY(14px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -9,7 +12,7 @@
 }
 
 @keyframes scaleIn {
-    from { opacity: 0; transform: scale(0.94); }
+    from { opacity: 0; transform: scale(0.97); }
     to { opacity: 1; transform: scale(1); }
 }
 
@@ -19,62 +22,68 @@
 }
 
 @keyframes toastIn {
-    from { opacity: 0; transform: translateY(-14px); }
+    from { opacity: 0; transform: translateY(-12px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+@keyframes aiFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
 }
 
 .anim-fade-up {
-    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .anim-fade {
-    animation: fadeIn 0.6s ease both;
+    animation: fadeIn 0.45s ease both;
 }
 
 .anim-scale-in {
-    animation: scaleIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.anim-delay-1 { animation-delay: 0.08s; }
-.anim-delay-2 { animation-delay: 0.16s; }
-.anim-delay-3 { animation-delay: 0.24s; }
-.anim-delay-4 { animation-delay: 0.32s; }
+/* hero stagger: 60-80ms per sibling */
+.anim-delay-1 { animation-delay: 0.07s; }
+.anim-delay-2 { animation-delay: 0.14s; }
+.anim-delay-3 { animation-delay: 0.21s; }
+.anim-delay-4 { animation-delay: 0.28s; }
 
+/* formal role badges — solid ink, gold for superadmin */
 .role-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.3px;
-    background-size: 200% 200%;
-    animation: gradientShift 6s ease infinite;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--ink-100, #e7eaf2);
+    color: var(--ink-700, #1c2740);
 }
 
 .role-badge.superadmin {
-    background-image: linear-gradient(120deg, #7c3aed, #2563eb, #7c3aed);
-    color: white;
+    background: var(--gold-500, #c9a227);
+    color: var(--ink-900, #0b1220);
 }
 
 .role-badge.admin {
-    background-image: linear-gradient(120deg, #0891b2, #2563eb, #0891b2);
-    color: white;
+    background: var(--ink-900, #0b1220);
+    color: var(--paper, #fcfbf8);
 }
 
 .role-badge .dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: #ffffff;
-    animation: softPulse 1.6s ease infinite;
+    background: currentColor;
 }
 
 .ai-thinking {
@@ -87,12 +96,17 @@
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: #2563eb;
-    animation: softPulse 0.9s ease infinite;
+    background: var(--gold-500, #c9a227);
+    animation: softPulse 1.2s ease infinite;
 }
 
-.ai-thinking span:nth-child(2) { animation-delay: 0.15s; }
-.ai-thinking span:nth-child(3) { animation-delay: 0.3s; }
+.ai-thinking span:nth-child(2) { animation-delay: 0.2s; }
+.ai-thinking span:nth-child(3) { animation-delay: 0.4s; }
+
+/* AI panel content cross-fades (~300ms), never pops */
+.ai-chip-row > * {
+    animation: aiFade 0.3s ease both;
+}
 
 .toast-stack {
     position: fixed;
@@ -106,21 +120,30 @@
 }
 
 .toast-stack .alert {
-    animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-    box-shadow: 0 10px 30px rgba(20, 40, 70, 0.15);
+    animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+    box-shadow: var(--shadow-md, 0 4px 16px rgba(11, 18, 32, 0.06));
+}
+
+/* premium skeleton shimmer — 1.5s soft sweep */
+.skeleton-shimmer {
+    background: linear-gradient(90deg, var(--ink-100, #e7eaf2) 25%, var(--paper, #fcfbf8) 50%, var(--ink-100, #e7eaf2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s linear infinite;
 }
 
 .btn-press {
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.12s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.12s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-press:active {
-    transform: scale(0.97);
+    transform: scale(0.98);
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .anim-fade-up, .anim-fade, .anim-scale-in, .role-badge, .role-badge .dot,
-    .ai-thinking span, .toast-stack .alert {
+    .anim-fade-up, .anim-fade, .anim-scale-in, .role-badge .dot,
+    .ai-thinking span, .toast-stack .alert, .ai-chip-row > *,
+    .skeleton-shimmer {
         animation: none !important;
     }
+    .btn-press { transition: none !important; }
 }

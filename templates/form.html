@@ -56,28 +56,38 @@
         box-sizing: border-box;
         padding: 12px 14px;
         border: 1px solid var(--border-color);
-        border-radius: 8px;
-        background: #fff;
+        border-radius: 6px;
+        background: #fcfbf8;
         color: var(--text-primary);
         font-size: 14px;
         transition: border-color .15s ease, box-shadow .15s ease;
     }
     .form-control::placeholder { color: #94a3b8; }
-    .form-control:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, .10); }
+    .form-control:focus { outline: none; border-color: #1c2740; box-shadow: 0 0 0 3px rgba(201,162,39,.15); }
     textarea.form-control { min-height: 120px; resize: vertical; }
 
-    /* ---- AI PANEL (formal) ---- */
+    /* ---- AI PANEL (signature moment: slow ink-gold-ink border, soft glow) ---- */
     .ai-panel {
         display: none;
         position: relative;
         margin-bottom: 26px;
         padding: 20px 22px;
         border-radius: 12px;
-        border: 1px solid #c9a227;
-        border-left: 5px solid #0f2e54;
-        background: #fffdf6;
+        border: 1px solid transparent;
+        background:
+            linear-gradient(#fcfbf8, #fcfbf8) padding-box,
+            linear-gradient(120deg, #1c2740, #c9a227, #1c2740) border-box;
+        background-size: 100% 100%, 220% 220%;
+        box-shadow: 0 8px 24px rgba(201, 162, 39, 0.12);
+        animation: aiBorderSweep 7s ease infinite;
+    }
+    @keyframes aiBorderSweep {
+        0%, 100% { background-position: 0 0, 0% 40%; }
+        50% { background-position: 0 0, 100% 60%; }
     }
     .ai-panel.show { display: block; }
+    .ai-chip-row > * { animation: aiPanelFade 0.3s ease both; }
+    @keyframes aiPanelFade { from { opacity: 0; } to { opacity: 1; } }
     .ai-panel-title {
         display: flex;
         align-items: center;
@@ -579,7 +589,7 @@
                             if (data.success && data.address) {
                                 locText.textContent = data.address;
                                 locText.classList.add("detected");
-                                detectBtn.textContent = "✓ Location Detected";
+                                detectBtn.textContent = "Location detected";
                                 if (addressInput && !addressInput.dataset.manuallyEdited) {
                                     addressInput.value = data.address;
                                 }

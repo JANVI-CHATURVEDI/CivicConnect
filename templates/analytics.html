@@ -59,7 +59,7 @@ const byStatus = JSON.parse(document.getElementById("byStatusData").textContent)
 const byState = JSON.parse(document.getElementById("byStateData").textContent);
 const trend = JSON.parse(document.getElementById("trendData").textContent);
 
-const palette = ["#2563eb", "#16c7b7", "#f59e0b", "#dc2626", "#7c3aed", "#0891b2", "#ea8a2c", "#34a853"];
+const palette = ["#35507a", "#2f6f4e", "#a66a1e", "#a3342f", "#47577d", "#c9a227", "#8793ad", "#1c2740"];
 
 new Chart(document.getElementById("categoryChart"), {
     type: "bar",
@@ -83,7 +83,7 @@ if (byState.length) {
         type: "bar",
         data: {
             labels: byState.map(d => d.state),
-            datasets: [{ label: "Reports", data: byState.map(d => d.count), backgroundColor: "#2563eb" }],
+            datasets: [{ label: "Reports", data: byState.map(d => d.count), backgroundColor: "#35507a" }],
         },
         options: { indexAxis: "y", plugins: { legend: { display: false } } },
     });
@@ -93,14 +93,32 @@ new Chart(document.getElementById("trendChart"), {
     type: "line",
     data: {
         labels: trend.map(d => d.day),
-        datasets: [{ label: "New Reports", data: trend.map(d => d.count), borderColor: "#2563eb", tension: 0.3, fill: false }],
+        datasets: [{ label: "New Reports", data: trend.map(d => d.count), borderColor: "#35507a", tension: 0.3, fill: false }],
     },
 });
 </script>
 
+<script>
+/* analytics stat count-up on first load only */
+(function () {
+    document.querySelectorAll(".dashboard-stat-value").forEach(function (el) {
+        var target = parseInt((el.textContent || "").replace(/[^0-9]/g, ""), 10);
+        if (isNaN(target)) return;
+        var t0 = null;
+        function step(t) {
+            if (!t0) t0 = t;
+            var p = Math.min(1, (t - t0) / 900);
+            el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+            if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    });
+})();
+</script>
+
 <style>
 .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.analytics-card { background: white; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; }
+.analytics-card { background: var(--paper, #fcfbf8); border: 1px solid var(--ink-100, #e7eaf2); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm, 0 1px 2px rgba(11,18,32,.04)); }
 .analytics-card h3 { margin: 0 0 14px; color: #0f172a; font-size: 15px; }
 @media (max-width: 800px) { .analytics-grid { grid-template-columns: 1fr; } }
 </style>
